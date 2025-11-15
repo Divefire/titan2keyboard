@@ -24,17 +24,19 @@ import com.titan2keyboard.ui.theme.Titan2KeyboardTheme
 /**
  * View that shows the current modifier state (Shift/Alt)
  */
-class ModifierIndicatorView(context: Context) : ComposeView(context) {
+class ModifierIndicatorView(context: Context) {
 
     private var modifiersState by mutableStateOf(ModifiersState())
 
-    init {
+    private val composeView = ComposeView(context).apply {
         setContent {
             Titan2KeyboardTheme {
                 ModifierIndicator(modifiersState)
             }
         }
     }
+
+    fun getView(): View = composeView
 
     fun updateModifiers(newState: ModifiersState) {
         modifiersState = newState

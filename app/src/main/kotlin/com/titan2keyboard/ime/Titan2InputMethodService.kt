@@ -58,7 +58,7 @@ class Titan2InputMethodService : InputMethodService(), ModifierStateListener {
         if (modifierIndicatorView == null) {
             modifierIndicatorView = ModifierIndicatorView(this)
         }
-        return modifierIndicatorView!!
+        return modifierIndicatorView!!.getView()
     }
 
     override fun onEvaluateInputViewShown(): Boolean {
