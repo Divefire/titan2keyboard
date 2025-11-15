@@ -528,17 +528,13 @@ class KeyEventHandler @Inject constructor(
             // Get the last character
             val lastChar = textBeforeCursor.last()
 
-            // Activate after sentence-ending punctuation
-            if (lastChar in listOf('.', '!', '?')) {
-                shouldActivate = true
-            }
-
             // Activate after newline
             if (lastChar == '\n') {
                 shouldActivate = true
             }
 
             // Check for sentence-ending punctuation followed by space
+            // This prevents auto-cap in URLs (www.github.com) and other period uses
             if (textBeforeCursor.length >= 2) {
                 val secondToLast = textBeforeCursor[textBeforeCursor.length - 2]
                 if (lastChar in listOf(' ', '\t') && secondToLast in listOf('.', '!', '?')) {
