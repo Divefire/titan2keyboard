@@ -115,6 +115,9 @@ class Titan2InputMethodService : InputMethodService(), ModifierStateListener {
 
         // Update the key event handler with current editor info
         keyEventHandler.updateEditorInfo(attribute)
+
+        // Check if we should activate auto-cap shift at start of input
+        keyEventHandler.onInputStarted(currentInputConnection)
     }
 
     override fun onFinishInput() {

@@ -42,9 +42,6 @@ class KeyEventHandler @Inject constructor(
     private var lastReplacement: ReplacementInfo? = null
     private var skipNextShortcut: Boolean = false
 
-    // Track last auto-capitalized character for undo on backspace
-    private var lastAutoCapitalizedChar: String? = null
-
     // Modifier state tracking
     private var modifiersState = ModifiersState()
     private var shiftKeyDownTime: Long = 0L
@@ -81,6 +78,17 @@ class KeyEventHandler @Inject constructor(
      */
     fun updateEditorInfo(editorInfo: EditorInfo?) {
         currentEditorInfo = editorInfo
+    }
+
+    /**
+     * Called when input is started - check if we should activate auto-cap shift
+     */
+    fun onInputStarted(inputConnection: InputConnection?) {
+        inputConnection ?: return
+        // Reset modifier state when starting new input
+        updateModifierState(ModifiersState())
+        // Check if we should activate auto-cap
+        checkAndActivateAutoCapShift(inputConnection)
     }
 
     /**
@@ -133,13 +141,14 @@ class KeyEventHandler @Inject constructor(
 
         // Handle first key press (repeatCount == 0)
 
+        // Check if we should activate auto-cap shift before processing this key
+        checkAndActivateAutoCapShift(inputConnection)
+
         // Handle modifier keys (Shift/Alt)
         when (event.keyCode) {
             KeyEvent.KEYCODE_SHIFT_LEFT, KeyEvent.KEYCODE_SHIFT_RIGHT -> {
-                if (currentSettings.stickyShift) {
-                    shiftKeyDownTime = event.eventTime
-                    return KeyEventResult.Handled
-                }
+                shiftKeyDownTime = event.eventTime
+                return KeyEventResult.Handled
             }
             KeyEvent.KEYCODE_ALT_LEFT, KeyEvent.KEYCODE_ALT_RIGHT -> {
                 if (currentSettings.stickyAlt) {
@@ -147,23 +156,6 @@ class KeyEventHandler @Inject constructor(
                     return KeyEventResult.Handled
                 }
             }
-        }
-
-        // Handle backspace - check if we should undo auto-capitalization
-        if (event.keyCode == KeyEvent.KEYCODE_DEL && lastAutoCapitalizedChar != null) {
-            val capitalizedChar = lastAutoCapitalizedChar!!
-            // Check if the text before cursor matches our capitalized character
-            val textBefore = inputConnection.getTextBeforeCursor(1, 0)
-
-            if (textBefore?.toString() == capitalizedChar.uppercase()) {
-                // Undo the auto-capitalization - replace with lowercase
-                inputConnection.deleteSurroundingText(1, 0)
-                inputConnection.commitText(capitalizedChar.lowercase(), 1)
-                lastAutoCapitalizedChar = null
-                return KeyEventResult.Handled
-            }
-            // Text doesn't match, clear the tracking
-            lastAutoCapitalizedChar = null
         }
 
         // Handle backspace - check if we should undo last replacement
@@ -198,7 +190,6 @@ class KeyEventHandler @Inject constructor(
         // Clear tracking on any non-backspace key
         if (event.keyCode != KeyEvent.KEYCODE_DEL) {
             lastReplacement = null
-            lastAutoCapitalizedChar = null
         }
 
         // Check for text shortcuts on word boundary keys (space, enter, punctuation)
@@ -297,21 +288,14 @@ class KeyEventHandler @Inject constructor(
             return KeyEventResult.Handled
         }
 
-        // Handle letter keys with Shift modifier or auto-capitalization
+        // Handle letter keys with shift modifier
         if (isLetterKey(event.keyCode)) {
             val char = getCharForKeyCode(event.keyCode)
             if (char != null) {
                 // Check if we should apply shift modifier
-                val shouldCapitalize = modifiersState.isShiftActive() || shouldAutoCapitalize(inputConnection)
-
-                if (shouldCapitalize) {
+                if (modifiersState.isShiftActive()) {
                     // Commit the capitalized character
                     inputConnection.commitText(char.uppercase(), 1)
-
-                    // Track auto-capitalization for undo (only if not from sticky modifier)
-                    if (!modifiersState.isShiftActive()) {
-                        lastAutoCapitalizedChar = char
-                    }
 
                     // Clear one-shot modifiers after use
                     clearOneShotModifiers()
@@ -406,10 +390,13 @@ class KeyEventHandler @Inject constructor(
     }
 
     /**
-     * Check if auto-capitalization should be applied
+     * Check if auto-capitalization conditions are met, and if so, activate shift in ONE_SHOT mode
      */
-    private fun shouldAutoCapitalize(inputConnection: InputConnection): Boolean {
-        if (!currentSettings.autoCapitalize) return false
+    private fun checkAndActivateAutoCapShift(inputConnection: InputConnection) {
+        if (!currentSettings.autoCapitalize) return
+
+        // Don't override existing modifier states
+        if (modifiersState.isShiftActive() || modifiersState.isAltActive()) return
 
         // Check editor info for input types that shouldn't auto-capitalize
         currentEditorInfo?.let { info ->
@@ -427,51 +414,56 @@ class KeyEventHandler @Inject constructor(
                         InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS,
                         InputType.TYPE_TEXT_VARIATION_PASSWORD,
                         InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD,
-                        InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD -> return false
+                        InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD -> return
                     }
 
                     // Check for NO_SUGGESTIONS flag (used by our shortcut dialog)
                     if (inputType and InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS != 0) {
-                        return false
+                        return
                     }
                 }
                 // Don't auto-capitalize for number, phone, datetime inputs
                 InputType.TYPE_CLASS_NUMBER,
                 InputType.TYPE_CLASS_PHONE,
-                InputType.TYPE_CLASS_DATETIME -> return false
+                InputType.TYPE_CLASS_DATETIME -> return
             }
         }
 
         // Check text before cursor to determine if we should capitalize
         val textBeforeCursor = inputConnection.getTextBeforeCursor(100, 0)
 
+        var shouldActivate = false
+
         if (textBeforeCursor.isNullOrEmpty()) {
-            // Start of text, capitalize
-            return true
-        }
+            // Start of text, activate shift
+            shouldActivate = true
+        } else {
+            // Get the last character
+            val lastChar = textBeforeCursor.last()
 
-        // Get the last character
-        val lastChar = textBeforeCursor.last()
+            // Activate after sentence-ending punctuation
+            if (lastChar in listOf('.', '!', '?')) {
+                shouldActivate = true
+            }
 
-        // Capitalize after sentence-ending punctuation
-        if (lastChar in listOf('.', '!', '?')) {
-            return true
-        }
+            // Activate after newline
+            if (lastChar == '\n') {
+                shouldActivate = true
+            }
 
-        // Capitalize after newline
-        if (lastChar == '\n') {
-            return true
-        }
-
-        // Check for sentence-ending punctuation followed by space
-        if (textBeforeCursor.length >= 2) {
-            val secondToLast = textBeforeCursor[textBeforeCursor.length - 2]
-            if (lastChar in listOf(' ', '\t') && secondToLast in listOf('.', '!', '?')) {
-                return true
+            // Check for sentence-ending punctuation followed by space
+            if (textBeforeCursor.length >= 2) {
+                val secondToLast = textBeforeCursor[textBeforeCursor.length - 2]
+                if (lastChar in listOf(' ', '\t') && secondToLast in listOf('.', '!', '?')) {
+                    shouldActivate = true
+                }
             }
         }
 
-        return false
+        if (shouldActivate) {
+            // Activate shift in ONE_SHOT mode for auto-cap
+            updateModifierState(ModifiersState(shift = ModifierState.ONE_SHOT, alt = ModifierState.NONE))
+        }
     }
 
     /**
@@ -566,15 +558,29 @@ class KeyEventHandler @Inject constructor(
      * @param isLongPress true if this is a long press (locked), false for one-shot
      */
     private fun toggleShiftModifier(isLongPress: Boolean) {
-        if (!currentSettings.stickyShift) return
-
         val newShiftState = when {
-            // If already locked and pressed again, turn off
+            // If already locked, turn off
             modifiersState.shift == ModifierState.LOCKED -> ModifierState.NONE
-            // Long press = locked
-            isLongPress -> ModifierState.LOCKED
-            // Short press = one-shot
-            else -> ModifierState.ONE_SHOT
+            // If already one-shot (from auto-cap or manual)
+            modifiersState.shift == ModifierState.ONE_SHOT -> {
+                if (isLongPress) {
+                    // Long press upgrades to locked
+                    ModifierState.LOCKED
+                } else {
+                    // Short press toggles off
+                    ModifierState.NONE
+                }
+            }
+            // Currently none
+            else -> {
+                if (isLongPress) {
+                    // Long press = locked
+                    ModifierState.LOCKED
+                } else {
+                    // Short press = one-shot (only if sticky shift enabled or will be handled by system)
+                    if (currentSettings.stickyShift) ModifierState.ONE_SHOT else modifiersState.shift
+                }
+            }
         }
 
         // Clear alt if activating shift (mutual exclusivity)
