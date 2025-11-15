@@ -48,6 +48,7 @@ class Titan2InputMethodService : InputMethodService(), ModifierStateListener {
         serviceScope.launch {
             settingsRepository.settingsFlow.collect { settings ->
                 Log.d(TAG, "Settings updated: $settings")
+                Log.d(TAG, "  stickyShift=${settings.stickyShift}, stickyAlt=${settings.stickyAlt}")
                 keyEventHandler.updateSettings(settings)
             }
         }
@@ -75,15 +76,23 @@ class Titan2InputMethodService : InputMethodService(), ModifierStateListener {
     }
 
     override fun onModifierStateChanged(modifiersState: ModifiersState) {
+        Log.d(TAG, "Modifier state changed: shift=${modifiersState.shift}, alt=${modifiersState.alt}")
+
         // Update the modifier indicator view
         modifierIndicatorView?.updateModifiers(modifiersState)
 
-        // Show/hide input view based on modifier state
+        // Update input view visibility based on modifier state
         val shouldShow = modifiersState.isShiftActive() || modifiersState.isAltActive()
+        Log.d(TAG, "shouldShow=$shouldShow")
+
+        // Show/hide the indicator view
+        modifierIndicatorView?.getView()?.visibility = if (shouldShow) View.VISIBLE else View.GONE
+
+        // Request to show the input view when modifiers are active
         if (shouldShow) {
-            showWindow(true)
+            requestShowSelf(0)
         } else {
-            hideWindow()
+            requestHideSelf(0)
         }
     }
 

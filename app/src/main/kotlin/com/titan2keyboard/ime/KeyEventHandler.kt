@@ -1,6 +1,7 @@
 package com.titan2keyboard.ime
 
 import android.text.InputType
+import android.util.Log
 import android.view.KeyEvent
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputConnection
@@ -51,6 +52,7 @@ class KeyEventHandler @Inject constructor(
     private var modifierStateListener: ModifierStateListener? = null
 
     companion object {
+        private const val TAG = "KeyEventHandler"
         private const val DOUBLE_SPACE_THRESHOLD_MS = 500L
         private const val LONG_PRESS_THRESHOLD_MS = 500L
     }
@@ -88,6 +90,7 @@ class KeyEventHandler @Inject constructor(
      * @return KeyEventResult indicating whether the event was handled
      */
     fun handleKeyDown(event: KeyEvent, inputConnection: InputConnection?): KeyEventResult {
+        Log.d(TAG, "handleKeyDown: keyCode=${event.keyCode}, modifiers=shift:${modifiersState.shift}/alt:${modifiersState.alt}")
         inputConnection ?: return KeyEventResult.NotHandled
 
         // Handle key repeats (repeatCount > 0)
@@ -255,7 +258,46 @@ class KeyEventHandler @Inject constructor(
             skipNextShortcut = false
         }
 
-        // Handle letter keys with modifiers or auto-capitalization
+        // Handle Alt modifier - send key event with Alt meta state
+        if (modifiersState.isAltActive()) {
+            Log.d(TAG, "Sending key with Alt modifier: keyCode=${event.keyCode}")
+
+            // Create key events with Alt modifier
+            val downTime = event.downTime
+            val eventTime = event.eventTime
+
+            val altDownEvent = KeyEvent(
+                downTime,
+                eventTime,
+                KeyEvent.ACTION_DOWN,
+                event.keyCode,
+                0, // repeat
+                KeyEvent.META_ALT_ON or KeyEvent.META_ALT_LEFT_ON,
+                event.deviceId,
+                event.scanCode
+            )
+
+            val altUpEvent = KeyEvent(
+                downTime,
+                eventTime,
+                KeyEvent.ACTION_UP,
+                event.keyCode,
+                0, // repeat
+                KeyEvent.META_ALT_ON or KeyEvent.META_ALT_LEFT_ON,
+                event.deviceId,
+                event.scanCode
+            )
+
+            // Send the key events with Alt modifier
+            inputConnection.sendKeyEvent(altDownEvent)
+            inputConnection.sendKeyEvent(altUpEvent)
+
+            // Clear one-shot modifiers after use
+            clearOneShotModifiers()
+            return KeyEventResult.Handled
+        }
+
+        // Handle letter keys with Shift modifier or auto-capitalization
         if (isLetterKey(event.keyCode)) {
             val char = getCharForKeyCode(event.keyCode)
             if (char != null) {
@@ -274,12 +316,6 @@ class KeyEventHandler @Inject constructor(
                     // Clear one-shot modifiers after use
                     clearOneShotModifiers()
                     return KeyEventResult.Handled
-                }
-
-                // If modifier is active but it's for a letter key, let it apply via clear below
-                if (modifiersState.isShiftActive() || modifiersState.isAltActive()) {
-                    // Clear one-shot modifiers after any character input
-                    clearOneShotModifiers()
                 }
             }
         }
@@ -520,6 +556,7 @@ class KeyEventHandler @Inject constructor(
      * Update modifier state and notify listener
      */
     private fun updateModifierState(newState: ModifiersState) {
+        Log.d(TAG, "updateModifierState called: old=${modifiersState}, new=${newState}, caller=${Thread.currentThread().stackTrace[3].methodName}")
         modifiersState = newState
         modifierStateListener?.onModifierStateChanged(newState)
     }
@@ -572,6 +609,7 @@ class KeyEventHandler @Inject constructor(
      * Clear one-shot modifiers after use
      */
     private fun clearOneShotModifiers() {
+        Log.d(TAG, "clearOneShotModifiers called: current modifiers=shift:${modifiersState.shift}/alt:${modifiersState.alt}")
         if (!modifiersState.hasOneShotModifier()) return
 
         val newShift = if (modifiersState.shift == ModifierState.ONE_SHOT) ModifierState.NONE else modifiersState.shift

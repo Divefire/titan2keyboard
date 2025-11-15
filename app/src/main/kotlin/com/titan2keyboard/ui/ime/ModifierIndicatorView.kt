@@ -1,120 +1,111 @@
 package com.titan2keyboard.ui.ime
 
 import android.content.Context
+import android.graphics.Color
+import android.graphics.Typeface
+import android.util.TypedValue
+import android.view.Gravity
 import android.view.View
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.unit.dp
+import android.widget.LinearLayout
+import android.widget.TextView
 import com.titan2keyboard.domain.model.ModifierState
 import com.titan2keyboard.domain.model.ModifiersState
-import com.titan2keyboard.ui.theme.Titan2KeyboardTheme
 
 /**
  * View that shows the current modifier state (Shift/Alt)
+ * Uses regular Android Views instead of Compose for compatibility with InputMethodService
  */
 class ModifierIndicatorView(context: Context) {
 
-    private var modifiersState by mutableStateOf(ModifiersState())
-
-    private val composeView = ComposeView(context).apply {
-        setContent {
-            Titan2KeyboardTheme {
-                ModifierIndicator(modifiersState)
-            }
-        }
+    private val rootLayout = LinearLayout(context).apply {
+        orientation = LinearLayout.HORIZONTAL
+        gravity = Gravity.CENTER
+        val padding = (16 * context.resources.displayMetrics.density).toInt()
+        val verticalPadding = (8 * context.resources.displayMetrics.density).toInt()
+        setPadding(padding, verticalPadding, padding, verticalPadding)
+        setBackgroundColor(Color.parseColor("#E3F2FD")) // Light blue background
+        layoutParams = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        )
     }
 
-    fun getView(): View = composeView
+    private val shiftIndicator = createIndicatorTextView(context, "SHIFT")
+    private val altIndicator = createIndicatorTextView(context, "ALT")
+
+    init {
+        rootLayout.addView(shiftIndicator)
+
+        // Add spacing between indicators
+        val spacerWidth = (16 * context.resources.displayMetrics.density).toInt()
+        val spacer = View(context).apply {
+            layoutParams = LinearLayout.LayoutParams(spacerWidth, 1)
+        }
+        rootLayout.addView(spacer)
+
+        rootLayout.addView(altIndicator)
+
+        // Initially hide both indicators
+        shiftIndicator.visibility = View.GONE
+        altIndicator.visibility = View.GONE
+    }
+
+    fun getView(): View = rootLayout
 
     fun updateModifiers(newState: ModifiersState) {
-        modifiersState = newState
-    }
-}
+        // Update shift indicator
+        if (newState.isShiftActive()) {
+            shiftIndicator.visibility = View.VISIBLE
+            updateIndicatorStyle(shiftIndicator, newState.shift)
+        } else {
+            shiftIndicator.visibility = View.GONE
+        }
 
-@Composable
-private fun ModifierIndicator(modifiersState: ModifiersState) {
-    // Only show if at least one modifier is active
-    if (!modifiersState.isShiftActive() && !modifiersState.isAltActive()) {
-        return
-    }
-
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.primaryContainer,
-        tonalElevation = 2.dp
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            // Shift indicator
-            if (modifiersState.isShiftActive()) {
-                ModifierChip(
-                    label = "SHIFT",
-                    state = modifiersState.shift
-                )
-            }
-
-            // Alt indicator
-            if (modifiersState.isAltActive()) {
-                ModifierChip(
-                    label = "ALT",
-                    state = modifiersState.alt
-                )
-            }
+        // Update alt indicator
+        if (newState.isAltActive()) {
+            altIndicator.visibility = View.VISIBLE
+            updateIndicatorStyle(altIndicator, newState.alt)
+        } else {
+            altIndicator.visibility = View.GONE
         }
     }
-}
 
-@Composable
-private fun ModifierChip(
-    label: String,
-    state: ModifierState
-) {
-    val backgroundColor = when (state) {
-        ModifierState.ONE_SHOT -> MaterialTheme.colorScheme.secondary
-        ModifierState.LOCKED -> MaterialTheme.colorScheme.tertiary
-        else -> Color.Transparent
-    }
+    private fun createIndicatorTextView(context: Context, label: String): TextView {
+        val horizontalPadding = (12 * context.resources.displayMetrics.density).toInt()
+        val verticalPadding = (6 * context.resources.displayMetrics.density).toInt()
 
-    val textColor = when (state) {
-        ModifierState.ONE_SHOT -> MaterialTheme.colorScheme.onSecondary
-        ModifierState.LOCKED -> MaterialTheme.colorScheme.onTertiary
-        else -> MaterialTheme.colorScheme.onSurface
-    }
-
-    Surface(
-        color = backgroundColor,
-        shape = MaterialTheme.shapes.small
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-        ) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelMedium,
-                color = textColor
+        return TextView(context).apply {
+            text = label
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
+            setTypeface(null, Typeface.BOLD)
+            setPadding(horizontalPadding, verticalPadding, horizontalPadding, verticalPadding)
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
             )
-            if (state == ModifierState.LOCKED) {
-                Text(
-                    text = " 🔒",
-                    style = MaterialTheme.typography.labelMedium
-                )
+        }
+    }
+
+    private fun updateIndicatorStyle(textView: TextView, state: ModifierState) {
+        when (state) {
+            ModifierState.ONE_SHOT -> {
+                // Purple background for one-shot
+                textView.setBackgroundColor(Color.parseColor("#9C27B0"))
+                textView.setTextColor(Color.WHITE)
+                textView.text = textView.text.toString().replace(" 🔒", "")
+            }
+            ModifierState.LOCKED -> {
+                // Deep purple background for locked
+                textView.setBackgroundColor(Color.parseColor("#673AB7"))
+                textView.setTextColor(Color.WHITE)
+                if (!textView.text.toString().endsWith(" 🔒")) {
+                    textView.text = "${textView.text} 🔒"
+                }
+            }
+            ModifierState.NONE -> {
+                // This shouldn't happen as we set visibility to GONE
+                textView.setBackgroundColor(Color.TRANSPARENT)
+                textView.setTextColor(Color.BLACK)
             }
         }
     }
