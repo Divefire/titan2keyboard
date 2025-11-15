@@ -29,6 +29,9 @@ class KeyEventHandler @Inject constructor(
     private var lastReplacement: ReplacementInfo? = null
     private var skipNextShortcut: Boolean = false
 
+    // Track last auto-capitalized character for undo on backspace
+    private var lastAutoCapitalizedChar: String? = null
+
     companion object {
         private const val DOUBLE_SPACE_THRESHOLD_MS = 500L
     }
@@ -89,6 +92,23 @@ class KeyEventHandler @Inject constructor(
 
         // Handle first key press (repeatCount == 0)
 
+        // Handle backspace - check if we should undo auto-capitalization
+        if (event.keyCode == KeyEvent.KEYCODE_DEL && lastAutoCapitalizedChar != null) {
+            val capitalizedChar = lastAutoCapitalizedChar!!
+            // Check if the text before cursor matches our capitalized character
+            val textBefore = inputConnection.getTextBeforeCursor(1, 0)
+
+            if (textBefore?.toString() == capitalizedChar.uppercase()) {
+                // Undo the auto-capitalization - replace with lowercase
+                inputConnection.deleteSurroundingText(1, 0)
+                inputConnection.commitText(capitalizedChar.lowercase(), 1)
+                lastAutoCapitalizedChar = null
+                return KeyEventResult.Handled
+            }
+            // Text doesn't match, clear the tracking
+            lastAutoCapitalizedChar = null
+        }
+
         // Handle backspace - check if we should undo last replacement
         if (event.keyCode == KeyEvent.KEYCODE_DEL && lastReplacement != null) {
             val replacement = lastReplacement!!
@@ -118,9 +138,10 @@ class KeyEventHandler @Inject constructor(
             lastReplacement = null
         }
 
-        // Clear replacement tracking on any non-backspace key
+        // Clear tracking on any non-backspace key
         if (event.keyCode != KeyEvent.KEYCODE_DEL) {
             lastReplacement = null
+            lastAutoCapitalizedChar = null
         }
 
         // Check for text shortcuts on word boundary keys (space, enter, punctuation)
@@ -186,6 +207,8 @@ class KeyEventHandler @Inject constructor(
             if (char != null) {
                 // Commit the capitalized character directly
                 inputConnection.commitText(char.uppercase(), 1)
+                // Track this auto-capitalization for potential undo on backspace
+                lastAutoCapitalizedChar = char
                 return KeyEventResult.Handled
             }
         }
