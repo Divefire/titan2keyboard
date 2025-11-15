@@ -6,7 +6,9 @@ import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import com.titan2keyboard.domain.model.KeyEventResult
+import com.titan2keyboard.domain.model.ModifiersState
 import com.titan2keyboard.domain.repository.SettingsRepository
+import com.titan2keyboard.ui.ime.ModifierIndicatorView
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -20,7 +22,7 @@ import javax.inject.Inject
  * Handles physical keyboard input events
  */
 @AndroidEntryPoint
-class Titan2InputMethodService : InputMethodService() {
+class Titan2InputMethodService : InputMethodService(), ModifierStateListener {
 
     @Inject
     lateinit var keyEventHandler: KeyEventHandler
@@ -29,6 +31,7 @@ class Titan2InputMethodService : InputMethodService() {
     lateinit var settingsRepository: SettingsRepository
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+    private var modifierIndicatorView: ModifierIndicatorView? = null
 
     companion object {
         private const val TAG = "Titan2IME"
@@ -37,6 +40,9 @@ class Titan2InputMethodService : InputMethodService() {
     override fun onCreate() {
         super.onCreate()
         Log.d(TAG, "IME Service created")
+
+        // Set up modifier state listener
+        keyEventHandler.setModifierStateListener(this)
 
         // Observe settings changes
         serviceScope.launch {
@@ -48,23 +54,37 @@ class Titan2InputMethodService : InputMethodService() {
     }
 
     override fun onCreateInputView(): View {
-        // For physical keyboard IME, we don't need a visible input view
-        // Return a minimal empty view
-        return View(this).apply {
-            visibility = View.GONE
+        // Create modifier indicator view to show Shift/Alt state
+        if (modifierIndicatorView == null) {
+            modifierIndicatorView = ModifierIndicatorView(this)
         }
+        return modifierIndicatorView!!
     }
 
     override fun onEvaluateInputViewShown(): Boolean {
-        // For hardware keyboard IME, we don't show an input view
-        // But we still want to be active to intercept key events
-        return false
+        // Show input view when modifiers are active
+        return keyEventHandler.getModifiersState().let {
+            it.isShiftActive() || it.isAltActive()
+        }
     }
 
     override fun onShowInputRequested(flags: Int, configChange: Boolean): Boolean {
         // Always return true to ensure we're active for hardware keyboard
         // This ensures key events come to us even when there's no soft keyboard shown
         return true
+    }
+
+    override fun onModifierStateChanged(modifiersState: ModifiersState) {
+        // Update the modifier indicator view
+        modifierIndicatorView?.updateModifiers(modifiersState)
+
+        // Show/hide input view based on modifier state
+        val shouldShow = modifiersState.isShiftActive() || modifiersState.isAltActive()
+        if (shouldShow) {
+            showWindow(true)
+        } else {
+            hideWindow()
+        }
     }
 
     override fun onStartInput(attribute: EditorInfo?, restarting: Boolean) {

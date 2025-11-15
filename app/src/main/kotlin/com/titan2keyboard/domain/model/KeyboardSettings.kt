@@ -9,6 +9,8 @@ data class KeyboardSettings(
     val longPressCapitalize: Boolean = false,
     val doubleSpacePeriod: Boolean = true,
     val textShortcutsEnabled: Boolean = true,
+    val stickyShift: Boolean = false,
+    val stickyAlt: Boolean = false,
     val keyRepeatDelay: Long = 400L, // milliseconds
     val keyRepeatRate: Long = 50L    // milliseconds
 )

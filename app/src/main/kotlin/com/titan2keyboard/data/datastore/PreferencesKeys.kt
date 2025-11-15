@@ -12,6 +12,8 @@ object PreferencesKeys {
     val LONG_PRESS_CAPITALIZE = booleanPreferencesKey("long_press_capitalize")
     val DOUBLE_SPACE_PERIOD = booleanPreferencesKey("double_space_period")
     val TEXT_SHORTCUTS_ENABLED = booleanPreferencesKey("text_shortcuts_enabled")
+    val STICKY_SHIFT = booleanPreferencesKey("sticky_shift")
+    val STICKY_ALT = booleanPreferencesKey("sticky_alt")
     val KEY_REPEAT_DELAY = longPreferencesKey("key_repeat_delay")
     val KEY_REPEAT_RATE = longPreferencesKey("key_repeat_rate")
 }

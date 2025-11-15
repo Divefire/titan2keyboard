@@ -64,6 +64,18 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    fun updateStickyShift(enabled: Boolean) {
+        viewModelScope.launch {
+            settingsRepository.updateSetting("stickyShift", enabled)
+        }
+    }
+
+    fun updateStickyAlt(enabled: Boolean) {
+        viewModelScope.launch {
+            settingsRepository.updateSetting("stickyAlt", enabled)
+        }
+    }
+
     fun resetToDefaults() {
         viewModelScope.launch {
             settingsRepository.resetToDefaults()

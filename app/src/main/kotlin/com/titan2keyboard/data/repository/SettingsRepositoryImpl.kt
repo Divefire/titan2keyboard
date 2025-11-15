@@ -27,6 +27,8 @@ class SettingsRepositoryImpl @Inject constructor(
                 longPressCapitalize = preferences[PreferencesKeys.LONG_PRESS_CAPITALIZE] ?: false,
                 doubleSpacePeriod = preferences[PreferencesKeys.DOUBLE_SPACE_PERIOD] ?: true,
                 textShortcutsEnabled = preferences[PreferencesKeys.TEXT_SHORTCUTS_ENABLED] ?: true,
+                stickyShift = preferences[PreferencesKeys.STICKY_SHIFT] ?: false,
+                stickyAlt = preferences[PreferencesKeys.STICKY_ALT] ?: false,
                 keyRepeatDelay = preferences[PreferencesKeys.KEY_REPEAT_DELAY] ?: 400L,
                 keyRepeatRate = preferences[PreferencesKeys.KEY_REPEAT_RATE] ?: 50L
             )
@@ -40,6 +42,8 @@ class SettingsRepositoryImpl @Inject constructor(
                 "longPressCapitalize" -> preferences[PreferencesKeys.LONG_PRESS_CAPITALIZE] = value as Boolean
                 "doubleSpacePeriod" -> preferences[PreferencesKeys.DOUBLE_SPACE_PERIOD] = value as Boolean
                 "textShortcutsEnabled" -> preferences[PreferencesKeys.TEXT_SHORTCUTS_ENABLED] = value as Boolean
+                "stickyShift" -> preferences[PreferencesKeys.STICKY_SHIFT] = value as Boolean
+                "stickyAlt" -> preferences[PreferencesKeys.STICKY_ALT] = value as Boolean
                 "keyRepeatDelay" -> preferences[PreferencesKeys.KEY_REPEAT_DELAY] = value as Long
                 "keyRepeatRate" -> preferences[PreferencesKeys.KEY_REPEAT_RATE] = value as Long
             }
