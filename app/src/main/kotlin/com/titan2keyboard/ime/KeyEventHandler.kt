@@ -56,13 +56,22 @@ class KeyEventHandler @Inject constructor(
                 return KeyEventResult.NotHandled
             }
 
-            // Handle long-press capitalization for letter keys (independent of key repeat setting)
-            // This allows users to hold a key to capitalize without enabling full key repeat
+            // Handle long-press capitalization for letter keys
             if (currentSettings.longPressCapitalize && isLetterKey(event.keyCode)) {
                 val char = getCharForKeyCode(event.keyCode)
                 if (char != null) {
-                    inputConnection.commitText(char.uppercase(), 1)
-                    return KeyEventResult.Handled
+                    if (currentSettings.keyRepeatEnabled) {
+                        // Key repeat is enabled: output uppercase on all repeats
+                        inputConnection.commitText(char.uppercase(), 1)
+                        return KeyEventResult.Handled
+                    } else {
+                        // Key repeat is disabled: output uppercase ONLY on first repeat (repeatCount == 1)
+                        if (event.repeatCount == 1) {
+                            inputConnection.commitText(char.uppercase(), 1)
+                        }
+                        // Block this and all subsequent repeats
+                        return KeyEventResult.Handled
+                    }
                 }
             }
 
