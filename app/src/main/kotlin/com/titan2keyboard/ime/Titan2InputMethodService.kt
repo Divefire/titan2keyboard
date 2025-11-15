@@ -1,12 +1,19 @@
 package com.titan2keyboard.ime
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
 import android.inputmethodservice.InputMethodService
+import android.os.Build
 import android.util.Log
 import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
+import androidx.core.app.NotificationCompat
+import com.titan2keyboard.R
 import com.titan2keyboard.domain.model.KeyEventResult
+import com.titan2keyboard.domain.model.ModifierState
 import com.titan2keyboard.domain.model.ModifiersState
 import com.titan2keyboard.domain.repository.SettingsRepository
 import com.titan2keyboard.ui.ime.ModifierIndicatorView
@@ -38,14 +45,23 @@ class Titan2InputMethodService : InputMethodService(), ModifierStateListener {
     private var isInputActive = false
     private var lastKeyEventTime = 0L
 
+    // Notification for status bar indicator
+    private lateinit var notificationManager: NotificationManager
+
     companion object {
         private const val TAG = "Titan2IME"
         private const val CAPACITIVE_BLOCK_TIME_MS = 1000L // Block capacitive for 1s after keystroke
+        private const val NOTIFICATION_CHANNEL_ID = "modifier_keys_status"
+        private const val NOTIFICATION_ID = 1001
     }
 
     override fun onCreate() {
         super.onCreate()
         Log.d(TAG, "IME Service created")
+
+        // Set up notification manager and channel for status bar indicators
+        notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        createNotificationChannel()
 
         // Set up modifier state listener
         keyEventHandler.setModifierStateListener(this)
@@ -57,6 +73,22 @@ class Titan2InputMethodService : InputMethodService(), ModifierStateListener {
                 Log.d(TAG, "  stickyShift=${settings.stickyShift}, stickyAlt=${settings.stickyAlt}")
                 keyEventHandler.updateSettings(settings)
             }
+        }
+    }
+
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                NOTIFICATION_CHANNEL_ID,
+                "Modifier Keys Status",
+                NotificationManager.IMPORTANCE_LOW
+            ).apply {
+                description = "Shows Shift/Alt key status in status bar"
+                setShowBadge(false)
+                enableLights(false)
+                enableVibration(false)
+            }
+            notificationManager.createNotificationChannel(channel)
         }
     }
 
@@ -96,6 +128,46 @@ class Titan2InputMethodService : InputMethodService(), ModifierStateListener {
 
         // Use candidates view to avoid focus loss issues
         setCandidatesViewShown(shouldShow)
+
+        // Update status bar notification
+        updateStatusBarNotification(modifiersState)
+    }
+
+    private fun updateStatusBarNotification(modifiersState: ModifiersState) {
+        val shouldShow = modifiersState.isShiftActive() || modifiersState.isAltActive()
+
+        if (shouldShow) {
+            // Build notification text based on active modifiers
+            val notificationText = buildString {
+                if (modifiersState.isShiftActive()) {
+                    append("SHIFT")
+                    if (modifiersState.shift == ModifierState.LOCKED) {
+                        append(" 🔒")
+                    }
+                }
+                if (modifiersState.isAltActive()) {
+                    if (isNotEmpty()) append(" + ")
+                    append("ALT")
+                    if (modifiersState.alt == ModifierState.LOCKED) {
+                        append(" 🔒")
+                    }
+                }
+            }
+
+            val notification = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
+                .setSmallIcon(android.R.drawable.ic_dialog_info) // TODO: Create custom icon
+                .setContentTitle("Modifier Keys Active")
+                .setContentText(notificationText)
+                .setPriority(NotificationCompat.PRIORITY_LOW)
+                .setOngoing(true)
+                .setShowWhen(false)
+                .build()
+
+            notificationManager.notify(NOTIFICATION_ID, notification)
+        } else {
+            // Cancel notification when no modifiers are active
+            notificationManager.cancel(NOTIFICATION_ID)
+        }
     }
 
     override fun onStartInput(attribute: EditorInfo?, restarting: Boolean) {
@@ -182,6 +254,8 @@ class Titan2InputMethodService : InputMethodService(), ModifierStateListener {
 
     override fun onDestroy() {
         Log.d(TAG, "IME Service destroyed")
+        // Cancel any active notifications
+        notificationManager.cancel(NOTIFICATION_ID)
         serviceScope.cancel()
         super.onDestroy()
     }
