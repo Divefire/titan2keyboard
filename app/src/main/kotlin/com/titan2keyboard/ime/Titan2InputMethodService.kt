@@ -61,7 +61,12 @@ class Titan2InputMethodService : InputMethodService(), ModifierStateListener {
     }
 
     override fun onCreateInputView(): View {
-        // Create modifier indicator view to show Shift/Alt state
+        // Return an empty view for input view since we use candidates view for the indicator
+        return View(this)
+    }
+
+    override fun onCreateCandidatesView(): View {
+        // Create modifier indicator view in candidates area to avoid focus issues
         if (modifierIndicatorView == null) {
             modifierIndicatorView = ModifierIndicatorView(this)
         }
@@ -69,10 +74,8 @@ class Titan2InputMethodService : InputMethodService(), ModifierStateListener {
     }
 
     override fun onEvaluateInputViewShown(): Boolean {
-        // Show input view when modifiers are active
-        return keyEventHandler.getModifiersState().let {
-            it.isShiftActive() || it.isAltActive()
-        }
+        // Don't show input view for hardware keyboard
+        return false
     }
 
     override fun onShowInputRequested(flags: Int, configChange: Boolean): Boolean {
@@ -87,19 +90,12 @@ class Titan2InputMethodService : InputMethodService(), ModifierStateListener {
         // Update the modifier indicator view
         modifierIndicatorView?.updateModifiers(modifiersState)
 
-        // Update input view visibility based on modifier state
+        // Show/hide the candidates view based on modifier state
         val shouldShow = modifiersState.isShiftActive() || modifiersState.isAltActive()
         Log.d(TAG, "shouldShow=$shouldShow")
 
-        // Show/hide the indicator view
-        modifierIndicatorView?.getView()?.visibility = if (shouldShow) View.VISIBLE else View.GONE
-
-        // Request to show the input view when modifiers are active
-        if (shouldShow) {
-            requestShowSelf(0)
-        } else {
-            requestHideSelf(0)
-        }
+        // Use candidates view to avoid focus loss issues
+        setCandidatesViewShown(shouldShow)
     }
 
     override fun onStartInput(attribute: EditorInfo?, restarting: Boolean) {
