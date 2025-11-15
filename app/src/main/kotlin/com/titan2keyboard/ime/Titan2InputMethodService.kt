@@ -5,7 +5,6 @@ import android.util.Log
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
-import androidx.compose.ui.platform.ComposeView
 import com.titan2keyboard.domain.model.KeyEventResult
 import com.titan2keyboard.domain.repository.SettingsRepository
 import dagger.hilt.android.AndroidEntryPoint
@@ -49,10 +48,10 @@ class Titan2InputMethodService : InputMethodService() {
     }
 
     override fun onCreateInputView(): View {
-        // For physical keyboard IME, we typically don't need a visible input view
-        // But we can provide a minimal Compose view if needed in the future
-        return ComposeView(this).apply {
-            // Can add Compose UI here if needed
+        // For physical keyboard IME, we don't need a visible input view
+        // Return a minimal empty view
+        return View(this).apply {
+            visibility = View.GONE
         }
     }
 
