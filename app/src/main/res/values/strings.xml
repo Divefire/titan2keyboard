@@ -41,6 +41,8 @@
     <string name="setting_sticky_shift_desc">Single press = one-shot, long press = locked</string>
     <string name="setting_sticky_alt">Sticky Alt</string>
     <string name="setting_sticky_alt_desc">Single press = one-shot, long press = locked</string>
+    <string name="setting_alt_backspace_delete_line">Alt+Backspace deletes line</string>
+    <string name="setting_alt_backspace_delete_line_desc">When enabled, Alt+Backspace deletes entire line before cursor</string>
     <string name="setting_key_repeat_delay">Key repeat delay</string>
     <string name="setting_key_repeat_rate">Key repeat rate</string>
 

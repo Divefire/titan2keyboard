@@ -107,6 +107,7 @@ fun SettingsScreen(
                         onTextShortcutsChanged = viewModel::updateTextShortcuts,
                         onStickyShiftChanged = viewModel::updateStickyShift,
                         onStickyAltChanged = viewModel::updateStickyAlt,
+                        onAltBackspaceDeleteLineChanged = viewModel::updateAltBackspaceDeleteLine,
                         onManageShortcuts = onNavigateToShortcuts,
                         onResetToDefaults = viewModel::resetToDefaults
                     )
@@ -133,6 +134,7 @@ private fun SettingsContent(
     onTextShortcutsChanged: (Boolean) -> Unit,
     onStickyShiftChanged: (Boolean) -> Unit,
     onStickyAltChanged: (Boolean) -> Unit,
+    onAltBackspaceDeleteLineChanged: (Boolean) -> Unit,
     onManageShortcuts: () -> Unit,
     onResetToDefaults: () -> Unit
 ) {
@@ -214,6 +216,13 @@ private fun SettingsContent(
             description = stringResource(R.string.setting_sticky_alt_desc),
             checked = settings.stickyAlt,
             onCheckedChange = onStickyAltChanged
+        )
+
+        SettingItem(
+            title = stringResource(R.string.setting_alt_backspace_delete_line),
+            description = stringResource(R.string.setting_alt_backspace_delete_line_desc),
+            checked = settings.altBackspaceDeleteLine,
+            onCheckedChange = onAltBackspaceDeleteLineChanged
         )
 
         Spacer(modifier = Modifier.height(24.dp))

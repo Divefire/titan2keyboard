@@ -76,6 +76,12 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    fun updateAltBackspaceDeleteLine(enabled: Boolean) {
+        viewModelScope.launch {
+            settingsRepository.updateSetting("altBackspaceDeleteLine", enabled)
+        }
+    }
+
     fun resetToDefaults() {
         viewModelScope.launch {
             settingsRepository.resetToDefaults()

@@ -14,6 +14,7 @@ object PreferencesKeys {
     val TEXT_SHORTCUTS_ENABLED = booleanPreferencesKey("text_shortcuts_enabled")
     val STICKY_SHIFT = booleanPreferencesKey("sticky_shift")
     val STICKY_ALT = booleanPreferencesKey("sticky_alt")
+    val ALT_BACKSPACE_DELETE_LINE = booleanPreferencesKey("alt_backspace_delete_line")
     val KEY_REPEAT_DELAY = longPreferencesKey("key_repeat_delay")
     val KEY_REPEAT_RATE = longPreferencesKey("key_repeat_rate")
 }

@@ -158,6 +158,38 @@ class KeyEventHandler @Inject constructor(
             }
         }
 
+        // Handle Alt+Backspace behavior
+        if (event.keyCode == KeyEvent.KEYCODE_DEL && modifiersState.isAltActive()) {
+            if (currentSettings.altBackspaceDeleteLine) {
+                // Delete entire line before cursor (everything from last newline or start of text to cursor)
+                val textBeforeCursor = inputConnection.getTextBeforeCursor(1000, 0)
+                if (textBeforeCursor != null && textBeforeCursor.isNotEmpty()) {
+                    val lastNewlineIndex = textBeforeCursor.lastIndexOf('\n')
+                    val deleteCount = if (lastNewlineIndex >= 0) {
+                        // Delete everything after the last newline
+                        textBeforeCursor.length - lastNewlineIndex - 1
+                    } else {
+                        // No newline found, delete everything
+                        textBeforeCursor.length
+                    }
+
+                    if (deleteCount > 0) {
+                        inputConnection.deleteSurroundingText(deleteCount, 0)
+                    }
+                }
+
+                // Clear one-shot modifiers after use
+                clearOneShotModifiers()
+                return KeyEventResult.Handled
+            } else {
+                // Setting is OFF: treat Alt+Backspace as regular backspace (ignore Alt modifier)
+                // Clear one-shot modifiers and let the regular backspace handler process it
+                clearOneShotModifiers()
+                // Fall through to let system handle regular backspace (don't send Alt modifier)
+                return KeyEventResult.NotHandled
+            }
+        }
+
         // Handle backspace - check if we should undo last replacement
         if (event.keyCode == KeyEvent.KEYCODE_DEL && lastReplacement != null) {
             val replacement = lastReplacement!!

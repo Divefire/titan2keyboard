@@ -29,6 +29,7 @@ class SettingsRepositoryImpl @Inject constructor(
                 textShortcutsEnabled = preferences[PreferencesKeys.TEXT_SHORTCUTS_ENABLED] ?: true,
                 stickyShift = preferences[PreferencesKeys.STICKY_SHIFT] ?: false,
                 stickyAlt = preferences[PreferencesKeys.STICKY_ALT] ?: false,
+                altBackspaceDeleteLine = preferences[PreferencesKeys.ALT_BACKSPACE_DELETE_LINE] ?: true,
                 keyRepeatDelay = preferences[PreferencesKeys.KEY_REPEAT_DELAY] ?: 400L,
                 keyRepeatRate = preferences[PreferencesKeys.KEY_REPEAT_RATE] ?: 50L
             )
@@ -44,6 +45,7 @@ class SettingsRepositoryImpl @Inject constructor(
                 "textShortcutsEnabled" -> preferences[PreferencesKeys.TEXT_SHORTCUTS_ENABLED] = value as Boolean
                 "stickyShift" -> preferences[PreferencesKeys.STICKY_SHIFT] = value as Boolean
                 "stickyAlt" -> preferences[PreferencesKeys.STICKY_ALT] = value as Boolean
+                "altBackspaceDeleteLine" -> preferences[PreferencesKeys.ALT_BACKSPACE_DELETE_LINE] = value as Boolean
                 "keyRepeatDelay" -> preferences[PreferencesKeys.KEY_REPEAT_DELAY] = value as Long
                 "keyRepeatRate" -> preferences[PreferencesKeys.KEY_REPEAT_RATE] = value as Long
             }
