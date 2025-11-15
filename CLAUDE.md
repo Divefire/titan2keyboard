@@ -8,21 +8,72 @@
 
 This is a newly initialized project. The codebase is in early development with minimal structure established.
 
+## Design Philosophy
+
+**Clean Sheet, Modern Implementation**
+
+This project is built from the ground up using the latest Android technologies and best practices:
+
+- **No Legacy Code**: 100% modern implementation, no backwards compatibility concerns
+- **Android 15 First**: Targets latest Android platform (API 35), minimum Android 14 (API 34)
+- **Kotlin-Only**: Pure Kotlin codebase, no Java
+- **Modern Toolchain**: Latest Gradle, AGP, KSP (no KAPT), version catalogs
+- **Jetpack Compose**: Declarative UI with Material Design 3
+- **Clean Architecture**: Proper separation of concerns (UI → Domain → Data)
+- **Reactive Patterns**: Coroutines, Flow, StateFlow throughout
+- **Dependency Injection**: Hilt for compile-time DI
+- **Type Safety**: Leverage Kotlin's type system fully
+- **Performance**: Built for Android 15's performance features and R8 optimization
+- **Developer Experience**: Fast builds, clear architecture, maintainable code
+
+This approach allows us to use the best tools and patterns without being constrained by legacy requirements.
+
 ## Technology Stack
 
-### Expected Technologies
-- **Platform**: Android
-- **Language**: Kotlin (preferred) or Java
-- **Build System**: Gradle with Android Gradle Plugin
+### Core Technologies
+- **Platform**: Android 15 (API 35)
+- **Language**: Kotlin (100% Kotlin, no Java)
+- **Build System**: Gradle 8.x with Android Gradle Plugin 8.x (Kotlin DSL)
 - **Target Device**: Unihertz Titan 2 (physical QWERTY keyboard)
-- **Minimum SDK**: TBD (Titan 2 runs Android 11+, so minSdk should be 30+)
-- **Target SDK**: Latest stable Android version
+- **Minimum SDK**: 34 (Android 14) - Clean sheet, no backwards compatibility needed
+- **Target SDK**: 35 (Android 15)
+- **Compile SDK**: 35
+
+### Modern Android Architecture & Libraries
+
+**UI Framework**
+- **Jetpack Compose** - Modern declarative UI (Material Design 3)
+- Compose UI for settings and configuration screens
+- Material Design 3 components and theming
+
+**Architecture Components**
+- **MVVM/MVI Architecture** - Modern unidirectional data flow
+- **ViewModel** - UI state management with lifecycle awareness
+- **StateFlow/SharedFlow** - Reactive state management (prefer over LiveData)
+- **Lifecycle** - Lifecycle-aware components
+
+**Dependency Injection**
+- **Hilt** - Modern dependency injection framework
+- Compile-time DI for better performance
+
+**Asynchronous Programming**
+- **Kotlin Coroutines** - All async operations
+- **Flow** - Reactive streams for data
+- **Dispatchers** - Proper thread management (Main, IO, Default)
+
+**Data Persistence**
+- **DataStore** - Modern preferences storage (replaces SharedPreferences)
+- **Room** (if needed) - Type-safe database access with Kotlin coroutines support
+
+**Build & Dependencies**
+- **Version Catalog** (libs.versions.toml) - Centralized dependency management
+- **Kotlin Symbol Processing (KSP)** - Replace kapt for faster builds
 
 ### Key Android Components
 - `InputMethodService` - Core IME service
-- `KeyboardView` - Custom keyboard view for physical key handling
-- Android Input Method Framework
-- Accessibility Services for enhanced functionality
+- Android Input Method Framework (latest APIs)
+- Hardware keyboard event handling
+- Modern accessibility APIs
 
 ## Expected Project Structure
 
@@ -31,27 +82,43 @@ titan2keyboard/
 ├── app/                          # Main application module
 │   ├── src/
 │   │   ├── main/
-│   │   │   ├── java/com/titan2keyboard/
+│   │   │   ├── kotlin/com/titan2keyboard/
+│   │   │   │   ├── Titan2KeyboardApp.kt  # Application class with Hilt
+│   │   │   │   ├── di/          # Dependency injection modules
+│   │   │   │   │   ├── AppModule.kt
+│   │   │   │   │   └── DataModule.kt
 │   │   │   │   ├── ime/         # IME service implementation
-│   │   │   │   ├── keyboard/    # Keyboard layout and handling
-│   │   │   │   ├── settings/    # Settings and preferences
-│   │   │   │   ├── utils/       # Utility classes
-│   │   │   │   └── models/      # Data models
+│   │   │   │   │   ├── Titan2InputMethodService.kt
+│   │   │   │   │   └── KeyEventHandler.kt
+│   │   │   │   ├── domain/      # Business logic layer
+│   │   │   │   │   ├── model/   # Domain models
+│   │   │   │   │   ├── repository/  # Repository interfaces
+│   │   │   │   │   └── usecase/ # Use cases
+│   │   │   │   ├── data/        # Data layer
+│   │   │   │   │   ├── repository/  # Repository implementations
+│   │   │   │   │   ├── datastore/   # DataStore preferences
+│   │   │   │   │   └── model/   # Data models/DTOs
+│   │   │   │   ├── ui/          # Presentation layer (Compose)
+│   │   │   │   │   ├── theme/   # Material3 theme
+│   │   │   │   │   ├── settings/    # Settings screens
+│   │   │   │   │   │   ├── SettingsScreen.kt
+│   │   │   │   │   │   └── SettingsViewModel.kt
+│   │   │   │   │   └── components/  # Reusable Compose components
+│   │   │   │   └── util/        # Utility classes and extensions
 │   │   │   ├── res/
-│   │   │   │   ├── layout/      # UI layouts
-│   │   │   │   ├── values/      # Strings, colors, dimensions
-│   │   │   │   ├── xml/         # Keyboard layouts, method definitions
-│   │   │   │   └── drawable/    # Icons and graphics
+│   │   │   │   ├── values/      # Strings, colors, dimensions (Compose-based)
+│   │   │   │   ├── xml/         # IME method definitions, input method
+│   │   │   │   └── drawable/    # Vector drawables, icons
 │   │   │   └── AndroidManifest.xml
-│   │   ├── test/                # Unit tests
-│   │   └── androidTest/         # Instrumentation tests
+│   │   ├── test/                # Unit tests (JUnit 5, Mockk)
+│   │   └── androidTest/         # Instrumentation tests (Compose UI tests)
 │   ├── build.gradle.kts         # App-level build configuration
-│   └── proguard-rules.pro       # ProGuard configuration
-├── buildSrc/                     # Build logic and dependencies
+│   └── proguard-rules.pro       # R8 optimization rules
 ├── gradle/                       # Gradle wrapper
+│   └── libs.versions.toml       # Version catalog for dependencies
 ├── build.gradle.kts             # Project-level build configuration
 ├── settings.gradle.kts          # Gradle settings
-├── gradle.properties            # Gradle properties
+├── gradle.properties            # Gradle properties (Kotlin, AndroidX flags)
 ├── LICENSE                      # Apache 2.0 License
 ├── README.md                    # User-facing documentation
 └── CLAUDE.md                    # This file
@@ -64,19 +131,63 @@ titan2keyboard/
 When initializing the Android project structure:
 
 1. **Create Android Application Structure**
-   - Use standard Android project layout
-   - Set up Gradle build system with Kotlin DSL
+   - Use standard Android project layout with Kotlin source sets
+   - Set up Gradle build system with Kotlin DSL (all `.gradle.kts` files)
    - Configure proper package structure: `com.titan2keyboard.*`
+   - Enable Jetpack Compose in build configuration
 
 2. **Configure Build Files**
-   - Set appropriate `minSdkVersion` (30+)
-   - Configure `targetSdkVersion` to latest stable
-   - Add necessary dependencies (AndroidX, Material Design, etc.)
+   - **Minimum SDK**: 34 (Android 14)
+   - **Target SDK**: 35 (Android 15)
+   - **Compile SDK**: 35
+   - **Kotlin**: Latest stable (1.9.x or 2.0.x)
+   - **JVM Target**: 17 (required for Android 15)
+   - Enable KSP (Kotlin Symbol Processing) for Hilt
+   - Configure version catalog in `gradle/libs.versions.toml`
+   - Enable Compose compiler and runtime
 
-3. **Manifest Configuration**
-   - Declare `InputMethodService`
-   - Add required permissions (if any)
-   - Configure intent filters for IME service
+3. **Version Catalog Setup** (`gradle/libs.versions.toml`)
+   ```toml
+   [versions]
+   kotlin = "1.9.22"
+   agp = "8.3.0"
+   compose-bom = "2024.02.00"
+   hilt = "2.50"
+
+   [libraries]
+   androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version = "1.12.0" }
+   compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "compose-bom" }
+   hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
+
+   [plugins]
+   android-application = { id = "com.android.application", version.ref = "agp" }
+   kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+   hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
+   ksp = { id = "com.google.devtools.ksp", version = "1.9.22-1.0.17" }
+   ```
+
+4. **Manifest Configuration**
+   - Declare `InputMethodService` with modern intent filters
+   - Enable `android:enableOnBackInvokedCallback="true"` for predictive back
+   - Add required permissions (minimal set)
+   - Configure app theme for Material Design 3
+   - Set `android:extractNativeLibs="false"` for better install performance
+
+5. **Gradle Properties**
+   ```properties
+   # Enable AndroidX
+   android.useAndroidX=true
+   # Enable Jetpack Compose
+   android.enableJetifier=false
+   # Kotlin code generation
+   kapt.use.worker.api=true
+   # Enable R8 full mode
+   android.enableR8.fullMode=true
+   # Enable non-transitive R classes
+   android.nonTransitiveRClass=true
+   # Enable configuration cache
+   org.gradle.configuration-cache=true
+   ```
 
 ### IME Development Guidelines
 
@@ -110,20 +221,69 @@ When initializing the Android project structure:
 
 ### Testing Strategy
 
-1. **Unit Tests**
-   - Test key mapping logic
-   - Test text processing algorithms
-   - Mock Android framework dependencies
+**Modern Testing Approach**
 
-2. **Integration Tests**
-   - Test IME service lifecycle
-   - Test input connection handling
-   - Test settings persistence
+1. **Unit Tests** (JUnit 5 + Mockk + Turbine for Flow testing)
+   - Test key mapping logic and event handling
+   - Test ViewModels with StateFlow/Flow
+   - Test repository implementations
+   - Test use cases and domain logic
+   - Use `MockK` for mocking
+   - Use `Turbine` for testing Flows
+   - Use `kotlinx-coroutines-test` for testing coroutines
 
-3. **Manual Testing**
-   - Test on actual Unihertz Titan 2 device
-   - Test various input scenarios
-   - Test integration with different apps
+   ```kotlin
+   @Test
+   fun `key event handler maps physical key correctly`() = runTest {
+       val handler = KeyEventHandler()
+       val result = handler.handleKeyEvent(createKeyEvent(KeyEvent.KEYCODE_A))
+       assertThat(result).isEqualTo(KeyEventResult.Handled)
+   }
+
+   @Test
+   fun `settings flow emits updated values`() = runTest {
+       settingsRepository.settingsFlow.test {
+           val initial = awaitItem()
+           settingsRepository.updateSetting("vibration", true)
+           val updated = awaitItem()
+           assertThat(updated.vibrationEnabled).isTrue()
+       }
+   }
+   ```
+
+2. **Compose UI Tests**
+   - Use Compose testing APIs
+   - Test settings screen interactions
+   - Test state changes and UI updates
+   - Semantic-based testing (accessibility-focused)
+
+   ```kotlin
+   @Test
+   fun settingsScreen_togglesVibration() {
+       composeTestRule.setContent {
+           SettingsScreen()
+       }
+       composeTestRule
+           .onNodeWithText("Vibration")
+           .performClick()
+       composeTestRule
+           .onNodeWithText("Vibration")
+           .assertIsOn()
+   }
+   ```
+
+3. **Instrumentation Tests**
+   - Test IME service lifecycle on device
+   - Test actual input connection handling
+   - Test DataStore persistence
+   - Use Hilt testing components
+
+4. **Manual Testing**
+   - Test on actual Unihertz Titan 2 device (primary)
+   - Test various input scenarios across apps
+   - Test key combinations and modifiers
+   - Test performance and latency
+   - Test with different input types (text, email, password, etc.)
 
 ### Code Conventions
 
@@ -150,26 +310,143 @@ When initializing the Android project structure:
 #### Code Organization
 
 ```kotlin
-// Example structure for IME Service
-class Titan2KeyboardService : InputMethodService() {
-    // Companion object for constants
+// Example: Modern IME Service with Hilt and Coroutines
+@AndroidEntryPoint
+class Titan2InputMethodService : InputMethodService() {
+
+    @Inject
+    lateinit var keyEventHandler: KeyEventHandler
+
+    @Inject
+    lateinit var settingsRepository: SettingsRepository
+
+    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+
+    private var currentInputConnection: InputConnection? = null
+
     companion object {
-        private const val TAG = "Titan2KeyboardService"
+        private const val TAG = "Titan2IME"
     }
 
-    // Properties (lateinit, lazy initialization)
-    private lateinit var keyboardView: View
+    override fun onCreate() {
+        super.onCreate()
+        // Initialize with coroutines
+        serviceScope.launch {
+            settingsRepository.settingsFlow.collect { settings ->
+                // React to settings changes
+                applySettings(settings)
+            }
+        }
+    }
 
-    // Lifecycle methods
-    override fun onCreateInputView(): View { }
-    override fun onStartInput(attribute: EditorInfo?, restarting: Boolean) { }
+    override fun onCreateInputView(): View {
+        // IME services typically don't have a view for physical keyboards
+        // but can show minimal UI if needed using Compose
+        return ComposeView(this).apply {
+            setContent {
+                MaterialTheme {
+                    // Optional: Minimal keyboard UI
+                }
+            }
+        }
+    }
 
-    // Key handling
-    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean { }
-    override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean { }
+    override fun onStartInput(attribute: EditorInfo?, restarting: Boolean) {
+        super.onStartInput(attribute, restarting)
+        currentInputConnection = currentInputConnection
+    }
 
-    // Helper methods (private)
-    private fun processKeyEvent(event: KeyEvent) { }
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        event ?: return super.onKeyDown(keyCode, event)
+
+        return when (keyEventHandler.handleKeyEvent(event, currentInputConnection)) {
+            KeyEventResult.Handled -> true
+            KeyEventResult.NotHandled -> super.onKeyDown(keyCode, event)
+        }
+    }
+
+    override fun onDestroy() {
+        serviceScope.cancel()
+        super.onDestroy()
+    }
+
+    private fun applySettings(settings: KeyboardSettings) {
+        // Apply user settings
+    }
+}
+
+// Example: ViewModel with StateFlow
+@HiltViewModel
+class SettingsViewModel @Inject constructor(
+    private val settingsRepository: SettingsRepository
+) : ViewModel() {
+
+    val settingsState: StateFlow<SettingsUiState> = settingsRepository
+        .settingsFlow
+        .map { settings ->
+            SettingsUiState.Success(settings)
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = SettingsUiState.Loading
+        )
+
+    fun updateSetting(key: String, value: Any) {
+        viewModelScope.launch {
+            settingsRepository.updateSetting(key, value)
+        }
+    }
+}
+
+// Example: Compose UI Screen
+@Composable
+fun SettingsScreen(
+    viewModel: SettingsViewModel = hiltViewModel()
+) {
+    val settingsState by viewModel.settingsState.collectAsStateWithLifecycle()
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Titan2 Keyboard Settings") }
+            )
+        }
+    ) { paddingValues ->
+        when (val state = settingsState) {
+            is SettingsUiState.Loading -> LoadingIndicator()
+            is SettingsUiState.Success -> {
+                SettingsContent(
+                    settings = state.settings,
+                    onSettingChanged = viewModel::updateSetting,
+                    modifier = Modifier.padding(paddingValues)
+                )
+            }
+        }
+    }
+}
+
+// Example: Repository with DataStore
+class SettingsRepositoryImpl @Inject constructor(
+    private val dataStore: DataStore<Preferences>
+) : SettingsRepository {
+
+    override val settingsFlow: Flow<KeyboardSettings> = dataStore.data
+        .map { preferences ->
+            KeyboardSettings(
+                autoCapitalize = preferences[AUTO_CAPITALIZE] ?: true,
+                vibrationEnabled = preferences[VIBRATION_ENABLED] ?: false
+            )
+        }
+
+    override suspend fun updateSetting(key: String, value: Any) {
+        dataStore.edit { preferences ->
+            when (key) {
+                "autoCapitalize" -> preferences[AUTO_CAPITALIZE] = value as Boolean
+                "vibration" -> preferences[VIBRATION_ENABLED] = value as Boolean
+            }
+        }
+    }
 }
 ```
 
@@ -224,10 +501,15 @@ class Titan2KeyboardService : InputMethodService() {
    - Device-specific optimization for Unihertz Titan 2
 
 2. **Android Development Patterns**
-   - Follow Android architecture best practices
-   - Use AndroidX libraries
-   - Implement proper lifecycle management
-   - Handle configuration changes
+   - **Architecture**: Follow clean architecture with separation of concerns (UI → Domain → Data)
+   - **State Management**: Use StateFlow for UI state, prefer immutable data classes
+   - **Dependency Injection**: Use Hilt for all dependency injection
+   - **Coroutines**: Use structured concurrency, proper scopes (viewModelScope, lifecycleScope)
+   - **Compose**: Declarative UI with Material3, proper state hoisting
+   - **Lifecycle**: Use lifecycle-aware components, collect flows with `collectAsStateWithLifecycle()`
+   - **No Deprecated APIs**: Only use modern APIs, no backwards compatibility code
+   - **R8 Optimization**: Write code that optimizes well with R8 (avoid reflection where possible)
+   - **Type Safety**: Leverage Kotlin's type system, use sealed classes for states/events
 
 3. **Testing Before Committing**
    - Ensure code compiles without errors
@@ -242,10 +524,21 @@ class Titan2KeyboardService : InputMethodService() {
    - Keep this CLAUDE.md updated with architectural decisions
 
 5. **Dependencies**
-   - Minimize external dependencies
-   - Prefer AndroidX over support libraries
+   - Use version catalog (`libs.versions.toml`) for all dependencies
+   - Use Bill of Materials (BOM) for Compose dependencies
+   - Only use modern AndroidX libraries (no legacy support libraries)
+   - Prefer KSP over KAPT for annotation processing
    - Use stable, well-maintained libraries
    - Document why each dependency is needed
+
+   **Essential Dependencies:**
+   - Jetpack Compose (UI)
+   - Hilt (Dependency Injection)
+   - Coroutines + Flow (Async)
+   - DataStore (Preferences)
+   - Lifecycle + ViewModel (Architecture)
+   - Material3 (Design)
+   - JUnit5 + Mockk + Turbine (Testing)
 
 ### Common Tasks
 
@@ -299,23 +592,90 @@ class Titan2KeyboardService : InputMethodService() {
 
 - **Titan 2 Hardware**: Physical QWERTY keyboard with specific layout
 - **Screen Size**: Compact display (4.2" 768x1280)
-- **Android Version**: Runs Android 11, ensure compatibility
+- **Android Version**: Ships with Android 11, but this app targets Android 14+ (requires user upgrade)
+- **Physical Keyboard**:
+  - Full QWERTY layout with 48 keys
+  - Dedicated modifier keys (Shift, Alt, Sym)
+  - Backlit keyboard
+  - Key travel: 1.5mm
+  - Focus on physical key event handling, not virtual keyboard rendering
+
+### Modern Android Best Practices
+
+**Kotlin Best Practices**
+- Use Kotlin idioms: extension functions, scope functions, null safety
+- Prefer `when` expressions over `if-else` chains
+- Use data classes for models with immutability
+- Leverage coroutines for all async work
+- Use Flow for reactive data streams
+
+**Jetpack Compose Best Practices**
+- Single source of truth for state
+- State hoisting to appropriate levels
+- Composition over inheritance
+- Use `remember` and `derivedStateOf` appropriately
+- Avoid side effects in composables, use `LaunchedEffect`, `DisposableEffect`
+- Material3 theming with dynamic colors support
+
+**Performance Optimizations**
+- Use R8 full mode for code shrinking and optimization
+- Baseline profiles for improved startup performance
+- Lazy loading where appropriate
+- Avoid unnecessary recompositions in Compose
+- Profile with Android Studio Profiler
+
+**Security & Privacy**
+- Never log user input (PII)
+- Use encrypted DataStore for sensitive preferences
+- Follow Android 14/15 privacy requirements
+- Request minimal permissions
+- Be transparent about data usage
+
+**Build Configuration**
+- Use non-transitive R classes for faster builds
+- Enable configuration cache
+- Use KSP instead of KAPT
+- Leverage Gradle build cache
+- Version catalogs for dependency management
 
 ## Resources
 
 ### Documentation
 
+**Android Official**
+- [Android 15 Documentation](https://developer.android.com/about/versions/15)
 - [Android Input Method Framework](https://developer.android.com/develop/ui/views/touch-and-input/creating-input-method)
 - [InputMethodService Reference](https://developer.android.com/reference/android/inputmethodservice/InputMethodService)
+- [Jetpack Compose](https://developer.android.com/jetpack/compose)
+- [Material Design 3](https://m3.material.io/)
+- [Android Architecture Guide](https://developer.android.com/topic/architecture)
+- [Kotlin Coroutines Guide](https://developer.android.com/kotlin/coroutines)
+- [Hilt Documentation](https://developer.android.com/training/dependency-injection/hilt-android)
+- [DataStore](https://developer.android.com/topic/libraries/architecture/datastore)
 - [Android Kotlin Style Guide](https://developer.android.com/kotlin/style-guide)
+
+**Kotlin**
+- [Kotlin Language Reference](https://kotlinlang.org/docs/reference/)
+- [Kotlin Coding Conventions](https://kotlinlang.org/docs/coding-conventions.html)
+- [Flow API](https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines.flow/)
+
+**Device**
 - [Unihertz Titan 2 Specifications](https://www.unihertz.com/products/titan-2)
 
 ### Tools
 
-- Android Studio (recommended IDE)
-- ADB for debugging
+**Required**
+- Android Studio Hedgehog (2023.1.1) or later
+- Android SDK 35 (Android 15)
+- Gradle 8.x
+- JDK 17
+
+**Development**
+- ADB for device debugging
 - Logcat for runtime logging
-- Android Emulator (limited testing - physical device recommended)
+- Android Studio Profiler (CPU, Memory, Network)
+- Layout Inspector for Compose debugging
+- Physical Unihertz Titan 2 device (required for proper testing)
 
 ## License
 
@@ -325,3 +685,5 @@ This project is licensed under the Apache License 2.0. See LICENSE file for deta
 
 **Last Updated**: 2025-11-15
 **Project Stage**: Initial Setup
+**Target Platform**: Android 15 (API 35)
+**Architecture**: Clean Architecture with MVVM, Jetpack Compose, Hilt, Coroutines/Flow
