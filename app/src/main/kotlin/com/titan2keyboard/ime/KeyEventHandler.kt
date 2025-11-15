@@ -27,6 +27,7 @@ class KeyEventHandler @Inject constructor(
         val hadTrailingSpace: Boolean
     )
     private var lastReplacement: ReplacementInfo? = null
+    private var skipNextShortcut: Boolean = false
 
     companion object {
         private const val DOUBLE_SPACE_THRESHOLD_MS = 500L
@@ -96,6 +97,8 @@ class KeyEventHandler @Inject constructor(
                 inputConnection.deleteSurroundingText(deleteCount, 0)
                 inputConnection.commitText(replacement.original, 1)
                 lastReplacement = null
+                // Skip next shortcut check to prevent re-triggering on the next space
+                skipNextShortcut = true
                 return KeyEventResult.Handled
             }
             // Text doesn't match, clear the replacement tracking
@@ -109,6 +112,13 @@ class KeyEventHandler @Inject constructor(
 
         // Check for text shortcuts on word boundary keys (space, enter, punctuation)
         if (currentSettings.textShortcutsEnabled && isWordBoundary(event.keyCode)) {
+            // If we just undid a replacement, skip this shortcut check
+            if (skipNextShortcut) {
+                skipNextShortcut = false
+                // Let the boundary character be inserted normally
+                return KeyEventResult.NotHandled
+            }
+
             val replacementResult = checkAndReplaceShortcut(inputConnection, event.keyCode)
             if (replacementResult != null) {
                 // Shortcut was replaced, handle double-space for space key
@@ -150,6 +160,11 @@ class KeyEventHandler @Inject constructor(
         // Reset space timer if any other key is pressed
         if (event.keyCode != KeyEvent.KEYCODE_SPACE) {
             lastSpaceTime = 0L
+        }
+
+        // Clear skip flag when typing a letter or other non-boundary key
+        if (!isWordBoundary(event.keyCode)) {
+            skipNextShortcut = false
         }
 
         // Handle auto-capitalization for letter keys
