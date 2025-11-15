@@ -102,6 +102,7 @@ fun SettingsScreen(
                         onAutoCapitalizeChanged = viewModel::updateAutoCapitalize,
                         onKeyRepeatChanged = viewModel::updateKeyRepeat,
                         onLongPressCapitalizeChanged = viewModel::updateLongPressCapitalize,
+                        onDoubleSpacePeriodChanged = viewModel::updateDoubleSpacePeriod,
                         onResetToDefaults = viewModel::resetToDefaults
                     )
                 }
@@ -123,6 +124,7 @@ private fun SettingsContent(
     onAutoCapitalizeChanged: (Boolean) -> Unit,
     onKeyRepeatChanged: (Boolean) -> Unit,
     onLongPressCapitalizeChanged: (Boolean) -> Unit,
+    onDoubleSpacePeriodChanged: (Boolean) -> Unit,
     onResetToDefaults: () -> Unit
 ) {
     Column(
@@ -146,6 +148,13 @@ private fun SettingsContent(
             description = stringResource(R.string.setting_long_press_capitalize_desc),
             checked = settings.longPressCapitalize,
             onCheckedChange = onLongPressCapitalizeChanged
+        )
+
+        SettingItem(
+            title = stringResource(R.string.setting_double_space_period),
+            description = stringResource(R.string.setting_double_space_period_desc),
+            checked = settings.doubleSpacePeriod,
+            onCheckedChange = onDoubleSpacePeriodChanged
         )
 
         Spacer(modifier = Modifier.height(16.dp))

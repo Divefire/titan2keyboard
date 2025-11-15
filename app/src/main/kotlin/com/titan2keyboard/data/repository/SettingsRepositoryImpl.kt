@@ -25,6 +25,7 @@ class SettingsRepositoryImpl @Inject constructor(
                 autoCapitalize = preferences[PreferencesKeys.AUTO_CAPITALIZE] ?: true,
                 keyRepeatEnabled = preferences[PreferencesKeys.KEY_REPEAT_ENABLED] ?: true,
                 longPressCapitalize = preferences[PreferencesKeys.LONG_PRESS_CAPITALIZE] ?: false,
+                doubleSpacePeriod = preferences[PreferencesKeys.DOUBLE_SPACE_PERIOD] ?: true,
                 keyRepeatDelay = preferences[PreferencesKeys.KEY_REPEAT_DELAY] ?: 400L,
                 keyRepeatRate = preferences[PreferencesKeys.KEY_REPEAT_RATE] ?: 50L
             )
@@ -36,6 +37,7 @@ class SettingsRepositoryImpl @Inject constructor(
                 "autoCapitalize" -> preferences[PreferencesKeys.AUTO_CAPITALIZE] = value as Boolean
                 "keyRepeatEnabled" -> preferences[PreferencesKeys.KEY_REPEAT_ENABLED] = value as Boolean
                 "longPressCapitalize" -> preferences[PreferencesKeys.LONG_PRESS_CAPITALIZE] = value as Boolean
+                "doubleSpacePeriod" -> preferences[PreferencesKeys.DOUBLE_SPACE_PERIOD] = value as Boolean
                 "keyRepeatDelay" -> preferences[PreferencesKeys.KEY_REPEAT_DELAY] = value as Long
                 "keyRepeatRate" -> preferences[PreferencesKeys.KEY_REPEAT_RATE] = value as Long
             }

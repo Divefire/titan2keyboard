@@ -14,6 +14,11 @@ import javax.inject.Singleton
 class KeyEventHandler @Inject constructor() {
 
     private var currentSettings: KeyboardSettings = KeyboardSettings()
+    private var lastSpaceTime: Long = 0L
+
+    companion object {
+        private const val DOUBLE_SPACE_THRESHOLD_MS = 500L
+    }
 
     /**
      * Update the current settings
@@ -57,6 +62,28 @@ class KeyEventHandler @Inject constructor() {
         }
 
         // Handle first key press (repeatCount == 0)
+
+        // Handle double-space period
+        if (event.keyCode == KeyEvent.KEYCODE_SPACE && currentSettings.doubleSpacePeriod) {
+            val currentTime = System.currentTimeMillis()
+            if (lastSpaceTime > 0 && (currentTime - lastSpaceTime) <= DOUBLE_SPACE_THRESHOLD_MS) {
+                // Double space detected - replace last space with period and space
+                inputConnection.deleteSurroundingText(1, 0)
+                inputConnection.commitText(". ", 1)
+                lastSpaceTime = 0L  // Reset to prevent triple-space issues
+                return KeyEventResult.Handled
+            } else {
+                // Single space - record the time and let system handle it
+                lastSpaceTime = currentTime
+                return KeyEventResult.NotHandled
+            }
+        }
+
+        // Reset space timer if any other key is pressed
+        if (event.keyCode != KeyEvent.KEYCODE_SPACE) {
+            lastSpaceTime = 0L
+        }
+
         // Handle auto-capitalization for letter keys
         if (isLetterKey(event.keyCode) && shouldAutoCapitalize(inputConnection)) {
             val char = getCharForKeyCode(event.keyCode)

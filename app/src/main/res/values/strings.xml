@@ -14,6 +14,8 @@
     <string name="setting_auto_capitalize_desc">Automatically capitalize first letter of sentences</string>
     <string name="setting_long_press_capitalize">Long-press capitalize</string>
     <string name="setting_long_press_capitalize_desc">Hold a letter key to capitalize it</string>
+    <string name="setting_double_space_period">Double-space period</string>
+    <string name="setting_double_space_period_desc">Press space twice to insert a period</string>
 
     <!-- Advanced Settings -->
     <string name="setting_key_repeat">Key repeat</string>

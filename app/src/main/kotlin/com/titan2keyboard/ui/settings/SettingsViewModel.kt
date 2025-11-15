@@ -52,6 +52,12 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    fun updateDoubleSpacePeriod(enabled: Boolean) {
+        viewModelScope.launch {
+            settingsRepository.updateSetting("doubleSpacePeriod", enabled)
+        }
+    }
+
     fun resetToDefaults() {
         viewModelScope.launch {
             settingsRepository.resetToDefaults()
