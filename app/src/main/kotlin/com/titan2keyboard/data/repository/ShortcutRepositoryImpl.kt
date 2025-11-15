@@ -1,5 +1,6 @@
 package com.titan2keyboard.data.repository
 
+import android.util.Log
 import com.titan2keyboard.data.datastore.ShortcutsDataStore
 import com.titan2keyboard.domain.model.TextShortcut
 import com.titan2keyboard.domain.repository.ShortcutRepository
@@ -29,15 +30,24 @@ class ShortcutRepositoryImpl @Inject constructor(
     private val cachedShortcuts = MutableStateFlow<List<TextShortcut>>(emptyList())
     private val cachedMap = MutableStateFlow<Map<String, TextShortcut>>(emptyMap())
 
+    companion object {
+        private const val TAG = "ShortcutRepository"
+    }
+
     init {
         // Initialize cache from DataStore
         scope.launch {
             shortcutsDataStore.shortcutsFlow.collect { shortcuts ->
+                Log.d(TAG, "Cache updated: ${shortcuts.size} shortcuts loaded")
+                shortcuts.forEach { shortcut ->
+                    Log.d(TAG, "  Shortcut: '${shortcut.trigger}' -> '${shortcut.replacement}' (caseSensitive=${shortcut.caseSensitive}, isDefault=${shortcut.isDefault})")
+                }
                 cachedShortcuts.value = shortcuts
                 // Build fast lookup map
                 cachedMap.value = shortcuts.associateBy {
                     if (it.caseSensitive) it.trigger else it.trigger.lowercase()
                 }
+                Log.d(TAG, "Cache map keys: ${cachedMap.value.keys}")
             }
         }
     }
@@ -50,7 +60,14 @@ class ShortcutRepositoryImpl @Inject constructor(
 
     override fun findReplacement(text: String): String? {
         val lookupKey = text.lowercase()
-        val shortcut = cachedMap.value[lookupKey] ?: return null
+        Log.d(TAG, "findReplacement: text='$text', lookupKey='$lookupKey', cachedMap.size=${cachedMap.value.size}")
+        val shortcut = cachedMap.value[lookupKey]
+        if (shortcut == null) {
+            Log.d(TAG, "findReplacement: No match found for '$lookupKey'")
+            return null
+        }
+
+        Log.d(TAG, "findReplacement: Found match: '${shortcut.trigger}' -> '${shortcut.replacement}'")
 
         // Preserve the case of the original text
         return when {

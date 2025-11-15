@@ -425,6 +425,18 @@ class KeyEventHandler @Inject constructor(
             return
         }
 
+        // Check if any capitalization flags are set - if none are set, don't auto-capitalize
+        // This respects KeyboardCapitalization.None from Compose TextField
+        val hasCapFlag = (inputType and (
+            InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS or
+            InputType.TYPE_TEXT_FLAG_CAP_WORDS or
+            InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
+        )) != 0
+
+        if (!hasCapFlag) {
+            return
+        }
+
         // Check text before cursor to determine if we should capitalize
         val textBeforeCursor = inputConnection.getTextBeforeCursor(100, 0)
 
@@ -489,10 +501,13 @@ class KeyEventHandler @Inject constructor(
 
         // Extract the last word (everything after the last word boundary)
         val lastWord = extractLastWord(textBeforeCursor)
+        Log.d(TAG, "checkAndReplaceShortcut: lastWord='$lastWord'")
         if (lastWord.isEmpty()) return null
 
         // Check if this word has a shortcut replacement
-        val replacement = shortcutRepository.findReplacement(lastWord) ?: return null
+        val replacement = shortcutRepository.findReplacement(lastWord)
+        Log.d(TAG, "checkAndReplaceShortcut: lastWord='$lastWord' -> replacement='$replacement'")
+        if (replacement == null) return null
 
         // Delete the original word
         inputConnection.deleteSurroundingText(lastWord.length, 0)

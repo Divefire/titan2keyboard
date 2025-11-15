@@ -72,11 +72,19 @@ fun ShortcutManagementScreen(
                 }
             )
         },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = { showAddDialog = true }
+        bottomBar = {
+            // Bottom bar with centered FAB
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                contentAlignment = Alignment.Center
             ) {
-                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_shortcut))
+                FloatingActionButton(
+                    onClick = { showAddDialog = true }
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_shortcut))
+                }
             }
         }
     ) { paddingValues ->
