@@ -58,6 +58,12 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    fun updateTextShortcuts(enabled: Boolean) {
+        viewModelScope.launch {
+            settingsRepository.updateSetting("textShortcutsEnabled", enabled)
+        }
+    }
+
     fun resetToDefaults() {
         viewModelScope.launch {
             settingsRepository.resetToDefaults()

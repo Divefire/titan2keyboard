@@ -42,6 +42,7 @@ class SettingsRepositoryImplTest {
             keyRepeatEnabled = true,
             longPressCapitalize = false,
             doubleSpacePeriod = true,
+            textShortcutsEnabled = true,
             keyRepeatDelay = 400L,
             keyRepeatRate = 50L
         )

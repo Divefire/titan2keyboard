@@ -4,6 +4,7 @@ import android.view.KeyEvent
 import android.view.inputmethod.InputConnection
 import com.titan2keyboard.domain.model.KeyEventResult
 import com.titan2keyboard.domain.model.KeyboardSettings
+import com.titan2keyboard.domain.repository.ShortcutRepository
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -11,10 +12,13 @@ import javax.inject.Singleton
  * Handles physical keyboard key events
  */
 @Singleton
-class KeyEventHandler @Inject constructor() {
+class KeyEventHandler @Inject constructor(
+    private val shortcutRepository: ShortcutRepository
+) {
 
     private var currentSettings: KeyboardSettings = KeyboardSettings()
     private var lastSpaceTime: Long = 0L
+    private var currentWord: StringBuilder = StringBuilder()
 
     companion object {
         private const val DOUBLE_SPACE_THRESHOLD_MS = 500L
@@ -63,7 +67,29 @@ class KeyEventHandler @Inject constructor() {
 
         // Handle first key press (repeatCount == 0)
 
-        // Handle double-space period
+        // Check for text shortcuts on word boundary keys (space, enter, punctuation)
+        if (currentSettings.textShortcutsEnabled && isWordBoundary(event.keyCode)) {
+            val replacement = checkAndReplaceShortcut(inputConnection)
+            if (replacement != null) {
+                // If we replaced a shortcut and it's a space, handle double-space period
+                if (event.keyCode == KeyEvent.KEYCODE_SPACE && currentSettings.doubleSpacePeriod) {
+                    val currentTime = System.currentTimeMillis()
+                    if (lastSpaceTime > 0 && (currentTime - lastSpaceTime) <= DOUBLE_SPACE_THRESHOLD_MS) {
+                        // Double space after replacement - add period
+                        inputConnection.deleteSurroundingText(1, 0)
+                        inputConnection.commitText(". ", 1)
+                        lastSpaceTime = 0L
+                        return KeyEventResult.Handled
+                    } else {
+                        lastSpaceTime = currentTime
+                    }
+                }
+                // Return NotHandled to let the word boundary character (space, etc.) be inserted
+                return KeyEventResult.NotHandled
+            }
+        }
+
+        // Handle double-space period (for non-shortcut cases)
         if (event.keyCode == KeyEvent.KEYCODE_SPACE && currentSettings.doubleSpacePeriod) {
             val currentTime = System.currentTimeMillis()
             if (lastSpaceTime > 0 && (currentTime - lastSpaceTime) <= DOUBLE_SPACE_THRESHOLD_MS) {
@@ -193,5 +219,62 @@ class KeyEventHandler @Inject constructor() {
         }
 
         return false
+    }
+
+    /**
+     * Check if a key code represents a word boundary
+     */
+    private fun isWordBoundary(keyCode: Int): Boolean {
+        return when (keyCode) {
+            KeyEvent.KEYCODE_SPACE,
+            KeyEvent.KEYCODE_ENTER,
+            KeyEvent.KEYCODE_TAB,
+            KeyEvent.KEYCODE_PERIOD,
+            KeyEvent.KEYCODE_COMMA -> true
+            else -> false
+        }
+    }
+
+    /**
+     * Check if the last word matches a shortcut and replace it
+     * @return The replacement text if a shortcut was found, null otherwise
+     */
+    private fun checkAndReplaceShortcut(inputConnection: InputConnection): String? {
+        // Get text before cursor to extract the last word
+        val textBeforeCursor = inputConnection.getTextBeforeCursor(50, 0) ?: return null
+        if (textBeforeCursor.isEmpty()) return null
+
+        // Extract the last word (everything after the last word boundary)
+        val lastWord = extractLastWord(textBeforeCursor)
+        if (lastWord.isEmpty()) return null
+
+        // Check if this word has a shortcut replacement
+        val replacement = shortcutRepository.findReplacement(lastWord) ?: return null
+
+        // Delete the original word and insert the replacement
+        inputConnection.deleteSurroundingText(lastWord.length, 0)
+        inputConnection.commitText(replacement, 1)
+
+        return replacement
+    }
+
+    /**
+     * Extract the last word from text (everything after the last word boundary)
+     */
+    private fun extractLastWord(text: CharSequence): String {
+        val str = text.toString()
+        var startIndex = str.length - 1
+
+        // Find the start of the last word by going backwards until we hit a word boundary
+        while (startIndex >= 0) {
+            val char = str[startIndex]
+            if (char.isWhitespace() || char in ".!?,;:\"'()[]{}") {
+                break
+            }
+            startIndex--
+        }
+
+        // Extract the word (startIndex is now at the boundary, so add 1)
+        return str.substring(startIndex + 1)
     }
 }
