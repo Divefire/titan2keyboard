@@ -46,12 +46,15 @@ class KeyEventHandler @Inject constructor(
     private var modifiersState = ModifiersState()
     private var shiftKeyDownTime: Long = 0L
     private var altKeyDownTime: Long = 0L
+    private var lastShiftTapTime: Long = 0L
+    private var lastAltTapTime: Long = 0L
     private var modifierStateListener: ModifierStateListener? = null
 
     companion object {
         private const val TAG = "KeyEventHandler"
         private const val DOUBLE_SPACE_THRESHOLD_MS = 500L
         private const val LONG_PRESS_THRESHOLD_MS = 500L
+        private const val DOUBLE_TAP_THRESHOLD_MS = 300L // Max time between taps for double-tap
     }
 
     /**
@@ -384,11 +387,33 @@ class KeyEventHandler @Inject constructor(
         // Handle modifier key release
         when (event.keyCode) {
             KeyEvent.KEYCODE_SHIFT_LEFT, KeyEvent.KEYCODE_SHIFT_RIGHT -> {
-                if (currentSettings.stickyShift && shiftKeyDownTime > 0) {
+                if (shiftKeyDownTime > 0) {
                     val pressDuration = event.eventTime - shiftKeyDownTime
                     val isLongPress = pressDuration >= LONG_PRESS_THRESHOLD_MS
-                    toggleShiftModifier(isLongPress)
+
+                    // Check for double-tap (only on short presses)
+                    val isDoubleTap = if (!isLongPress) {
+                        val timeSinceLastTap = event.eventTime - lastShiftTapTime
+                        timeSinceLastTap < DOUBLE_TAP_THRESHOLD_MS
+                    } else {
+                        false
+                    }
+
+                    // Double-tap acts like long-press (locks modifier)
+                    val shouldLock = isLongPress || isDoubleTap
+
+                    if (shouldLock) {
+                        Log.d(TAG, "Shift: ${if (isDoubleTap) "double-tap" else "long-press"} detected, locking")
+                    }
+
+                    toggleShiftModifier(shouldLock)
                     shiftKeyDownTime = 0L
+
+                    // Update last tap time for double-tap detection (only for short presses)
+                    if (!isLongPress) {
+                        lastShiftTapTime = event.eventTime
+                    }
+
                     return KeyEventResult.Handled
                 }
             }
@@ -396,8 +421,30 @@ class KeyEventHandler @Inject constructor(
                 if (currentSettings.stickyAlt && altKeyDownTime > 0) {
                     val pressDuration = event.eventTime - altKeyDownTime
                     val isLongPress = pressDuration >= LONG_PRESS_THRESHOLD_MS
-                    toggleAltModifier(isLongPress)
+
+                    // Check for double-tap (only on short presses)
+                    val isDoubleTap = if (!isLongPress) {
+                        val timeSinceLastTap = event.eventTime - lastAltTapTime
+                        timeSinceLastTap < DOUBLE_TAP_THRESHOLD_MS
+                    } else {
+                        false
+                    }
+
+                    // Double-tap acts like long-press (locks modifier)
+                    val shouldLock = isLongPress || isDoubleTap
+
+                    if (shouldLock) {
+                        Log.d(TAG, "Alt: ${if (isDoubleTap) "double-tap" else "long-press"} detected, locking")
+                    }
+
+                    toggleAltModifier(shouldLock)
                     altKeyDownTime = 0L
+
+                    // Update last tap time for double-tap detection (only for short presses)
+                    if (!isLongPress) {
+                        lastAltTapTime = event.eventTime
+                    }
+
                     return KeyEventResult.Handled
                 }
             }
