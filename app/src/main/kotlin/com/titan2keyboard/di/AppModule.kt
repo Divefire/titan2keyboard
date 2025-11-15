@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
+import com.titan2keyboard.data.datastore.ShortcutsDataStore
 import com.titan2keyboard.data.repository.SettingsRepositoryImpl
 import com.titan2keyboard.data.repository.ShortcutRepositoryImpl
 import com.titan2keyboard.domain.repository.SettingsRepository
@@ -42,7 +43,17 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideShortcutRepository(): ShortcutRepository {
-        return ShortcutRepositoryImpl()
+    fun provideShortcutsDataStore(
+        @ApplicationContext context: Context
+    ): ShortcutsDataStore {
+        return ShortcutsDataStore(context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideShortcutRepository(
+        shortcutsDataStore: ShortcutsDataStore
+    ): ShortcutRepository {
+        return ShortcutRepositoryImpl(shortcutsDataStore)
     }
 }

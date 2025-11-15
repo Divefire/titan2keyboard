@@ -18,6 +18,21 @@
     <string name="setting_double_space_period_desc">Press space twice to insert a period</string>
     <string name="setting_text_shortcuts">Text shortcuts</string>
     <string name="setting_text_shortcuts_desc">Auto-correct common contractions and typos (e.g., Im → I\'m)</string>
+    <string name="manage_shortcuts">Manage shortcuts</string>
+
+    <!-- Shortcuts Management -->
+    <string name="shortcuts_title">Text Shortcuts</string>
+    <string name="navigate_back">Navigate back</string>
+    <string name="add_shortcut">Add shortcut</string>
+    <string name="edit_shortcut">Edit shortcut</string>
+    <string name="delete_shortcut">Delete shortcut</string>
+    <string name="no_shortcuts">No shortcuts yet. Tap + to add one.</string>
+    <string name="case_sensitive">Case sensitive</string>
+    <string name="default_shortcut">Default</string>
+    <string name="trigger_text">Trigger (e.g., Im)</string>
+    <string name="replacement_text">Replacement (e.g., I\'m)</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
 
     <!-- Advanced Settings -->
     <string name="setting_key_repeat">Key repeat</string>

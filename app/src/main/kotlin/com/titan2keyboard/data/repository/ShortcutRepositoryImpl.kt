@@ -1,79 +1,56 @@
 package com.titan2keyboard.data.repository
 
+import com.titan2keyboard.data.datastore.ShortcutsDataStore
 import com.titan2keyboard.domain.model.TextShortcut
 import com.titan2keyboard.domain.repository.ShortcutRepository
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Implementation of ShortcutRepository with default shortcuts
+ * Implementation of ShortcutRepository with persistent storage
+ * Maintains an in-memory cache for fast synchronous lookups during typing
  */
 @Singleton
-class ShortcutRepositoryImpl @Inject constructor() : ShortcutRepository {
+class ShortcutRepositoryImpl @Inject constructor(
+    private val shortcutsDataStore: ShortcutsDataStore
+) : ShortcutRepository {
 
-    private val shortcuts = listOf(
-        // Common contractions
-        TextShortcut("Im", "I'm", caseSensitive = false),
-        TextShortcut("Ive", "I've", caseSensitive = false),
-        TextShortcut("Ill", "I'll", caseSensitive = false),
-        TextShortcut("Id", "I'd", caseSensitive = false),
-        TextShortcut("dont", "don't", caseSensitive = false),
-        TextShortcut("doesnt", "doesn't", caseSensitive = false),
-        TextShortcut("didnt", "didn't", caseSensitive = false),
-        TextShortcut("cant", "can't", caseSensitive = false),
-        TextShortcut("couldnt", "couldn't", caseSensitive = false),
-        TextShortcut("wouldnt", "wouldn't", caseSensitive = false),
-        TextShortcut("shouldnt", "shouldn't", caseSensitive = false),
-        TextShortcut("isnt", "isn't", caseSensitive = false),
-        TextShortcut("arent", "aren't", caseSensitive = false),
-        TextShortcut("wasnt", "wasn't", caseSensitive = false),
-        TextShortcut("werent", "weren't", caseSensitive = false),
-        TextShortcut("hasnt", "hasn't", caseSensitive = false),
-        TextShortcut("havent", "haven't", caseSensitive = false),
-        TextShortcut("hadnt", "hadn't", caseSensitive = false),
-        TextShortcut("wont", "won't", caseSensitive = false),
-        TextShortcut("thats", "that's", caseSensitive = false),
-        TextShortcut("theres", "there's", caseSensitive = false),
-        TextShortcut("heres", "here's", caseSensitive = false),
-        TextShortcut("whats", "what's", caseSensitive = false),
-        TextShortcut("wheres", "where's", caseSensitive = false),
-        TextShortcut("whos", "who's", caseSensitive = false),
-        TextShortcut("hows", "how's", caseSensitive = false),
-        TextShortcut("whens", "when's", caseSensitive = false),
-        TextShortcut("whys", "why's", caseSensitive = false),
-        TextShortcut("youre", "you're", caseSensitive = false),
-        TextShortcut("youve", "you've", caseSensitive = false),
-        TextShortcut("youll", "you'll", caseSensitive = false),
-        TextShortcut("youd", "you'd", caseSensitive = false),
-        TextShortcut("theyre", "they're", caseSensitive = false),
-        TextShortcut("theyve", "they've", caseSensitive = false),
-        TextShortcut("theyll", "they'll", caseSensitive = false),
-        TextShortcut("theyd", "they'd", caseSensitive = false),
-        TextShortcut("weve", "we've", caseSensitive = false),
-        TextShortcut("wed", "we'd", caseSensitive = false),
-        TextShortcut("shes", "she's", caseSensitive = false),
-        TextShortcut("hes", "he's", caseSensitive = false),
-        TextShortcut("lets", "let's", caseSensitive = false),
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
-        // Common typos
-        TextShortcut("teh", "the", caseSensitive = false),
-        TextShortcut("recieve", "receive", caseSensitive = false),
-        TextShortcut("occured", "occurred", caseSensitive = false),
-        TextShortcut("seperate", "separate", caseSensitive = false),
-        TextShortcut("definately", "definitely", caseSensitive = false),
-        TextShortcut("alot", "a lot", caseSensitive = false),
-    )
+    // In-memory cache for fast synchronous access during typing
+    private val cachedShortcuts = MutableStateFlow<List<TextShortcut>>(emptyList())
+    private val cachedMap = MutableStateFlow<Map<String, TextShortcut>>(emptyMap())
 
-    // Build a map for fast lookup (case-insensitive)
-    private val shortcutMap: Map<String, TextShortcut> = shortcuts.associateBy {
-        if (it.caseSensitive) it.trigger else it.trigger.lowercase()
+    init {
+        // Initialize cache from DataStore
+        scope.launch {
+            shortcutsDataStore.shortcutsFlow.collect { shortcuts ->
+                cachedShortcuts.value = shortcuts
+                // Build fast lookup map
+                cachedMap.value = shortcuts.associateBy {
+                    if (it.caseSensitive) it.trigger else it.trigger.lowercase()
+                }
+            }
+        }
     }
 
-    override fun getShortcuts(): List<TextShortcut> = shortcuts
+    override val shortcutsFlow: Flow<List<TextShortcut>> = shortcutsDataStore.shortcutsFlow
+
+    override suspend fun getShortcuts(): List<TextShortcut> {
+        return shortcutsDataStore.shortcutsFlow.first()
+    }
 
     override fun findReplacement(text: String): String? {
         val lookupKey = text.lowercase()
-        val shortcut = shortcutMap[lookupKey] ?: return null
+        val shortcut = cachedMap.value[lookupKey] ?: return null
 
         // Preserve the case of the original text
         return when {
@@ -84,5 +61,80 @@ class ShortcutRepositoryImpl @Inject constructor() : ShortcutRepository {
             // Otherwise use replacement as-is
             else -> shortcut.replacement
         }
+    }
+
+    override suspend fun addShortcut(shortcut: TextShortcut) {
+        shortcutsDataStore.addShortcut(shortcut)
+    }
+
+    override suspend fun updateShortcut(shortcut: TextShortcut) {
+        shortcutsDataStore.updateShortcut(shortcut)
+    }
+
+    override suspend fun deleteShortcut(id: String) {
+        shortcutsDataStore.deleteShortcut(id)
+    }
+
+    override suspend fun initializeDefaults() {
+        val existing = getShortcuts()
+        if (existing.isNotEmpty()) {
+            return // Already initialized
+        }
+
+        // Create default shortcuts with IDs
+        val defaults = listOf(
+            // Common contractions
+            TextShortcut(UUID.randomUUID().toString(), "Im", "I'm", caseSensitive = false, isDefault = true),
+            TextShortcut(UUID.randomUUID().toString(), "Ive", "I've", caseSensitive = false, isDefault = true),
+            TextShortcut(UUID.randomUUID().toString(), "Ill", "I'll", caseSensitive = false, isDefault = true),
+            TextShortcut(UUID.randomUUID().toString(), "Id", "I'd", caseSensitive = false, isDefault = true),
+            TextShortcut(UUID.randomUUID().toString(), "dont", "don't", caseSensitive = false, isDefault = true),
+            TextShortcut(UUID.randomUUID().toString(), "doesnt", "doesn't", caseSensitive = false, isDefault = true),
+            TextShortcut(UUID.randomUUID().toString(), "didnt", "didn't", caseSensitive = false, isDefault = true),
+            TextShortcut(UUID.randomUUID().toString(), "cant", "can't", caseSensitive = false, isDefault = true),
+            TextShortcut(UUID.randomUUID().toString(), "couldnt", "couldn't", caseSensitive = false, isDefault = true),
+            TextShortcut(UUID.randomUUID().toString(), "wouldnt", "wouldn't", caseSensitive = false, isDefault = true),
+            TextShortcut(UUID.randomUUID().toString(), "shouldnt", "shouldn't", caseSensitive = false, isDefault = true),
+            TextShortcut(UUID.randomUUID().toString(), "isnt", "isn't", caseSensitive = false, isDefault = true),
+            TextShortcut(UUID.randomUUID().toString(), "arent", "aren't", caseSensitive = false, isDefault = true),
+            TextShortcut(UUID.randomUUID().toString(), "wasnt", "wasn't", caseSensitive = false, isDefault = true),
+            TextShortcut(UUID.randomUUID().toString(), "werent", "weren't", caseSensitive = false, isDefault = true),
+            TextShortcut(UUID.randomUUID().toString(), "hasnt", "hasn't", caseSensitive = false, isDefault = true),
+            TextShortcut(UUID.randomUUID().toString(), "havent", "haven't", caseSensitive = false, isDefault = true),
+            TextShortcut(UUID.randomUUID().toString(), "hadnt", "hadn't", caseSensitive = false, isDefault = true),
+            TextShortcut(UUID.randomUUID().toString(), "wont", "won't", caseSensitive = false, isDefault = true),
+            TextShortcut(UUID.randomUUID().toString(), "thats", "that's", caseSensitive = false, isDefault = true),
+            TextShortcut(UUID.randomUUID().toString(), "theres", "there's", caseSensitive = false, isDefault = true),
+            TextShortcut(UUID.randomUUID().toString(), "heres", "here's", caseSensitive = false, isDefault = true),
+            TextShortcut(UUID.randomUUID().toString(), "whats", "what's", caseSensitive = false, isDefault = true),
+            TextShortcut(UUID.randomUUID().toString(), "wheres", "where's", caseSensitive = false, isDefault = true),
+            TextShortcut(UUID.randomUUID().toString(), "whos", "who's", caseSensitive = false, isDefault = true),
+            TextShortcut(UUID.randomUUID().toString(), "hows", "how's", caseSensitive = false, isDefault = true),
+            TextShortcut(UUID.randomUUID().toString(), "whens", "when's", caseSensitive = false, isDefault = true),
+            TextShortcut(UUID.randomUUID().toString(), "whys", "why's", caseSensitive = false, isDefault = true),
+            TextShortcut(UUID.randomUUID().toString(), "youre", "you're", caseSensitive = false, isDefault = true),
+            TextShortcut(UUID.randomUUID().toString(), "youve", "you've", caseSensitive = false, isDefault = true),
+            TextShortcut(UUID.randomUUID().toString(), "youll", "you'll", caseSensitive = false, isDefault = true),
+            TextShortcut(UUID.randomUUID().toString(), "youd", "you'd", caseSensitive = false, isDefault = true),
+            TextShortcut(UUID.randomUUID().toString(), "theyre", "they're", caseSensitive = false, isDefault = true),
+            TextShortcut(UUID.randomUUID().toString(), "theyve", "they've", caseSensitive = false, isDefault = true),
+            TextShortcut(UUID.randomUUID().toString(), "theyll", "they'll", caseSensitive = false, isDefault = true),
+            TextShortcut(UUID.randomUUID().toString(), "theyd", "they'd", caseSensitive = false, isDefault = true),
+            TextShortcut(UUID.randomUUID().toString(), "weve", "we've", caseSensitive = false, isDefault = true),
+            TextShortcut(UUID.randomUUID().toString(), "wed", "we'd", caseSensitive = false, isDefault = true),
+            TextShortcut(UUID.randomUUID().toString(), "shes", "she's", caseSensitive = false, isDefault = true),
+            TextShortcut(UUID.randomUUID().toString(), "hes", "he's", caseSensitive = false, isDefault = true),
+            TextShortcut(UUID.randomUUID().toString(), "lets", "let's", caseSensitive = false, isDefault = true),
+
+            // Common typos
+            TextShortcut(UUID.randomUUID().toString(), "teh", "the", caseSensitive = false, isDefault = true),
+            TextShortcut(UUID.randomUUID().toString(), "recieve", "receive", caseSensitive = false, isDefault = true),
+            TextShortcut(UUID.randomUUID().toString(), "occured", "occurred", caseSensitive = false, isDefault = true),
+            TextShortcut(UUID.randomUUID().toString(), "seperate", "separate", caseSensitive = false, isDefault = true),
+            TextShortcut(UUID.randomUUID().toString(), "definately", "definitely", caseSensitive = false, isDefault = true),
+            TextShortcut(UUID.randomUUID().toString(), "alot", "a lot", caseSensitive = false, isDefault = true),
+        )
+
+        shortcutsDataStore.saveShortcuts(defaults)
     }
 }

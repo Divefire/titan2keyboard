@@ -19,10 +19,11 @@ interface ShortcutRepository {
 
     /**
      * Find a replacement for the given text
+     * Synchronous lookup using in-memory cache for real-time typing performance
      * @param text The text to look up
      * @return The replacement text, or null if no shortcut matches
      */
-    suspend fun findReplacement(text: String): String?
+    fun findReplacement(text: String): String?
 
     /**
      * Add a new shortcut

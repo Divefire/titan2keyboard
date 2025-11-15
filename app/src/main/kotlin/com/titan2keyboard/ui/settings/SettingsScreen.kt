@@ -37,6 +37,7 @@ import com.titan2keyboard.R
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
+    onNavigateToShortcuts: () -> Unit = {},
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val settingsState by viewModel.settingsState.collectAsStateWithLifecycle()
@@ -104,6 +105,7 @@ fun SettingsScreen(
                         onLongPressCapitalizeChanged = viewModel::updateLongPressCapitalize,
                         onDoubleSpacePeriodChanged = viewModel::updateDoubleSpacePeriod,
                         onTextShortcutsChanged = viewModel::updateTextShortcuts,
+                        onManageShortcuts = onNavigateToShortcuts,
                         onResetToDefaults = viewModel::resetToDefaults
                     )
                 }
@@ -127,6 +129,7 @@ private fun SettingsContent(
     onLongPressCapitalizeChanged: (Boolean) -> Unit,
     onDoubleSpacePeriodChanged: (Boolean) -> Unit,
     onTextShortcutsChanged: (Boolean) -> Unit,
+    onManageShortcuts: () -> Unit,
     onResetToDefaults: () -> Unit
 ) {
     Column(
@@ -165,6 +168,20 @@ private fun SettingsContent(
             checked = settings.textShortcutsEnabled,
             onCheckedChange = onTextShortcutsChanged
         )
+
+        // Manage Shortcuts Button
+        Card(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            TextButton(
+                onClick = onManageShortcuts,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
+            ) {
+                Text(stringResource(R.string.manage_shortcuts))
+            }
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
