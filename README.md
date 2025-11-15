@@ -1,10 +1,10 @@
-# Titan2 Keyboard
+# Titan 2 Keyboard
 
 A modern Input Method Editor (IME) keyboard application specifically designed for the Unihertz Titan 2 physical QWERTY keyboard.
 
 ## Overview
 
-Titan2 Keyboard is built from the ground up using the latest Android technologies and best practices, targeting Android 15 (API 35) with no legacy code or backwards compatibility concerns. It enhances the typing experience on the Unihertz Titan 2's physical keyboard through intelligent key handling, customizable settings, and modern Android integration.
+Titan 2 Keyboard is built from the ground up using the latest Android technologies and best practices, targeting Android 15 (API 35) with no legacy code or backwards compatibility concerns. It enhances the typing experience on the Unihertz Titan 2's physical keyboard through intelligent key handling, customizable settings, and modern Android integration.
 
 ## Features
 
