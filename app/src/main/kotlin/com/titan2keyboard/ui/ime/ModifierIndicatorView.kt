@@ -1,6 +1,7 @@
 package com.titan2keyboard.ui.ime
 
 import android.content.Context
+import android.view.View
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
