@@ -49,13 +49,10 @@ class ShortcutRepositoryImpl @Inject constructor() : ShortcutRepository {
         TextShortcut("theyve", "they've", caseSensitive = false),
         TextShortcut("theyll", "they'll", caseSensitive = false),
         TextShortcut("theyd", "they'd", caseSensitive = false),
-        TextShortcut("were", "we're", caseSensitive = false),
         TextShortcut("weve", "we've", caseSensitive = false),
-        TextShortcut("well", "we'll", caseSensitive = false),
         TextShortcut("wed", "we'd", caseSensitive = false),
         TextShortcut("shes", "she's", caseSensitive = false),
         TextShortcut("hes", "he's", caseSensitive = false),
-        TextShortcut("its", "it's", caseSensitive = false),
         TextShortcut("lets", "let's", caseSensitive = false),
 
         // Common typos
