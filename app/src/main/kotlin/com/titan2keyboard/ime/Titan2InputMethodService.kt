@@ -3,6 +3,7 @@ package com.titan2keyboard.ime
 import android.inputmethodservice.InputMethodService
 import android.util.Log
 import android.view.KeyEvent
+import android.view.MotionEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import com.titan2keyboard.domain.model.KeyEventResult
@@ -33,8 +34,13 @@ class Titan2InputMethodService : InputMethodService(), ModifierStateListener {
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private var modifierIndicatorView: ModifierIndicatorView? = null
 
+    // Track whether we're in a text input field to block capacitive touch
+    private var isInTextInputField = false
+    private var lastKeyEventTime = 0L
+
     companion object {
         private const val TAG = "Titan2IME"
+        private const val CAPACITIVE_BLOCK_TIME_MS = 1000L // Block capacitive for 1s after keystroke
     }
 
     override fun onCreate() {
@@ -111,6 +117,10 @@ class Titan2InputMethodService : InputMethodService(), ModifierStateListener {
             val hasAutoCorrectionDisabled = (info.inputType and android.text.InputType.TYPE_TEXT_FLAG_AUTO_CORRECT) == 0
             Log.d(TAG, "Input type - class: $typeClass, variation: $typeVariation, " +
                     "noSuggestions: $hasNoSuggestions, autoCorrectionDisabled: $hasAutoCorrectionDisabled")
+
+            // Check if this is a text input field
+            isInTextInputField = typeClass == android.text.InputType.TYPE_CLASS_TEXT
+            Log.d(TAG, "isInTextInputField: $isInTextInputField")
         }
 
         // Update the key event handler with current editor info
@@ -123,10 +133,14 @@ class Titan2InputMethodService : InputMethodService(), ModifierStateListener {
     override fun onFinishInput() {
         super.onFinishInput()
         Log.d(TAG, "Input finished")
+        isInTextInputField = false
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         event ?: return super.onKeyDown(keyCode, event)
+
+        // Track key event time for capacitive touch blocking
+        lastKeyEventTime = System.currentTimeMillis()
 
         val result = keyEventHandler.handleKeyDown(event, currentInputConnection)
         return when (result) {
@@ -148,6 +162,26 @@ class Titan2InputMethodService : InputMethodService(), ModifierStateListener {
             KeyEventResult.Handled -> true
             KeyEventResult.NotHandled -> super.onKeyUp(keyCode, event)
         }
+    }
+
+    override fun onGenericMotionEvent(event: MotionEvent): Boolean {
+        // Block capacitive touch events (trackpad/scroll gestures) when in text input field
+        if (isInTextInputField) {
+            val timeSinceLastKey = System.currentTimeMillis() - lastKeyEventTime
+
+            // Block if we recently typed (within 1 second)
+            if (lastKeyEventTime > 0 && timeSinceLastKey < CAPACITIVE_BLOCK_TIME_MS) {
+                Log.d(TAG, "Blocking capacitive touch event (${timeSinceLastKey}ms since last key)")
+                return true // Consume the event
+            }
+
+            // Also block all capacitive touch while in text field (optional - can be removed if too aggressive)
+            Log.d(TAG, "Blocking capacitive touch event (in text field)")
+            return true // Consume the event
+        }
+
+        // Not in text field, allow capacitive touch
+        return super.onGenericMotionEvent(event)
     }
 
     override fun onDestroy() {
