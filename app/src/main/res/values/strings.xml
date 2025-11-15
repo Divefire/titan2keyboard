@@ -10,12 +10,8 @@
     <string name="settings_advanced">Advanced</string>
 
     <!-- General Settings -->
-    <string name="setting_vibration">Vibration feedback</string>
-    <string name="setting_vibration_desc">Vibrate on key press</string>
-    <string name="setting_sound">Sound feedback</string>
-    <string name="setting_sound_desc">Play sound on key press</string>
     <string name="setting_auto_capitalize">Auto-capitalization</string>
-    <string name="setting_auto_capitalize_desc">Automatically capitalize first letter</string>
+    <string name="setting_auto_capitalize_desc">Automatically capitalize first letter of sentences</string>
 
     <!-- Advanced Settings -->
     <string name="setting_key_repeat">Key repeat</string>

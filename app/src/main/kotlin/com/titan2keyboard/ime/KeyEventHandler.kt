@@ -31,11 +31,62 @@ class KeyEventHandler @Inject constructor() {
     fun handleKeyDown(event: KeyEvent, inputConnection: InputConnection?): KeyEventResult {
         inputConnection ?: return KeyEventResult.NotHandled
 
-        // For now, let the system handle all events
-        // This is where we'll add custom key handling logic
-        return when (event.keyCode) {
-            // System will handle standard text input
-            else -> KeyEventResult.NotHandled
+        // Handle key repeat setting
+        if (!currentSettings.keyRepeatEnabled && event.repeatCount > 0) {
+            // Block repeated keys if key repeat is disabled
+            return KeyEventResult.Handled
+        }
+
+        // Handle auto-capitalization for letter keys
+        if (isLetterKey(event.keyCode) && event.repeatCount == 0) {
+            // Only apply auto-capitalize on first key press, not repeats
+            if (shouldAutoCapitalize(inputConnection)) {
+                // Get the letter character for this key code
+                val char = getCharForKeyCode(event.keyCode)
+                if (char != null) {
+                    // Commit the capitalized character directly
+                    inputConnection.commitText(char.uppercase(), 1)
+                    return KeyEventResult.Handled
+                }
+            }
+        }
+
+        // Let system handle all other events normally
+        return KeyEventResult.NotHandled
+    }
+
+    /**
+     * Get the character for a letter key code
+     */
+    private fun getCharForKeyCode(keyCode: Int): String? {
+        return when (keyCode) {
+            KeyEvent.KEYCODE_A -> "a"
+            KeyEvent.KEYCODE_B -> "b"
+            KeyEvent.KEYCODE_C -> "c"
+            KeyEvent.KEYCODE_D -> "d"
+            KeyEvent.KEYCODE_E -> "e"
+            KeyEvent.KEYCODE_F -> "f"
+            KeyEvent.KEYCODE_G -> "g"
+            KeyEvent.KEYCODE_H -> "h"
+            KeyEvent.KEYCODE_I -> "i"
+            KeyEvent.KEYCODE_J -> "j"
+            KeyEvent.KEYCODE_K -> "k"
+            KeyEvent.KEYCODE_L -> "l"
+            KeyEvent.KEYCODE_M -> "m"
+            KeyEvent.KEYCODE_N -> "n"
+            KeyEvent.KEYCODE_O -> "o"
+            KeyEvent.KEYCODE_P -> "p"
+            KeyEvent.KEYCODE_Q -> "q"
+            KeyEvent.KEYCODE_R -> "r"
+            KeyEvent.KEYCODE_S -> "s"
+            KeyEvent.KEYCODE_T -> "t"
+            KeyEvent.KEYCODE_U -> "u"
+            KeyEvent.KEYCODE_V -> "v"
+            KeyEvent.KEYCODE_W -> "w"
+            KeyEvent.KEYCODE_X -> "x"
+            KeyEvent.KEYCODE_Y -> "y"
+            KeyEvent.KEYCODE_Z -> "z"
+            else -> null
         }
     }
 
@@ -45,8 +96,19 @@ class KeyEventHandler @Inject constructor() {
     fun handleKeyUp(event: KeyEvent, inputConnection: InputConnection?): KeyEventResult {
         inputConnection ?: return KeyEventResult.NotHandled
 
-        // For now, let the system handle all events
+        // Handle key repeat setting for key up
+        if (!currentSettings.keyRepeatEnabled && event.repeatCount > 0) {
+            return KeyEventResult.Handled
+        }
+
         return KeyEventResult.NotHandled
+    }
+
+    /**
+     * Check if the key code represents a letter
+     */
+    private fun isLetterKey(keyCode: Int): Boolean {
+        return keyCode in KeyEvent.KEYCODE_A..KeyEvent.KEYCODE_Z
     }
 
     /**
@@ -55,7 +117,35 @@ class KeyEventHandler @Inject constructor() {
     private fun shouldAutoCapitalize(inputConnection: InputConnection): Boolean {
         if (!currentSettings.autoCapitalize) return false
 
-        val textBeforeCursor = inputConnection.getTextBeforeCursor(1, 0)
-        return textBeforeCursor.isNullOrEmpty() || textBeforeCursor.last() in listOf('.', '!', '?', '\n')
+        // Check text before cursor to determine if we should capitalize
+        val textBeforeCursor = inputConnection.getTextBeforeCursor(100, 0)
+
+        if (textBeforeCursor.isNullOrEmpty()) {
+            // Start of text, capitalize
+            return true
+        }
+
+        // Get the last character
+        val lastChar = textBeforeCursor.last()
+
+        // Capitalize after sentence-ending punctuation
+        if (lastChar in listOf('.', '!', '?')) {
+            return true
+        }
+
+        // Capitalize after newline
+        if (lastChar == '\n') {
+            return true
+        }
+
+        // Check for sentence-ending punctuation followed by space
+        if (textBeforeCursor.length >= 2) {
+            val secondToLast = textBeforeCursor[textBeforeCursor.length - 2]
+            if (lastChar in listOf(' ', '\t') && secondToLast in listOf('.', '!', '?')) {
+                return true
+            }
+        }
+
+        return false
     }
 }
