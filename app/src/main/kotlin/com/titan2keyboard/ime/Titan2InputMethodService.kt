@@ -137,6 +137,14 @@ class Titan2InputMethodService : InputMethodService(), ModifierStateListener {
         val shouldShow = modifiersState.isShiftActive() || modifiersState.isAltActive()
 
         if (shouldShow) {
+            // Choose icon based on which modifiers are active
+            val iconRes = when {
+                modifiersState.isShiftActive() && modifiersState.isAltActive() -> R.drawable.ic_shift_alt
+                modifiersState.isShiftActive() -> R.drawable.ic_shift
+                modifiersState.isAltActive() -> R.drawable.ic_alt
+                else -> R.drawable.ic_shift // Fallback
+            }
+
             // Build notification text based on active modifiers
             val notificationText = buildString {
                 if (modifiersState.isShiftActive()) {
@@ -155,7 +163,7 @@ class Titan2InputMethodService : InputMethodService(), ModifierStateListener {
             }
 
             val notification = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
-                .setSmallIcon(android.R.drawable.ic_dialog_info) // TODO: Create custom icon
+                .setSmallIcon(iconRes)
                 .setContentTitle("Modifier Keys Active")
                 .setContentText(notificationText)
                 .setPriority(NotificationCompat.PRIORITY_LOW)
