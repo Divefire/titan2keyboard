@@ -31,37 +31,43 @@ class KeyEventHandler @Inject constructor() {
     fun handleKeyDown(event: KeyEvent, inputConnection: InputConnection?): KeyEventResult {
         inputConnection ?: return KeyEventResult.NotHandled
 
-        // Handle long-press capitalization for letter keys
-        if (currentSettings.longPressCapitalize && isLetterKey(event.keyCode) && event.repeatCount > 0) {
-            // User is holding down a letter key - output uppercase
+        // Handle key repeats (repeatCount > 0)
+        if (event.repeatCount > 0) {
+            // Always allow backspace to repeat
+            if (event.keyCode == KeyEvent.KEYCODE_DEL) {
+                return KeyEventResult.NotHandled
+            }
+
+            // Handle long-press capitalization for letter keys (if enabled)
+            if (currentSettings.longPressCapitalize && isLetterKey(event.keyCode)) {
+                val char = getCharForKeyCode(event.keyCode)
+                if (char != null) {
+                    inputConnection.commitText(char.uppercase(), 1)
+                    return KeyEventResult.Handled
+                }
+            }
+
+            // Block all other key repeats if key repeat is disabled
+            if (!currentSettings.keyRepeatEnabled) {
+                return KeyEventResult.Handled
+            }
+
+            // If key repeat is enabled, let system handle the repeat
+            return KeyEventResult.NotHandled
+        }
+
+        // Handle first key press (repeatCount == 0)
+        // Handle auto-capitalization for letter keys
+        if (isLetterKey(event.keyCode) && shouldAutoCapitalize(inputConnection)) {
             val char = getCharForKeyCode(event.keyCode)
             if (char != null) {
+                // Commit the capitalized character directly
                 inputConnection.commitText(char.uppercase(), 1)
                 return KeyEventResult.Handled
             }
         }
 
-        // Handle key repeat setting (but always allow backspace to repeat)
-        if (!currentSettings.keyRepeatEnabled && event.repeatCount > 0 && event.keyCode != KeyEvent.KEYCODE_DEL) {
-            // Block repeated keys if key repeat is disabled (except backspace and long-press capitalize)
-            return KeyEventResult.Handled
-        }
-
-        // Handle auto-capitalization for letter keys (first press only)
-        if (isLetterKey(event.keyCode) && event.repeatCount == 0) {
-            // Only apply auto-capitalize on first key press, not repeats
-            if (shouldAutoCapitalize(inputConnection)) {
-                // Get the letter character for this key code
-                val char = getCharForKeyCode(event.keyCode)
-                if (char != null) {
-                    // Commit the capitalized character directly
-                    inputConnection.commitText(char.uppercase(), 1)
-                    return KeyEventResult.Handled
-                }
-            }
-        }
-
-        // Let system handle all other events normally
+        // Let system handle all other first presses normally
         return KeyEventResult.NotHandled
     }
 
@@ -106,8 +112,11 @@ class KeyEventHandler @Inject constructor() {
     fun handleKeyUp(event: KeyEvent, inputConnection: InputConnection?): KeyEventResult {
         inputConnection ?: return KeyEventResult.NotHandled
 
-        // Handle key repeat setting for key up (but always allow backspace to repeat)
-        if (!currentSettings.keyRepeatEnabled && event.repeatCount > 0 && event.keyCode != KeyEvent.KEYCODE_DEL) {
+        // Block key up for repeats if key repeat is disabled
+        // (but always allow backspace and long-press capitalize)
+        if (event.repeatCount > 0 && !currentSettings.keyRepeatEnabled &&
+            event.keyCode != KeyEvent.KEYCODE_DEL &&
+            !(currentSettings.longPressCapitalize && isLetterKey(event.keyCode))) {
             return KeyEventResult.Handled
         }
 
