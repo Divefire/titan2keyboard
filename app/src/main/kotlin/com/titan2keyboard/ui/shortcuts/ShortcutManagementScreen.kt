@@ -291,6 +291,7 @@ private fun ShortcutEditDialog(
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(
                         capitalization = KeyboardCapitalization.None,
+                        autoCorrect = false,
                         keyboardType = KeyboardType.Ascii,
                         imeAction = ImeAction.Next
                     ),
@@ -304,6 +305,7 @@ private fun ShortcutEditDialog(
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(
                         capitalization = KeyboardCapitalization.None,
+                        autoCorrect = false,
                         keyboardType = KeyboardType.Ascii,
                         imeAction = ImeAction.Done
                     ),

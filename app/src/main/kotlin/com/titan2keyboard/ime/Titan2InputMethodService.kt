@@ -78,7 +78,10 @@ class Titan2InputMethodService : InputMethodService() {
         attribute?.let { info ->
             val typeClass = info.inputType and android.text.InputType.TYPE_MASK_CLASS
             val typeVariation = info.inputType and android.text.InputType.TYPE_MASK_VARIATION
-            Log.d(TAG, "Input type class: $typeClass, variation: $typeVariation")
+            val hasNoSuggestions = (info.inputType and android.text.InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS) != 0
+            val hasAutoCorrectionDisabled = (info.inputType and android.text.InputType.TYPE_TEXT_FLAG_AUTO_CORRECT) == 0
+            Log.d(TAG, "Input type - class: $typeClass, variation: $typeVariation, " +
+                    "noSuggestions: $hasNoSuggestions, autoCorrectionDisabled: $hasAutoCorrectionDisabled")
         }
 
         // Update the key event handler with current editor info
