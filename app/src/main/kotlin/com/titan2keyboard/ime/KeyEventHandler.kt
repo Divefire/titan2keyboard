@@ -61,12 +61,15 @@ class KeyEventHandler @Inject constructor(
                 val char = getCharForKeyCode(event.keyCode)
                 if (char != null) {
                     if (currentSettings.keyRepeatEnabled) {
-                        // Key repeat is enabled: output uppercase on all repeats
+                        // Key repeat is enabled: output uppercase on all repeats (appends)
                         inputConnection.commitText(char.uppercase(), 1)
                         return KeyEventResult.Handled
                     } else {
-                        // Key repeat is disabled: output uppercase ONLY on first repeat (repeatCount == 1)
+                        // Key repeat is disabled: replace lowercase with uppercase on first repeat
                         if (event.repeatCount == 1) {
+                            // Delete the lowercase letter we just typed
+                            inputConnection.deleteSurroundingText(1, 0)
+                            // Replace it with uppercase
                             inputConnection.commitText(char.uppercase(), 1)
                         }
                         // Block this and all subsequent repeats
