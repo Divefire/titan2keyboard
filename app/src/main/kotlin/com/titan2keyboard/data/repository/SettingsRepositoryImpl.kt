@@ -22,8 +22,6 @@ class SettingsRepositoryImpl @Inject constructor(
     override val settingsFlow: Flow<KeyboardSettings> = dataStore.data
         .map { preferences ->
             KeyboardSettings(
-                vibrationEnabled = preferences[PreferencesKeys.VIBRATION_ENABLED] ?: false,
-                soundEnabled = preferences[PreferencesKeys.SOUND_ENABLED] ?: false,
                 autoCapitalize = preferences[PreferencesKeys.AUTO_CAPITALIZE] ?: true,
                 keyRepeatEnabled = preferences[PreferencesKeys.KEY_REPEAT_ENABLED] ?: true,
                 keyRepeatDelay = preferences[PreferencesKeys.KEY_REPEAT_DELAY] ?: 400L,
@@ -34,8 +32,6 @@ class SettingsRepositoryImpl @Inject constructor(
     override suspend fun updateSetting(key: String, value: Any) {
         dataStore.edit { preferences ->
             when (key) {
-                "vibrationEnabled" -> preferences[PreferencesKeys.VIBRATION_ENABLED] = value as Boolean
-                "soundEnabled" -> preferences[PreferencesKeys.SOUND_ENABLED] = value as Boolean
                 "autoCapitalize" -> preferences[PreferencesKeys.AUTO_CAPITALIZE] = value as Boolean
                 "keyRepeatEnabled" -> preferences[PreferencesKeys.KEY_REPEAT_ENABLED] = value as Boolean
                 "keyRepeatDelay" -> preferences[PreferencesKeys.KEY_REPEAT_DELAY] = value as Long

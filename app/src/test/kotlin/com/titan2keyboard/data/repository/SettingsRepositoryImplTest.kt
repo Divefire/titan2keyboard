@@ -38,8 +38,6 @@ class SettingsRepositoryImplTest {
 
         // Then
         val expected = KeyboardSettings(
-            vibrationEnabled = false,
-            soundEnabled = false,
             autoCapitalize = true,
             keyRepeatEnabled = true,
             keyRepeatDelay = 400L,

@@ -7,8 +7,6 @@ import androidx.datastore.preferences.core.longPreferencesKey
  * DataStore preference keys for keyboard settings
  */
 object PreferencesKeys {
-    val VIBRATION_ENABLED = booleanPreferencesKey("vibration_enabled")
-    val SOUND_ENABLED = booleanPreferencesKey("sound_enabled")
     val AUTO_CAPITALIZE = booleanPreferencesKey("auto_capitalize")
     val KEY_REPEAT_ENABLED = booleanPreferencesKey("key_repeat_enabled")
     val KEY_REPEAT_DELAY = longPreferencesKey("key_repeat_delay")

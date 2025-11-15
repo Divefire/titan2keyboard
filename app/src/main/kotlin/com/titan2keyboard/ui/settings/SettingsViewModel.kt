@@ -34,18 +34,6 @@ class SettingsViewModel @Inject constructor(
             initialValue = SettingsUiState.Loading
         )
 
-    fun updateVibration(enabled: Boolean) {
-        viewModelScope.launch {
-            settingsRepository.updateSetting("vibrationEnabled", enabled)
-        }
-    }
-
-    fun updateSound(enabled: Boolean) {
-        viewModelScope.launch {
-            settingsRepository.updateSetting("soundEnabled", enabled)
-        }
-    }
-
     fun updateAutoCapitalize(enabled: Boolean) {
         viewModelScope.launch {
             settingsRepository.updateSetting("autoCapitalize", enabled)

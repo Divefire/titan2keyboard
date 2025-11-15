@@ -99,8 +99,6 @@ fun SettingsScreen(
                 is SettingsUiState.Success -> {
                     SettingsContent(
                         settings = state.settings,
-                        onVibrationChanged = viewModel::updateVibration,
-                        onSoundChanged = viewModel::updateSound,
                         onAutoCapitalizeChanged = viewModel::updateAutoCapitalize,
                         onKeyRepeatChanged = viewModel::updateKeyRepeat,
                         onResetToDefaults = viewModel::resetToDefaults
@@ -121,8 +119,6 @@ fun SettingsScreen(
 @Composable
 private fun SettingsContent(
     settings: com.titan2keyboard.domain.model.KeyboardSettings,
-    onVibrationChanged: (Boolean) -> Unit,
-    onSoundChanged: (Boolean) -> Unit,
     onAutoCapitalizeChanged: (Boolean) -> Unit,
     onKeyRepeatChanged: (Boolean) -> Unit,
     onResetToDefaults: () -> Unit
@@ -134,20 +130,6 @@ private fun SettingsContent(
             text = stringResource(R.string.settings_general),
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.primary
-        )
-
-        SettingItem(
-            title = stringResource(R.string.setting_vibration),
-            description = stringResource(R.string.setting_vibration_desc),
-            checked = settings.vibrationEnabled,
-            onCheckedChange = onVibrationChanged
-        )
-
-        SettingItem(
-            title = stringResource(R.string.setting_sound),
-            description = stringResource(R.string.setting_sound_desc),
-            checked = settings.soundEnabled,
-            onCheckedChange = onSoundChanged
         )
 
         SettingItem(
