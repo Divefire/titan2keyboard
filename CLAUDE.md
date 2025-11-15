@@ -590,15 +590,34 @@ class SettingsRepositoryImpl @Inject constructor(
 
 ### Device-Specific Considerations
 
-- **Titan 2 Hardware**: Physical QWERTY keyboard with specific layout
-- **Screen Size**: Compact display (4.2" 768x1280)
-- **Android Version**: Ships with Android 11, but this app targets Android 14+ (requires user upgrade)
-- **Physical Keyboard**:
-  - Full QWERTY layout with 48 keys
-  - Dedicated modifier keys (Shift, Alt, Sym)
-  - Backlit keyboard
-  - Key travel: 1.5mm
-  - Focus on physical key event handling, not virtual keyboard rendering
+**Unihertz Titan 2 Specifications:**
+
+- **Android Version**: Android 15 (native, fully supported)
+- **Display**:
+  - Primary: 4.5" square display, 1440 × 1440 pixels, 60Hz refresh rate
+  - Secondary: 2" rear display, 410 × 502 pixels
+- **Processor**: MediaTek Dimensity 7300 (5G) Octa-Core 2.0-2.6 GHz
+- **Memory**: 12GB LPDDR5 RAM
+- **Storage**: 512GB UFS 3.1
+- **Battery**: 5050mAh with 33W fast charging
+- **Dimensions**: 137.8 × 88.7 × 10.8mm, 235g
+
+**Physical QWERTY Keyboard Features:**
+- Full QWERTY layout with A-Z keys plus function keys
+- Customizable key assignments (long-press and short-press shortcuts for each letter key)
+- Scroll Assistant: swipe on keyboard surface to browse
+- Cursor Assistant: move cursor via keyboard gestures
+- Backlit keyboard with adjustable brightness
+- Trackpad-like functionality: swipe fingers across key tops to scroll or move cursor
+- Dedicated modifier keys (Shift, Alt, Sym)
+- Multi-language support
+
+**Development Focus:**
+- Physical key event handling, not virtual keyboard rendering
+- Suggestions bar rendering, emoji board rendering, alternative characters not featured on the physical board rendering will all need to be implimented
+- Optimize for square display aspect ratio (1:1)
+- Support customizable key mapping and gestures
+- Integrate with hardware keyboard features (scroll/cursor assistants)
 
 ### Modern Android Best Practices
 

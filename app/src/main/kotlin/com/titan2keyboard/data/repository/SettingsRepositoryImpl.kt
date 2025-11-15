@@ -22,10 +22,14 @@ class SettingsRepositoryImpl @Inject constructor(
     override val settingsFlow: Flow<KeyboardSettings> = dataStore.data
         .map { preferences ->
             KeyboardSettings(
-                vibrationEnabled = preferences[PreferencesKeys.VIBRATION_ENABLED] ?: false,
-                soundEnabled = preferences[PreferencesKeys.SOUND_ENABLED] ?: false,
                 autoCapitalize = preferences[PreferencesKeys.AUTO_CAPITALIZE] ?: true,
                 keyRepeatEnabled = preferences[PreferencesKeys.KEY_REPEAT_ENABLED] ?: true,
+                longPressCapitalize = preferences[PreferencesKeys.LONG_PRESS_CAPITALIZE] ?: false,
+                doubleSpacePeriod = preferences[PreferencesKeys.DOUBLE_SPACE_PERIOD] ?: true,
+                textShortcutsEnabled = preferences[PreferencesKeys.TEXT_SHORTCUTS_ENABLED] ?: true,
+                stickyShift = preferences[PreferencesKeys.STICKY_SHIFT] ?: false,
+                stickyAlt = preferences[PreferencesKeys.STICKY_ALT] ?: false,
+                altBackspaceDeleteLine = preferences[PreferencesKeys.ALT_BACKSPACE_DELETE_LINE] ?: true,
                 keyRepeatDelay = preferences[PreferencesKeys.KEY_REPEAT_DELAY] ?: 400L,
                 keyRepeatRate = preferences[PreferencesKeys.KEY_REPEAT_RATE] ?: 50L
             )
@@ -34,10 +38,14 @@ class SettingsRepositoryImpl @Inject constructor(
     override suspend fun updateSetting(key: String, value: Any) {
         dataStore.edit { preferences ->
             when (key) {
-                "vibrationEnabled" -> preferences[PreferencesKeys.VIBRATION_ENABLED] = value as Boolean
-                "soundEnabled" -> preferences[PreferencesKeys.SOUND_ENABLED] = value as Boolean
                 "autoCapitalize" -> preferences[PreferencesKeys.AUTO_CAPITALIZE] = value as Boolean
                 "keyRepeatEnabled" -> preferences[PreferencesKeys.KEY_REPEAT_ENABLED] = value as Boolean
+                "longPressCapitalize" -> preferences[PreferencesKeys.LONG_PRESS_CAPITALIZE] = value as Boolean
+                "doubleSpacePeriod" -> preferences[PreferencesKeys.DOUBLE_SPACE_PERIOD] = value as Boolean
+                "textShortcutsEnabled" -> preferences[PreferencesKeys.TEXT_SHORTCUTS_ENABLED] = value as Boolean
+                "stickyShift" -> preferences[PreferencesKeys.STICKY_SHIFT] = value as Boolean
+                "stickyAlt" -> preferences[PreferencesKeys.STICKY_ALT] = value as Boolean
+                "altBackspaceDeleteLine" -> preferences[PreferencesKeys.ALT_BACKSPACE_DELETE_LINE] = value as Boolean
                 "keyRepeatDelay" -> preferences[PreferencesKeys.KEY_REPEAT_DELAY] = value as Long
                 "keyRepeatRate" -> preferences[PreferencesKeys.KEY_REPEAT_RATE] = value as Long
             }

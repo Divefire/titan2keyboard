@@ -37,6 +37,7 @@ import com.titan2keyboard.R
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
+    onNavigateToShortcuts: () -> Unit = {},
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val settingsState by viewModel.settingsState.collectAsStateWithLifecycle()
@@ -99,10 +100,15 @@ fun SettingsScreen(
                 is SettingsUiState.Success -> {
                     SettingsContent(
                         settings = state.settings,
-                        onVibrationChanged = viewModel::updateVibration,
-                        onSoundChanged = viewModel::updateSound,
                         onAutoCapitalizeChanged = viewModel::updateAutoCapitalize,
                         onKeyRepeatChanged = viewModel::updateKeyRepeat,
+                        onLongPressCapitalizeChanged = viewModel::updateLongPressCapitalize,
+                        onDoubleSpacePeriodChanged = viewModel::updateDoubleSpacePeriod,
+                        onTextShortcutsChanged = viewModel::updateTextShortcuts,
+                        onStickyShiftChanged = viewModel::updateStickyShift,
+                        onStickyAltChanged = viewModel::updateStickyAlt,
+                        onAltBackspaceDeleteLineChanged = viewModel::updateAltBackspaceDeleteLine,
+                        onManageShortcuts = onNavigateToShortcuts,
                         onResetToDefaults = viewModel::resetToDefaults
                     )
                 }
@@ -121,10 +127,15 @@ fun SettingsScreen(
 @Composable
 private fun SettingsContent(
     settings: com.titan2keyboard.domain.model.KeyboardSettings,
-    onVibrationChanged: (Boolean) -> Unit,
-    onSoundChanged: (Boolean) -> Unit,
     onAutoCapitalizeChanged: (Boolean) -> Unit,
     onKeyRepeatChanged: (Boolean) -> Unit,
+    onLongPressCapitalizeChanged: (Boolean) -> Unit,
+    onDoubleSpacePeriodChanged: (Boolean) -> Unit,
+    onTextShortcutsChanged: (Boolean) -> Unit,
+    onStickyShiftChanged: (Boolean) -> Unit,
+    onStickyAltChanged: (Boolean) -> Unit,
+    onAltBackspaceDeleteLineChanged: (Boolean) -> Unit,
+    onManageShortcuts: () -> Unit,
     onResetToDefaults: () -> Unit
 ) {
     Column(
@@ -137,25 +148,46 @@ private fun SettingsContent(
         )
 
         SettingItem(
-            title = stringResource(R.string.setting_vibration),
-            description = stringResource(R.string.setting_vibration_desc),
-            checked = settings.vibrationEnabled,
-            onCheckedChange = onVibrationChanged
-        )
-
-        SettingItem(
-            title = stringResource(R.string.setting_sound),
-            description = stringResource(R.string.setting_sound_desc),
-            checked = settings.soundEnabled,
-            onCheckedChange = onSoundChanged
-        )
-
-        SettingItem(
             title = stringResource(R.string.setting_auto_capitalize),
             description = stringResource(R.string.setting_auto_capitalize_desc),
             checked = settings.autoCapitalize,
             onCheckedChange = onAutoCapitalizeChanged
         )
+
+        SettingItem(
+            title = stringResource(R.string.setting_long_press_capitalize),
+            description = stringResource(R.string.setting_long_press_capitalize_desc),
+            checked = settings.longPressCapitalize,
+            onCheckedChange = onLongPressCapitalizeChanged
+        )
+
+        SettingItem(
+            title = stringResource(R.string.setting_double_space_period),
+            description = stringResource(R.string.setting_double_space_period_desc),
+            checked = settings.doubleSpacePeriod,
+            onCheckedChange = onDoubleSpacePeriodChanged
+        )
+
+        SettingItem(
+            title = stringResource(R.string.setting_text_shortcuts),
+            description = stringResource(R.string.setting_text_shortcuts_desc),
+            checked = settings.textShortcutsEnabled,
+            onCheckedChange = onTextShortcutsChanged
+        )
+
+        // Manage Shortcuts Button
+        Card(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            TextButton(
+                onClick = onManageShortcuts,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
+            ) {
+                Text(stringResource(R.string.manage_shortcuts))
+            }
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -170,6 +202,27 @@ private fun SettingsContent(
             description = stringResource(R.string.setting_key_repeat_desc),
             checked = settings.keyRepeatEnabled,
             onCheckedChange = onKeyRepeatChanged
+        )
+
+        SettingItem(
+            title = stringResource(R.string.setting_sticky_shift),
+            description = stringResource(R.string.setting_sticky_shift_desc),
+            checked = settings.stickyShift,
+            onCheckedChange = onStickyShiftChanged
+        )
+
+        SettingItem(
+            title = stringResource(R.string.setting_sticky_alt),
+            description = stringResource(R.string.setting_sticky_alt_desc),
+            checked = settings.stickyAlt,
+            onCheckedChange = onStickyAltChanged
+        )
+
+        SettingItem(
+            title = stringResource(R.string.setting_alt_backspace_delete_line),
+            description = stringResource(R.string.setting_alt_backspace_delete_line_desc),
+            checked = settings.altBackspaceDeleteLine,
+            onCheckedChange = onAltBackspaceDeleteLineChanged
         )
 
         Spacer(modifier = Modifier.height(24.dp))

@@ -34,18 +34,6 @@ class SettingsViewModel @Inject constructor(
             initialValue = SettingsUiState.Loading
         )
 
-    fun updateVibration(enabled: Boolean) {
-        viewModelScope.launch {
-            settingsRepository.updateSetting("vibrationEnabled", enabled)
-        }
-    }
-
-    fun updateSound(enabled: Boolean) {
-        viewModelScope.launch {
-            settingsRepository.updateSetting("soundEnabled", enabled)
-        }
-    }
-
     fun updateAutoCapitalize(enabled: Boolean) {
         viewModelScope.launch {
             settingsRepository.updateSetting("autoCapitalize", enabled)
@@ -55,6 +43,42 @@ class SettingsViewModel @Inject constructor(
     fun updateKeyRepeat(enabled: Boolean) {
         viewModelScope.launch {
             settingsRepository.updateSetting("keyRepeatEnabled", enabled)
+        }
+    }
+
+    fun updateLongPressCapitalize(enabled: Boolean) {
+        viewModelScope.launch {
+            settingsRepository.updateSetting("longPressCapitalize", enabled)
+        }
+    }
+
+    fun updateDoubleSpacePeriod(enabled: Boolean) {
+        viewModelScope.launch {
+            settingsRepository.updateSetting("doubleSpacePeriod", enabled)
+        }
+    }
+
+    fun updateTextShortcuts(enabled: Boolean) {
+        viewModelScope.launch {
+            settingsRepository.updateSetting("textShortcutsEnabled", enabled)
+        }
+    }
+
+    fun updateStickyShift(enabled: Boolean) {
+        viewModelScope.launch {
+            settingsRepository.updateSetting("stickyShift", enabled)
+        }
+    }
+
+    fun updateStickyAlt(enabled: Boolean) {
+        viewModelScope.launch {
+            settingsRepository.updateSetting("stickyAlt", enabled)
+        }
+    }
+
+    fun updateAltBackspaceDeleteLine(enabled: Boolean) {
+        viewModelScope.launch {
+            settingsRepository.updateSetting("altBackspaceDeleteLine", enabled)
         }
     }
 

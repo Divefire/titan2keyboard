@@ -13,10 +13,8 @@ Titan 2 Keyboard is built from the ground up using the latest Android technologi
 - **Reactive Settings** - Real-time settings updates using Kotlin Flow and DataStore
 - **Material Design 3** - Modern UI with dynamic theming support
 - **Customizable Behavior**
-  - Vibration feedback
-  - Sound feedback
   - Auto-capitalization
-  - Key repeat configuration
+  - Key repeat control
 
 ## Technology Stack
 
