@@ -593,12 +593,28 @@ class KeyEventHandler @Inject constructor(
         if (!currentSettings.stickyAlt) return
 
         val newAltState = when {
-            // If already locked and pressed again, turn off
+            // If already locked, turn off
             modifiersState.alt == ModifierState.LOCKED -> ModifierState.NONE
-            // Long press = locked
-            isLongPress -> ModifierState.LOCKED
-            // Short press = one-shot
-            else -> ModifierState.ONE_SHOT
+            // If already one-shot
+            modifiersState.alt == ModifierState.ONE_SHOT -> {
+                if (isLongPress) {
+                    // Long press upgrades to locked
+                    ModifierState.LOCKED
+                } else {
+                    // Short press toggles off
+                    ModifierState.NONE
+                }
+            }
+            // Currently none
+            else -> {
+                if (isLongPress) {
+                    // Long press = locked
+                    ModifierState.LOCKED
+                } else {
+                    // Short press = one-shot
+                    ModifierState.ONE_SHOT
+                }
+            }
         }
 
         // Clear shift if activating alt (mutual exclusivity)

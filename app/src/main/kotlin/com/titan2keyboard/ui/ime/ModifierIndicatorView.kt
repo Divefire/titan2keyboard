@@ -2,12 +2,15 @@ package com.titan2keyboard.ui.ime
 
 import android.content.Context
 import android.graphics.Color
+import android.graphics.PorterDuff
 import android.graphics.Typeface
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import com.titan2keyboard.R
 import com.titan2keyboard.domain.model.ModifierState
 import com.titan2keyboard.domain.model.ModifiersState
 
@@ -23,21 +26,21 @@ class ModifierIndicatorView(context: Context) {
         val padding = (16 * context.resources.displayMetrics.density).toInt()
         val verticalPadding = (8 * context.resources.displayMetrics.density).toInt()
         setPadding(padding, verticalPadding, padding, verticalPadding)
-        setBackgroundColor(Color.parseColor("#E3F2FD")) // Light blue background
+        setBackgroundColor(Color.parseColor("#1A237E")) // Dark blue background
         layoutParams = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.WRAP_CONTENT
         )
     }
 
-    private val shiftIndicator = createIndicatorTextView(context, "SHIFT")
-    private val altIndicator = createIndicatorTextView(context, "ALT")
+    private val shiftIndicator = createIndicatorImageView(context, R.drawable.ic_shift)
+    private val altIndicator = createIndicatorImageView(context, R.drawable.ic_alt)
 
     init {
         rootLayout.addView(shiftIndicator)
 
         // Add spacing between indicators
-        val spacerWidth = (16 * context.resources.displayMetrics.density).toInt()
+        val spacerWidth = (24 * context.resources.displayMetrics.density).toInt()
         val spacer = View(context).apply {
             layoutParams = LinearLayout.LayoutParams(spacerWidth, 1)
         }
@@ -56,7 +59,7 @@ class ModifierIndicatorView(context: Context) {
         // Update shift indicator
         if (newState.isShiftActive()) {
             shiftIndicator.visibility = View.VISIBLE
-            updateIndicatorStyle(shiftIndicator, newState.shift)
+            updateIndicatorImageStyle(shiftIndicator, newState.shift)
         } else {
             shiftIndicator.visibility = View.GONE
         }
@@ -64,48 +67,40 @@ class ModifierIndicatorView(context: Context) {
         // Update alt indicator
         if (newState.isAltActive()) {
             altIndicator.visibility = View.VISIBLE
-            updateIndicatorStyle(altIndicator, newState.alt)
+            updateIndicatorImageStyle(altIndicator, newState.alt)
         } else {
             altIndicator.visibility = View.GONE
         }
     }
 
-    private fun createIndicatorTextView(context: Context, label: String): TextView {
-        val horizontalPadding = (12 * context.resources.displayMetrics.density).toInt()
-        val verticalPadding = (6 * context.resources.displayMetrics.density).toInt()
+    private fun createIndicatorImageView(context: Context, iconRes: Int): ImageView {
+        val padding = (12 * context.resources.displayMetrics.density).toInt()
+        val iconSize = (32 * context.resources.displayMetrics.density).toInt()
 
-        return TextView(context).apply {
-            text = label
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
-            setTypeface(null, Typeface.BOLD)
-            setPadding(horizontalPadding, verticalPadding, horizontalPadding, verticalPadding)
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            )
+        return ImageView(context).apply {
+            setImageResource(iconRes)
+            setPadding(padding, padding, padding, padding)
+            layoutParams = LinearLayout.LayoutParams(iconSize + padding * 2, iconSize + padding * 2)
+            scaleType = ImageView.ScaleType.CENTER_INSIDE
         }
     }
 
-    private fun updateIndicatorStyle(textView: TextView, state: ModifierState) {
+    private fun updateIndicatorImageStyle(imageView: ImageView, state: ModifierState) {
         when (state) {
             ModifierState.ONE_SHOT -> {
-                // Purple background for one-shot
-                textView.setBackgroundColor(Color.parseColor("#9C27B0"))
-                textView.setTextColor(Color.WHITE)
-                textView.text = textView.text.toString().replace(" 🔒", "")
+                // Purple background with white icon for one-shot
+                imageView.setBackgroundColor(Color.parseColor("#9C27B0"))
+                imageView.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN)
             }
             ModifierState.LOCKED -> {
-                // Deep purple background for locked
-                textView.setBackgroundColor(Color.parseColor("#673AB7"))
-                textView.setTextColor(Color.WHITE)
-                if (!textView.text.toString().endsWith(" 🔒")) {
-                    textView.text = "${textView.text} 🔒"
-                }
+                // Deep purple background with white icon for locked
+                imageView.setBackgroundColor(Color.parseColor("#673AB7"))
+                imageView.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN)
             }
             ModifierState.NONE -> {
                 // This shouldn't happen as we set visibility to GONE
-                textView.setBackgroundColor(Color.TRANSPARENT)
-                textView.setTextColor(Color.BLACK)
+                imageView.setBackgroundColor(Color.TRANSPARENT)
+                imageView.clearColorFilter()
             }
         }
     }

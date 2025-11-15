@@ -16,7 +16,6 @@ import com.titan2keyboard.domain.model.KeyEventResult
 import com.titan2keyboard.domain.model.ModifierState
 import com.titan2keyboard.domain.model.ModifiersState
 import com.titan2keyboard.domain.repository.SettingsRepository
-import com.titan2keyboard.ui.ime.ModifierIndicatorView
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -39,7 +38,6 @@ class Titan2InputMethodService : InputMethodService(), ModifierStateListener {
     lateinit var settingsRepository: SettingsRepository
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
-    private var modifierIndicatorView: ModifierIndicatorView? = null
 
     // Track whether we're in any input field to block capacitive touch
     private var isInputActive = false
@@ -51,7 +49,7 @@ class Titan2InputMethodService : InputMethodService(), ModifierStateListener {
     companion object {
         private const val TAG = "Titan2IME"
         private const val CAPACITIVE_BLOCK_TIME_MS = 1000L // Block capacitive for 1s after keystroke
-        private const val NOTIFICATION_CHANNEL_ID = "modifier_keys_status"
+        private const val NOTIFICATION_CHANNEL_ID = "modifier_keys_status_v2"
         private const val NOTIFICATION_ID = 1001
     }
 
@@ -81,12 +79,14 @@ class Titan2InputMethodService : InputMethodService(), ModifierStateListener {
             val channel = NotificationChannel(
                 NOTIFICATION_CHANNEL_ID,
                 "Modifier Keys Status",
-                NotificationManager.IMPORTANCE_LOW
+                NotificationManager.IMPORTANCE_DEFAULT
             ).apply {
                 description = "Shows Shift/Alt key status in status bar"
                 setShowBadge(false)
                 enableLights(false)
                 enableVibration(false)
+                // Silent notification - no sound
+                setSound(null, null)
             }
             notificationManager.createNotificationChannel(channel)
         }
@@ -97,12 +97,9 @@ class Titan2InputMethodService : InputMethodService(), ModifierStateListener {
         return View(this)
     }
 
-    override fun onCreateCandidatesView(): View {
-        // Create modifier indicator view in candidates area to avoid focus issues
-        if (modifierIndicatorView == null) {
-            modifierIndicatorView = ModifierIndicatorView(this)
-        }
-        return modifierIndicatorView!!.getView()
+    override fun onCreateCandidatesView(): View? {
+        // Reserve candidates view for other functions (autocomplete, suggestions, etc.)
+        return null
     }
 
     override fun onEvaluateInputViewShown(): Boolean {
@@ -119,22 +116,19 @@ class Titan2InputMethodService : InputMethodService(), ModifierStateListener {
     override fun onModifierStateChanged(modifiersState: ModifiersState) {
         Log.d(TAG, "Modifier state changed: shift=${modifiersState.shift}, alt=${modifiersState.alt}")
 
-        // Update the modifier indicator view
-        modifierIndicatorView?.updateModifiers(modifiersState)
-
-        // Show/hide the candidates view based on modifier state
-        val shouldShow = modifiersState.isShiftActive() || modifiersState.isAltActive()
-        Log.d(TAG, "shouldShow=$shouldShow")
-
-        // Use candidates view to avoid focus loss issues
-        setCandidatesViewShown(shouldShow)
-
         // Update status bar notification
-        updateStatusBarNotification(modifiersState)
+        Log.d(TAG, "Calling updateStatusBarNotification")
+        try {
+            updateStatusBarNotification(modifiersState)
+            Log.d(TAG, "updateStatusBarNotification completed successfully")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error in updateStatusBarNotification", e)
+        }
     }
 
     private fun updateStatusBarNotification(modifiersState: ModifiersState) {
         val shouldShow = modifiersState.isShiftActive() || modifiersState.isAltActive()
+        Log.d(TAG, "updateStatusBarNotification: shouldShow=$shouldShow")
 
         if (shouldShow) {
             // Choose icon based on which modifiers are active
@@ -144,6 +138,7 @@ class Titan2InputMethodService : InputMethodService(), ModifierStateListener {
                 modifiersState.isAltActive() -> R.drawable.ic_alt
                 else -> R.drawable.ic_shift // Fallback
             }
+            Log.d(TAG, "Using icon resource: $iconRes")
 
             // Build notification text based on active modifiers
             val notificationText = buildString {
@@ -161,19 +156,26 @@ class Titan2InputMethodService : InputMethodService(), ModifierStateListener {
                     }
                 }
             }
+            Log.d(TAG, "Notification text: $notificationText")
 
-            val notification = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
-                .setSmallIcon(iconRes)
-                .setContentTitle("Modifier Keys Active")
-                .setContentText(notificationText)
-                .setPriority(NotificationCompat.PRIORITY_LOW)
-                .setOngoing(true)
-                .setShowWhen(false)
-                .build()
+            try {
+                val notification = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
+                    .setSmallIcon(iconRes)
+                    .setContentTitle("Modifier Keys Active")
+                    .setContentText(notificationText)
+                    .setPriority(NotificationCompat.PRIORITY_LOW)
+                    .setOngoing(true)
+                    .setShowWhen(false)
+                    .build()
 
-            notificationManager.notify(NOTIFICATION_ID, notification)
+                notificationManager.notify(NOTIFICATION_ID, notification)
+                Log.d(TAG, "Notification posted successfully")
+            } catch (e: Exception) {
+                Log.e(TAG, "Error posting notification", e)
+            }
         } else {
             // Cancel notification when no modifiers are active
+            Log.d(TAG, "Canceling notification")
             notificationManager.cancel(NOTIFICATION_ID)
         }
     }
