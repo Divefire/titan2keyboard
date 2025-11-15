@@ -80,6 +80,9 @@ class Titan2InputMethodService : InputMethodService() {
             val typeVariation = info.inputType and android.text.InputType.TYPE_MASK_VARIATION
             Log.d(TAG, "Input type class: $typeClass, variation: $typeVariation")
         }
+
+        // Update the key event handler with current editor info
+        keyEventHandler.updateEditorInfo(attribute)
     }
 
     override fun onFinishInput() {

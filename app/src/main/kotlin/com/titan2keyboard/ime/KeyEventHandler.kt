@@ -1,6 +1,8 @@
 package com.titan2keyboard.ime
 
+import android.text.InputType
 import android.view.KeyEvent
+import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputConnection
 import com.titan2keyboard.domain.model.KeyEventResult
 import com.titan2keyboard.domain.model.KeyboardSettings
@@ -17,6 +19,7 @@ class KeyEventHandler @Inject constructor(
 ) {
 
     private var currentSettings: KeyboardSettings = KeyboardSettings()
+    private var currentEditorInfo: EditorInfo? = null
     private var lastSpaceTime: Long = 0L
     private var currentWord: StringBuilder = StringBuilder()
 
@@ -41,6 +44,13 @@ class KeyEventHandler @Inject constructor(
      */
     fun updateSettings(settings: KeyboardSettings) {
         currentSettings = settings
+    }
+
+    /**
+     * Update the current editor info
+     */
+    fun updateEditorInfo(editorInfo: EditorInfo?) {
+        currentEditorInfo = editorInfo
     }
 
     /**
@@ -281,6 +291,37 @@ class KeyEventHandler @Inject constructor(
      */
     private fun shouldAutoCapitalize(inputConnection: InputConnection): Boolean {
         if (!currentSettings.autoCapitalize) return false
+
+        // Check editor info for input types that shouldn't auto-capitalize
+        currentEditorInfo?.let { info ->
+            val inputType = info.inputType
+            val typeClass = inputType and InputType.TYPE_MASK_CLASS
+            val typeVariation = inputType and InputType.TYPE_MASK_VARIATION
+
+            // Don't auto-capitalize for specific input types
+            when (typeClass) {
+                InputType.TYPE_CLASS_TEXT -> {
+                    // Check for variations that shouldn't capitalize
+                    when (typeVariation) {
+                        InputType.TYPE_TEXT_VARIATION_URI,
+                        InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS,
+                        InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS,
+                        InputType.TYPE_TEXT_VARIATION_PASSWORD,
+                        InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD,
+                        InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD -> return false
+                    }
+
+                    // Check for NO_SUGGESTIONS flag (used by our shortcut dialog)
+                    if (inputType and InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS != 0) {
+                        return false
+                    }
+                }
+                // Don't auto-capitalize for number, phone, datetime inputs
+                InputType.TYPE_CLASS_NUMBER,
+                InputType.TYPE_CLASS_PHONE,
+                InputType.TYPE_CLASS_DATETIME -> return false
+            }
+        }
 
         // Check text before cursor to determine if we should capitalize
         val textBeforeCursor = inputConnection.getTextBeforeCursor(100, 0)
