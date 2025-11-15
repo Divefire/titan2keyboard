@@ -37,6 +37,10 @@
     <!-- Advanced Settings -->
     <string name="setting_key_repeat">Key repeat</string>
     <string name="setting_key_repeat_desc">Repeat character on long press</string>
+    <string name="setting_sticky_shift">Sticky Shift</string>
+    <string name="setting_sticky_shift_desc">Single press = one-shot, long press = locked</string>
+    <string name="setting_sticky_alt">Sticky Alt</string>
+    <string name="setting_sticky_alt_desc">Single press = one-shot, long press = locked</string>
     <string name="setting_key_repeat_delay">Key repeat delay</string>
     <string name="setting_key_repeat_rate">Key repeat rate</string>
 

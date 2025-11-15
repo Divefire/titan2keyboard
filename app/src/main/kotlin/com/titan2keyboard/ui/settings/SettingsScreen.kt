@@ -105,6 +105,8 @@ fun SettingsScreen(
                         onLongPressCapitalizeChanged = viewModel::updateLongPressCapitalize,
                         onDoubleSpacePeriodChanged = viewModel::updateDoubleSpacePeriod,
                         onTextShortcutsChanged = viewModel::updateTextShortcuts,
+                        onStickyShiftChanged = viewModel::updateStickyShift,
+                        onStickyAltChanged = viewModel::updateStickyAlt,
                         onManageShortcuts = onNavigateToShortcuts,
                         onResetToDefaults = viewModel::resetToDefaults
                     )
@@ -129,6 +131,8 @@ private fun SettingsContent(
     onLongPressCapitalizeChanged: (Boolean) -> Unit,
     onDoubleSpacePeriodChanged: (Boolean) -> Unit,
     onTextShortcutsChanged: (Boolean) -> Unit,
+    onStickyShiftChanged: (Boolean) -> Unit,
+    onStickyAltChanged: (Boolean) -> Unit,
     onManageShortcuts: () -> Unit,
     onResetToDefaults: () -> Unit
 ) {
@@ -196,6 +200,20 @@ private fun SettingsContent(
             description = stringResource(R.string.setting_key_repeat_desc),
             checked = settings.keyRepeatEnabled,
             onCheckedChange = onKeyRepeatChanged
+        )
+
+        SettingItem(
+            title = stringResource(R.string.setting_sticky_shift),
+            description = stringResource(R.string.setting_sticky_shift_desc),
+            checked = settings.stickyShift,
+            onCheckedChange = onStickyShiftChanged
+        )
+
+        SettingItem(
+            title = stringResource(R.string.setting_sticky_alt),
+            description = stringResource(R.string.setting_sticky_alt_desc),
+            checked = settings.stickyAlt,
+            onCheckedChange = onStickyAltChanged
         )
 
         Spacer(modifier = Modifier.height(24.dp))
