@@ -55,9 +55,31 @@ class Titan2InputMethodService : InputMethodService() {
         }
     }
 
+    override fun onEvaluateInputViewShown(): Boolean {
+        // For hardware keyboard IME, we don't show an input view
+        // But we still want to be active to intercept key events
+        return false
+    }
+
+    override fun onShowInputRequested(flags: Int, configChange: Boolean): Boolean {
+        // Always return true to ensure we're active for hardware keyboard
+        // This ensures key events come to us even when there's no soft keyboard shown
+        return true
+    }
+
     override fun onStartInput(attribute: EditorInfo?, restarting: Boolean) {
         super.onStartInput(attribute, restarting)
-        Log.d(TAG, "Input started - inputType: ${attribute?.inputType}, restarting: $restarting")
+        Log.d(TAG, "Input started - inputType: ${attribute?.inputType}, " +
+                "packageName: ${attribute?.packageName}, " +
+                "fieldId: ${attribute?.fieldId}, " +
+                "restarting: $restarting")
+
+        // Log input type details for debugging
+        attribute?.let { info ->
+            val typeClass = info.inputType and android.text.InputType.TYPE_MASK_CLASS
+            val typeVariation = info.inputType and android.text.InputType.TYPE_MASK_VARIATION
+            Log.d(TAG, "Input type class: $typeClass, variation: $typeVariation")
+        }
     }
 
     override fun onFinishInput() {
