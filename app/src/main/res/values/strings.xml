@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Titan2 Keyboard</string>
+    <string name="ime_name">Titan2 Keyboard</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Keyboard Settings</string>
+    <string name="settings_general">General</string>
+    <string name="settings_appearance">Appearance</string>
+    <string name="settings_advanced">Advanced</string>
+
+    <!-- General Settings -->
+    <string name="setting_vibration">Vibration feedback</string>
+    <string name="setting_vibration_desc">Vibrate on key press</string>
+    <string name="setting_sound">Sound feedback</string>
+    <string name="setting_sound_desc">Play sound on key press</string>
+    <string name="setting_auto_capitalize">Auto-capitalization</string>
+    <string name="setting_auto_capitalize_desc">Automatically capitalize first letter</string>
+
+    <!-- Advanced Settings -->
+    <string name="setting_key_repeat">Key repeat</string>
+    <string name="setting_key_repeat_desc">Repeat character on long press</string>
+    <string name="setting_key_repeat_delay">Key repeat delay</string>
+    <string name="setting_key_repeat_rate">Key repeat rate</string>
+
+    <!-- About -->
+    <string name="about_title">About</string>
+    <string name="about_version">Version</string>
+    <string name="about_description">A modern IME keyboard for Unihertz Titan 2</string>
+
+    <!-- Enable IME -->
+    <string name="enable_ime_title">Enable Keyboard</string>
+    <string name="enable_ime_message">To use Titan2 Keyboard, you need to enable it in your device settings.</string>
+    <string name="enable_ime_button">Open Settings</string>
+</resources>

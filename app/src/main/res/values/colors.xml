@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Material3 Dynamic Color will be used, these are fallbacks -->
+    <color name="seed_color">#6750A4</color>
+</resources>
