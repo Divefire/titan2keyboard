@@ -101,6 +101,7 @@ fun SettingsScreen(
                         settings = state.settings,
                         onAutoCapitalizeChanged = viewModel::updateAutoCapitalize,
                         onKeyRepeatChanged = viewModel::updateKeyRepeat,
+                        onLongPressCapitalizeChanged = viewModel::updateLongPressCapitalize,
                         onResetToDefaults = viewModel::resetToDefaults
                     )
                 }
@@ -121,6 +122,7 @@ private fun SettingsContent(
     settings: com.titan2keyboard.domain.model.KeyboardSettings,
     onAutoCapitalizeChanged: (Boolean) -> Unit,
     onKeyRepeatChanged: (Boolean) -> Unit,
+    onLongPressCapitalizeChanged: (Boolean) -> Unit,
     onResetToDefaults: () -> Unit
 ) {
     Column(
@@ -137,6 +139,13 @@ private fun SettingsContent(
             description = stringResource(R.string.setting_auto_capitalize_desc),
             checked = settings.autoCapitalize,
             onCheckedChange = onAutoCapitalizeChanged
+        )
+
+        SettingItem(
+            title = stringResource(R.string.setting_long_press_capitalize),
+            description = stringResource(R.string.setting_long_press_capitalize_desc),
+            checked = settings.longPressCapitalize,
+            onCheckedChange = onLongPressCapitalizeChanged
         )
 
         Spacer(modifier = Modifier.height(16.dp))

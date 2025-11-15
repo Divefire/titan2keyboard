@@ -12,6 +12,8 @@
     <!-- General Settings -->
     <string name="setting_auto_capitalize">Auto-capitalization</string>
     <string name="setting_auto_capitalize_desc">Automatically capitalize first letter of sentences</string>
+    <string name="setting_long_press_capitalize">Long-press capitalize</string>
+    <string name="setting_long_press_capitalize_desc">Hold a letter key to capitalize it</string>
 
     <!-- Advanced Settings -->
     <string name="setting_key_repeat">Key repeat</string>

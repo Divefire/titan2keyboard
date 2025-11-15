@@ -24,6 +24,7 @@ class SettingsRepositoryImpl @Inject constructor(
             KeyboardSettings(
                 autoCapitalize = preferences[PreferencesKeys.AUTO_CAPITALIZE] ?: true,
                 keyRepeatEnabled = preferences[PreferencesKeys.KEY_REPEAT_ENABLED] ?: true,
+                longPressCapitalize = preferences[PreferencesKeys.LONG_PRESS_CAPITALIZE] ?: false,
                 keyRepeatDelay = preferences[PreferencesKeys.KEY_REPEAT_DELAY] ?: 400L,
                 keyRepeatRate = preferences[PreferencesKeys.KEY_REPEAT_RATE] ?: 50L
             )
@@ -34,6 +35,7 @@ class SettingsRepositoryImpl @Inject constructor(
             when (key) {
                 "autoCapitalize" -> preferences[PreferencesKeys.AUTO_CAPITALIZE] = value as Boolean
                 "keyRepeatEnabled" -> preferences[PreferencesKeys.KEY_REPEAT_ENABLED] = value as Boolean
+                "longPressCapitalize" -> preferences[PreferencesKeys.LONG_PRESS_CAPITALIZE] = value as Boolean
                 "keyRepeatDelay" -> preferences[PreferencesKeys.KEY_REPEAT_DELAY] = value as Long
                 "keyRepeatRate" -> preferences[PreferencesKeys.KEY_REPEAT_RATE] = value as Long
             }

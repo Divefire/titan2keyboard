@@ -46,6 +46,12 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    fun updateLongPressCapitalize(enabled: Boolean) {
+        viewModelScope.launch {
+            settingsRepository.updateSetting("longPressCapitalize", enabled)
+        }
+    }
+
     fun resetToDefaults() {
         viewModelScope.launch {
             settingsRepository.resetToDefaults()

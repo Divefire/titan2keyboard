@@ -40,6 +40,7 @@ class SettingsRepositoryImplTest {
         val expected = KeyboardSettings(
             autoCapitalize = true,
             keyRepeatEnabled = true,
+            longPressCapitalize = false,
             keyRepeatDelay = 400L,
             keyRepeatRate = 50L
         )

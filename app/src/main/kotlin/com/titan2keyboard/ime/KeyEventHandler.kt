@@ -31,13 +31,23 @@ class KeyEventHandler @Inject constructor() {
     fun handleKeyDown(event: KeyEvent, inputConnection: InputConnection?): KeyEventResult {
         inputConnection ?: return KeyEventResult.NotHandled
 
+        // Handle long-press capitalization for letter keys
+        if (currentSettings.longPressCapitalize && isLetterKey(event.keyCode) && event.repeatCount > 0) {
+            // User is holding down a letter key - output uppercase
+            val char = getCharForKeyCode(event.keyCode)
+            if (char != null) {
+                inputConnection.commitText(char.uppercase(), 1)
+                return KeyEventResult.Handled
+            }
+        }
+
         // Handle key repeat setting (but always allow backspace to repeat)
         if (!currentSettings.keyRepeatEnabled && event.repeatCount > 0 && event.keyCode != KeyEvent.KEYCODE_DEL) {
-            // Block repeated keys if key repeat is disabled (except backspace)
+            // Block repeated keys if key repeat is disabled (except backspace and long-press capitalize)
             return KeyEventResult.Handled
         }
 
-        // Handle auto-capitalization for letter keys
+        // Handle auto-capitalization for letter keys (first press only)
         if (isLetterKey(event.keyCode) && event.repeatCount == 0) {
             // Only apply auto-capitalize on first key press, not repeats
             if (shouldAutoCapitalize(inputConnection)) {
