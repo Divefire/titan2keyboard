@@ -31,9 +31,9 @@ class KeyEventHandler @Inject constructor() {
     fun handleKeyDown(event: KeyEvent, inputConnection: InputConnection?): KeyEventResult {
         inputConnection ?: return KeyEventResult.NotHandled
 
-        // Handle key repeat setting
-        if (!currentSettings.keyRepeatEnabled && event.repeatCount > 0) {
-            // Block repeated keys if key repeat is disabled
+        // Handle key repeat setting (but always allow backspace to repeat)
+        if (!currentSettings.keyRepeatEnabled && event.repeatCount > 0 && event.keyCode != KeyEvent.KEYCODE_DEL) {
+            // Block repeated keys if key repeat is disabled (except backspace)
             return KeyEventResult.Handled
         }
 
@@ -96,8 +96,8 @@ class KeyEventHandler @Inject constructor() {
     fun handleKeyUp(event: KeyEvent, inputConnection: InputConnection?): KeyEventResult {
         inputConnection ?: return KeyEventResult.NotHandled
 
-        // Handle key repeat setting for key up
-        if (!currentSettings.keyRepeatEnabled && event.repeatCount > 0) {
+        // Handle key repeat setting for key up (but always allow backspace to repeat)
+        if (!currentSettings.keyRepeatEnabled && event.repeatCount > 0 && event.keyCode != KeyEvent.KEYCODE_DEL) {
             return KeyEventResult.Handled
         }
 
