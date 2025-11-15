@@ -87,8 +87,8 @@ class KeyEventHandler @Inject constructor(
         inputConnection ?: return
         // Reset modifier state when starting new input
         updateModifierState(ModifiersState())
-        // Check if we should activate auto-cap
-        checkAndActivateAutoCapShift(inputConnection)
+        // Don't auto-activate shift on input start - wait for first key press
+        // This prevents the shift indicator from showing on home screen or non-text fields
     }
 
     /**
@@ -398,35 +398,31 @@ class KeyEventHandler @Inject constructor(
         // Don't override existing modifier states
         if (modifiersState.isShiftActive() || modifiersState.isAltActive()) return
 
-        // Check editor info for input types that shouldn't auto-capitalize
-        currentEditorInfo?.let { info ->
-            val inputType = info.inputType
-            val typeClass = inputType and InputType.TYPE_MASK_CLASS
-            val typeVariation = inputType and InputType.TYPE_MASK_VARIATION
+        // Must have valid editor info
+        val info = currentEditorInfo ?: return
 
-            // Don't auto-capitalize for specific input types
-            when (typeClass) {
-                InputType.TYPE_CLASS_TEXT -> {
-                    // Check for variations that shouldn't capitalize
-                    when (typeVariation) {
-                        InputType.TYPE_TEXT_VARIATION_URI,
-                        InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS,
-                        InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS,
-                        InputType.TYPE_TEXT_VARIATION_PASSWORD,
-                        InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD,
-                        InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD -> return
-                    }
+        val inputType = info.inputType
+        val typeClass = inputType and InputType.TYPE_MASK_CLASS
+        val typeVariation = inputType and InputType.TYPE_MASK_VARIATION
 
-                    // Check for NO_SUGGESTIONS flag (used by our shortcut dialog)
-                    if (inputType and InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS != 0) {
-                        return
-                    }
-                }
-                // Don't auto-capitalize for number, phone, datetime inputs
-                InputType.TYPE_CLASS_NUMBER,
-                InputType.TYPE_CLASS_PHONE,
-                InputType.TYPE_CLASS_DATETIME -> return
-            }
+        // Only auto-capitalize for text input types
+        if (typeClass != InputType.TYPE_CLASS_TEXT) {
+            return
+        }
+
+        // Don't auto-capitalize for specific text variations
+        when (typeVariation) {
+            InputType.TYPE_TEXT_VARIATION_URI,
+            InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS,
+            InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS,
+            InputType.TYPE_TEXT_VARIATION_PASSWORD,
+            InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD,
+            InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD -> return
+        }
+
+        // Check for NO_SUGGESTIONS flag (used by our shortcut dialog)
+        if (inputType and InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS != 0) {
+            return
         }
 
         // Check text before cursor to determine if we should capitalize
