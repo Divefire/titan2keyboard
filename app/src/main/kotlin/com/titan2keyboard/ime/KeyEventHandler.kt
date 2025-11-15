@@ -56,19 +56,19 @@ class KeyEventHandler @Inject constructor(
                 return KeyEventResult.NotHandled
             }
 
-            // Block all other key repeats if key repeat is disabled
-            // This takes priority over long-press capitalize
-            if (!currentSettings.keyRepeatEnabled) {
-                return KeyEventResult.Handled
-            }
-
-            // Handle long-press capitalization for letter keys (only if repeats are enabled)
+            // Handle long-press capitalization for letter keys (independent of key repeat setting)
+            // This allows users to hold a key to capitalize without enabling full key repeat
             if (currentSettings.longPressCapitalize && isLetterKey(event.keyCode)) {
                 val char = getCharForKeyCode(event.keyCode)
                 if (char != null) {
                     inputConnection.commitText(char.uppercase(), 1)
                     return KeyEventResult.Handled
                 }
+            }
+
+            // Block all other key repeats if key repeat is disabled
+            if (!currentSettings.keyRepeatEnabled) {
+                return KeyEventResult.Handled
             }
 
             // If key repeat is enabled, let system handle the repeat
@@ -224,10 +224,10 @@ class KeyEventHandler @Inject constructor(
         inputConnection ?: return KeyEventResult.NotHandled
 
         // Block key up for repeats if key repeat is disabled
-        // (but always allow backspace)
-        // Note: key repeat disabled takes priority over long-press capitalize
+        // (but always allow backspace and long-press capitalize)
         if (event.repeatCount > 0 && !currentSettings.keyRepeatEnabled &&
-            event.keyCode != KeyEvent.KEYCODE_DEL) {
+            event.keyCode != KeyEvent.KEYCODE_DEL &&
+            !(currentSettings.longPressCapitalize && isLetterKey(event.keyCode))) {
             return KeyEventResult.Handled
         }
 
