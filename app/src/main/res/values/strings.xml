@@ -38,9 +38,9 @@
     <string name="setting_key_repeat">Key repeat</string>
     <string name="setting_key_repeat_desc">Repeat character on long press</string>
     <string name="setting_sticky_shift">Sticky Shift</string>
-    <string name="setting_sticky_shift_desc">Single press = one-shot, long press = locked</string>
+    <string name="setting_sticky_shift_desc">Single press = one-shot, long press or double-tap = locked</string>
     <string name="setting_sticky_alt">Sticky Alt</string>
-    <string name="setting_sticky_alt_desc">Single press = one-shot, long press = locked</string>
+    <string name="setting_sticky_alt_desc">Single press = one-shot, long press or double-tap = locked</string>
     <string name="setting_alt_backspace_delete_line">Alt+Backspace deletes line</string>
     <string name="setting_alt_backspace_delete_line_desc">When enabled, Alt+Backspace deletes entire line before cursor</string>
     <string name="setting_key_repeat_delay">Key repeat delay</string>
@@ -49,6 +49,13 @@
     <!-- About -->
     <string name="about_title">About</string>
     <string name="about_version">Version</string>
+    <string name="about_build_number">Build Number</string>
+    <string name="about_build_type">Build Type</string>
+    <string name="about_build_type_debug">Debug</string>
+    <string name="about_build_type_release">Release</string>
+    <string name="about_package">Package</string>
+    <string name="about_license_title">License</string>
+    <string name="about_license_text">Licensed under Apache License 2.0</string>
     <string name="about_description">A modern IME keyboard for Unihertz Titan 2</string>
 
     <!-- Enable IME -->

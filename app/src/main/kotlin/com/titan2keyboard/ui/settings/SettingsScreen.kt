@@ -46,6 +46,7 @@ import com.titan2keyboard.util.LocaleUtils
 @Composable
 fun SettingsScreen(
     onNavigateToShortcuts: () -> Unit = {},
+    onNavigateToAbout: () -> Unit = {},
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val settingsState by viewModel.settingsState.collectAsStateWithLifecycle()
@@ -118,6 +119,7 @@ fun SettingsScreen(
                         onAltBackspaceDeleteLineChanged = viewModel::updateAltBackspaceDeleteLine,
                         onPreferredCurrencyChanged = viewModel::updatePreferredCurrency,
                         onManageShortcuts = onNavigateToShortcuts,
+                        onNavigateToAbout = onNavigateToAbout,
                         onResetToDefaults = viewModel::resetToDefaults
                     )
                 }
@@ -146,6 +148,7 @@ private fun SettingsContent(
     onAltBackspaceDeleteLineChanged: (Boolean) -> Unit,
     onPreferredCurrencyChanged: (String?) -> Unit,
     onManageShortcuts: () -> Unit,
+    onNavigateToAbout: () -> Unit,
     onResetToDefaults: () -> Unit
 ) {
     var showCurrencyDialog by remember { mutableStateOf(false) }
@@ -243,6 +246,22 @@ private fun SettingsContent(
         )
 
         Spacer(modifier = Modifier.height(24.dp))
+
+        // About Button
+        Card(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            TextButton(
+                onClick = onNavigateToAbout,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
+            ) {
+                Text(stringResource(R.string.about_title))
+            }
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
 
         TextButton(
             onClick = onResetToDefaults,

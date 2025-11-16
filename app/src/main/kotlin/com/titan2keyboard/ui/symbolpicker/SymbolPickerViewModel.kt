@@ -1,26 +1,29 @@
 package com.titan2keyboard.ui.symbolpicker
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.titan2keyboard.data.SymbolRepository
 import com.titan2keyboard.domain.model.SymbolCategory
 import com.titan2keyboard.domain.repository.SettingsRepository
-import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
- * ViewModel for the symbol picker
+ * Manager for the symbol picker
  * Manages visibility state and category cycling
+ * Note: This is a Singleton, not a ViewModel, because InputMethodService doesn't support ViewModelStore
  */
-@HiltViewModel
+@Singleton
 class SymbolPickerViewModel @Inject constructor(
     private val symbolRepository: SymbolRepository,
     private val settingsRepository: SettingsRepository
-) : ViewModel() {
+) {
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
     private val _isVisible = MutableStateFlow(false)
     val isVisible: StateFlow<Boolean> = _isVisible.asStateFlow()
@@ -33,7 +36,7 @@ class SymbolPickerViewModel @Inject constructor(
 
     init {
         // Watch for settings changes to update categories when currency preference changes
-        viewModelScope.launch {
+        scope.launch {
             settingsRepository.settingsFlow.collect { settings ->
                 preferredCurrency = settings.preferredCurrency
                 allCategories = symbolRepository.getCategories(preferredCurrency)

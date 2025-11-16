@@ -10,7 +10,17 @@ import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.app.NotificationCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LifecycleRegistry
+import androidx.lifecycle.setViewTreeLifecycleOwner
+import androidx.savedstate.SavedStateRegistry
+import androidx.savedstate.SavedStateRegistryController
+import androidx.savedstate.SavedStateRegistryOwner
+import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.titan2keyboard.R
 import com.titan2keyboard.domain.model.KeyEventResult
 import com.titan2keyboard.domain.model.ModifierState
@@ -29,7 +39,17 @@ import javax.inject.Inject
  * Handles physical keyboard input events
  */
 @AndroidEntryPoint
-class Titan2InputMethodService : InputMethodService(), ModifierStateListener {
+class Titan2InputMethodService : InputMethodService(), ModifierStateListener,
+    LifecycleOwner, SavedStateRegistryOwner {
+
+    private val lifecycleRegistry = LifecycleRegistry(this)
+    private val savedStateRegistryController = SavedStateRegistryController.create(this)
+
+    override val lifecycle: Lifecycle
+        get() = lifecycleRegistry
+
+    override val savedStateRegistry: SavedStateRegistry
+        get() = savedStateRegistryController.savedStateRegistry
 
     @Inject
     lateinit var keyEventHandler: KeyEventHandler
@@ -59,6 +79,10 @@ class Titan2InputMethodService : InputMethodService(), ModifierStateListener {
     override fun onCreate() {
         super.onCreate()
         Log.d(TAG, "IME Service created")
+
+        // Initialize lifecycle components
+        savedStateRegistryController.performRestore(null)
+        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
 
         // Set up notification manager and channel for status bar indicators
         notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -106,22 +130,13 @@ class Titan2InputMethodService : InputMethodService(), ModifierStateListener {
     }
 
     override fun onCreateCandidatesView(): View? {
-        // Create a Compose view for the symbol picker
-        return androidx.compose.ui.platform.ComposeView(this).apply {
-            setContent {
-                com.titan2keyboard.ui.theme.Titan2KeyboardTheme {
-                    com.titan2keyboard.ui.symbolpicker.SymbolPicker(
-                        viewModel = symbolPickerViewModel,
-                        onSymbolSelected = { symbol ->
-                            handleSymbolSelected(symbol)
-                        },
-                        onDismiss = {
-                            // Symbol picker dismissed
-                        }
-                    )
-                }
-            }
-        }
+        // TODO: Symbol picker disabled - ComposeView doesn't work properly in InputMethodService candidates view
+        // The IME window hierarchy doesn't support ViewTreeLifecycleOwner, causing crashes when ComposeView is attached
+        // Future implementation options:
+        // 1. Use a Dialog with Compose when Sym key is pressed
+        // 2. Use PopupWindow instead of candidates view
+        // 3. Build custom View-based UI for candidates area
+        return null
     }
 
     override fun onEvaluateInputViewShown(): Boolean {
@@ -209,6 +224,10 @@ class Titan2InputMethodService : InputMethodService(), ModifierStateListener {
                 "fieldId: ${attribute?.fieldId}, " +
                 "restarting: $restarting")
 
+        // Move lifecycle to STARTED state when input starts
+        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_START)
+        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
+
         // Log input type details for debugging
         attribute?.let { info ->
             val typeClass = info.inputType and android.text.InputType.TYPE_MASK_CLASS
@@ -233,6 +252,11 @@ class Titan2InputMethodService : InputMethodService(), ModifierStateListener {
     override fun onFinishInput() {
         super.onFinishInput()
         Log.d(TAG, "Input finished")
+
+        // Move lifecycle to CREATED state when input finishes
+        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
+
         isInputActive = false
     }
 
@@ -302,6 +326,10 @@ class Titan2InputMethodService : InputMethodService(), ModifierStateListener {
 
     override fun onDestroy() {
         Log.d(TAG, "IME Service destroyed")
+
+        // Clean up lifecycle
+        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+
         // Cancel any active notifications
         notificationManager.cancel(NOTIFICATION_ID)
         serviceScope.cancel()
