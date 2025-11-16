@@ -37,6 +37,9 @@ class Titan2InputMethodService : InputMethodService(), ModifierStateListener {
     @Inject
     lateinit var settingsRepository: SettingsRepository
 
+    @Inject
+    lateinit var symbolPickerViewModel: com.titan2keyboard.ui.symbolpicker.SymbolPickerViewModel
+
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
     // Track whether we're in any input field to block capacitive touch
@@ -63,6 +66,11 @@ class Titan2InputMethodService : InputMethodService(), ModifierStateListener {
 
         // Set up modifier state listener
         keyEventHandler.setModifierStateListener(this)
+
+        // Set up Sym key callback to show/cycle symbol picker
+        keyEventHandler.setSymKeyPressedCallback {
+            handleSymKeyPressed()
+        }
 
         // Observe settings changes
         serviceScope.launch {
@@ -98,8 +106,22 @@ class Titan2InputMethodService : InputMethodService(), ModifierStateListener {
     }
 
     override fun onCreateCandidatesView(): View? {
-        // Reserve candidates view for other functions (autocomplete, suggestions, etc.)
-        return null
+        // Create a Compose view for the symbol picker
+        return androidx.compose.ui.platform.ComposeView(this).apply {
+            setContent {
+                com.titan2keyboard.ui.theme.Titan2KeyboardTheme {
+                    com.titan2keyboard.ui.symbolpicker.SymbolPicker(
+                        viewModel = symbolPickerViewModel,
+                        onSymbolSelected = { symbol ->
+                            handleSymbolSelected(symbol)
+                        },
+                        onDismiss = {
+                            // Symbol picker dismissed
+                        }
+                    )
+                }
+            }
+        }
     }
 
     override fun onEvaluateInputViewShown(): Boolean {
@@ -260,6 +282,22 @@ class Titan2InputMethodService : InputMethodService(), ModifierStateListener {
 
         // No input active, allow capacitive touch
         return super.onGenericMotionEvent(event)
+    }
+
+    /**
+     * Handle Sym key press - show picker or cycle to next category
+     */
+    private fun handleSymKeyPressed() {
+        Log.d(TAG, "Sym key pressed")
+        symbolPickerViewModel.cycleToNextCategory()
+    }
+
+    /**
+     * Handle symbol selection from picker
+     */
+    private fun handleSymbolSelected(symbol: String) {
+        Log.d(TAG, "Symbol selected: $symbol")
+        currentInputConnection?.commitText(symbol, 1)
     }
 
     override fun onDestroy() {

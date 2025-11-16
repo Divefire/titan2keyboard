@@ -82,6 +82,12 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    fun updatePreferredCurrency(currency: String?) {
+        viewModelScope.launch {
+            settingsRepository.updateSetting("preferredCurrency", currency)
+        }
+    }
+
     fun resetToDefaults() {
         viewModelScope.launch {
             settingsRepository.resetToDefaults()

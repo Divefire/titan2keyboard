@@ -2,6 +2,7 @@ package com.titan2keyboard.data.datastore
 
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
 
 /**
  * DataStore preference keys for keyboard settings
@@ -17,4 +18,5 @@ object PreferencesKeys {
     val ALT_BACKSPACE_DELETE_LINE = booleanPreferencesKey("alt_backspace_delete_line")
     val KEY_REPEAT_DELAY = longPreferencesKey("key_repeat_delay")
     val KEY_REPEAT_RATE = longPreferencesKey("key_repeat_rate")
+    val PREFERRED_CURRENCY = stringPreferencesKey("preferred_currency")
 }

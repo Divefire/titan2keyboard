@@ -50,6 +50,10 @@ class KeyEventHandler @Inject constructor(
     private var lastAltTapTime: Long = 0L
     private var modifierStateListener: ModifierStateListener? = null
 
+    // Sym key tracking
+    private var symKeyDownTime: Long = 0L
+    private var onSymKeyPressed: (() -> Unit)? = null
+
     companion object {
         private const val TAG = "KeyEventHandler"
         private const val DOUBLE_SPACE_THRESHOLD_MS = 500L
@@ -62,6 +66,13 @@ class KeyEventHandler @Inject constructor(
      */
     fun setModifierStateListener(listener: ModifierStateListener?) {
         modifierStateListener = listener
+    }
+
+    /**
+     * Set the callback for Sym key presses
+     */
+    fun setSymKeyPressedCallback(callback: () -> Unit) {
+        onSymKeyPressed = callback
     }
 
     /**
@@ -147,7 +158,7 @@ class KeyEventHandler @Inject constructor(
         // Check if we should activate auto-cap shift before processing this key
         checkAndActivateAutoCapShift(inputConnection)
 
-        // Handle modifier keys (Shift/Alt)
+        // Handle modifier keys (Shift/Alt/Sym)
         when (event.keyCode) {
             KeyEvent.KEYCODE_SHIFT_LEFT, KeyEvent.KEYCODE_SHIFT_RIGHT -> {
                 shiftKeyDownTime = event.eventTime
@@ -158,6 +169,10 @@ class KeyEventHandler @Inject constructor(
                     altKeyDownTime = event.eventTime
                     return KeyEventResult.Handled
                 }
+            }
+            KeyEvent.KEYCODE_SYM -> {
+                symKeyDownTime = event.eventTime
+                return KeyEventResult.Handled
             }
         }
 
@@ -445,6 +460,14 @@ class KeyEventHandler @Inject constructor(
                         lastAltTapTime = event.eventTime
                     }
 
+                    return KeyEventResult.Handled
+                }
+            }
+            KeyEvent.KEYCODE_SYM -> {
+                if (symKeyDownTime > 0) {
+                    // Notify service to show picker or cycle category
+                    onSymKeyPressed?.invoke()
+                    symKeyDownTime = 0L
                     return KeyEventResult.Handled
                 }
             }
