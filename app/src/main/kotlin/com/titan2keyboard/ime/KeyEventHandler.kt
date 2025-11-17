@@ -25,7 +25,8 @@ interface ModifierStateListener {
  */
 @Singleton
 class KeyEventHandler @Inject constructor(
-    private val shortcutRepository: ShortcutRepository
+    private val shortcutRepository: ShortcutRepository,
+    private val accentRepository: com.titan2keyboard.data.AccentRepository
 ) {
 
     private var currentSettings: KeyboardSettings = KeyboardSettings()
@@ -54,11 +55,21 @@ class KeyEventHandler @Inject constructor(
     private var symKeyDownTime: Long = 0L
     private var onSymKeyPressed: (() -> Unit)? = null
 
+    // Accent cycling tracking
+    private var accentKeyDownTime: Long = 0L
+    private var accentBaseChar: Char? = null
+    private var accentCycleList: List<String> = emptyList()
+    private var accentCycleIndex: Int = 0
+    private var accentCycleHandler: android.os.Handler? = null
+    private var accentCycleRunnable: Runnable? = null
+
     companion object {
         private const val TAG = "KeyEventHandler"
         private const val DOUBLE_SPACE_THRESHOLD_MS = 500L
         private const val LONG_PRESS_THRESHOLD_MS = 500L
         private const val DOUBLE_TAP_THRESHOLD_MS = 300L // Max time between taps for double-tap
+        private const val ACCENT_CYCLE_INTERVAL_MS = 300L // Time between accent cycles while holding key
+        private const val ACCENT_START_DELAY_MS = 500L // Delay before starting accent cycling
     }
 
     /**
@@ -122,7 +133,31 @@ class KeyEventHandler @Inject constructor(
                 return KeyEventResult.NotHandled
             }
 
-            // Handle long-press capitalization for letter keys
+            // Handle accent cycling for letter keys if enabled
+            if (currentSettings.longPressAccents && isLetterKey(event.keyCode) && accentKeyDownTime > 0) {
+                val pressDuration = event.eventTime - accentKeyDownTime
+
+                // Start cycling after the initial delay
+                if (pressDuration >= ACCENT_START_DELAY_MS && accentCycleList.isNotEmpty()) {
+                    // Calculate which accent to show based on press duration
+                    val cyclesSinceStart = ((pressDuration - ACCENT_START_DELAY_MS) / ACCENT_CYCLE_INTERVAL_MS).toInt()
+                    val newIndex = (cyclesSinceStart + 1) % accentCycleList.size  // +1 because we start at index 0
+
+                    if (newIndex != accentCycleIndex) {
+                        // Cycle to next accent
+                        accentCycleIndex = newIndex
+
+                        // Delete previous character and insert new one
+                        inputConnection.deleteSurroundingText(1, 0)
+                        inputConnection.commitText(accentCycleList[accentCycleIndex], 1)
+
+                        Log.d(TAG, "Accent cycling: ${accentCycleList[accentCycleIndex]} (index $accentCycleIndex/${accentCycleList.size})")
+                    }
+                }
+                return KeyEventResult.Handled
+            }
+
+            // Handle long-press capitalization for letter keys (legacy behavior)
             if (currentSettings.longPressCapitalize && isLetterKey(event.keyCode)) {
                 val char = getCharForKeyCode(event.keyCode)
                 if (char != null) {
@@ -351,6 +386,20 @@ class KeyEventHandler @Inject constructor(
                     clearOneShotModifiers()
                     return KeyEventResult.Handled
                 }
+
+                // Start tracking for accent cycling if enabled and no modifiers active
+                if (currentSettings.longPressAccents && !modifiersState.isShiftActive() && !modifiersState.isAltActive()) {
+                    val baseChar = if (modifiersState.shift == ModifierState.ONE_SHOT) char[0].uppercaseChar() else char[0]
+                    val accentCycle = accentRepository.getAccentCycle(currentSettings.selectedLanguage, baseChar)
+
+                    if (accentCycle.isNotEmpty()) {
+                        // This letter has accents, track it for cycling
+                        accentKeyDownTime = event.eventTime
+                        accentBaseChar = baseChar
+                        accentCycleList = accentCycle
+                        accentCycleIndex = 0  // Start with base character
+                    }
+                }
             }
         }
 
@@ -471,6 +520,15 @@ class KeyEventHandler @Inject constructor(
                     return KeyEventResult.Handled
                 }
             }
+        }
+
+        // Reset accent tracking when letter key is released
+        if (isLetterKey(event.keyCode) && accentKeyDownTime > 0) {
+            accentKeyDownTime = 0L
+            accentBaseChar = null
+            accentCycleList = emptyList()
+            accentCycleIndex = 0
+            Log.d(TAG, "Accent tracking reset for keyCode=${event.keyCode}")
         }
 
         // Block key up for repeats if key repeat is disabled

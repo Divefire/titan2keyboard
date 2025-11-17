@@ -88,6 +88,18 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    fun updateSelectedLanguage(language: String) {
+        viewModelScope.launch {
+            settingsRepository.updateSetting("selectedLanguage", language)
+        }
+    }
+
+    fun updateLongPressAccents(enabled: Boolean) {
+        viewModelScope.launch {
+            settingsRepository.updateSetting("longPressAccents", enabled)
+        }
+    }
+
     fun resetToDefaults() {
         viewModelScope.launch {
             settingsRepository.resetToDefaults()

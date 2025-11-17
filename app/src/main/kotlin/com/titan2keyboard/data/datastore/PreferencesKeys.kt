@@ -19,4 +19,6 @@ object PreferencesKeys {
     val KEY_REPEAT_DELAY = longPreferencesKey("key_repeat_delay")
     val KEY_REPEAT_RATE = longPreferencesKey("key_repeat_rate")
     val PREFERRED_CURRENCY = stringPreferencesKey("preferred_currency")
+    val SELECTED_LANGUAGE = stringPreferencesKey("selected_language")
+    val LONG_PRESS_ACCENTS = booleanPreferencesKey("long_press_accents")
 }

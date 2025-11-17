@@ -118,6 +118,8 @@ fun SettingsScreen(
                         onStickyAltChanged = viewModel::updateStickyAlt,
                         onAltBackspaceDeleteLineChanged = viewModel::updateAltBackspaceDeleteLine,
                         onPreferredCurrencyChanged = viewModel::updatePreferredCurrency,
+                        onSelectedLanguageChanged = viewModel::updateSelectedLanguage,
+                        onLongPressAccentsChanged = viewModel::updateLongPressAccents,
                         onManageShortcuts = onNavigateToShortcuts,
                         onNavigateToAbout = onNavigateToAbout,
                         onResetToDefaults = viewModel::resetToDefaults
@@ -147,11 +149,14 @@ private fun SettingsContent(
     onStickyAltChanged: (Boolean) -> Unit,
     onAltBackspaceDeleteLineChanged: (Boolean) -> Unit,
     onPreferredCurrencyChanged: (String?) -> Unit,
+    onSelectedLanguageChanged: (String) -> Unit,
+    onLongPressAccentsChanged: (Boolean) -> Unit,
     onManageShortcuts: () -> Unit,
     onNavigateToAbout: () -> Unit,
     onResetToDefaults: () -> Unit
 ) {
     var showCurrencyDialog by remember { mutableStateOf(false) }
+    var showLanguageDialog by remember { mutableStateOf(false) }
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
@@ -193,6 +198,20 @@ private fun SettingsContent(
         CurrencyPreferenceItem(
             currentCurrency = settings.preferredCurrency,
             onClick = { showCurrencyDialog = true }
+        )
+
+        // Language Selection
+        LanguagePreferenceItem(
+            currentLanguage = settings.selectedLanguage,
+            onClick = { showLanguageDialog = true }
+        )
+
+        // Long-press accent behavior
+        SettingItem(
+            title = "Long-press for accents",
+            description = "Long-press letter keys to cycle through accent variants instead of uppercase (e.g., e → é → è → ê)",
+            checked = settings.longPressAccents,
+            onCheckedChange = onLongPressAccentsChanged
         )
 
         // Manage Shortcuts Button
@@ -282,6 +301,18 @@ private fun SettingsContent(
             onDismiss = { showCurrencyDialog = false }
         )
     }
+
+    // Language selection dialog
+    if (showLanguageDialog) {
+        LanguageSelectionDialog(
+            currentLanguage = settings.selectedLanguage,
+            onLanguageSelected = { language ->
+                onSelectedLanguageChanged(language)
+                showLanguageDialog = false
+            },
+            onDismiss = { showLanguageDialog = false }
+        )
+    }
 }
 
 @Composable
@@ -361,6 +392,90 @@ private fun CurrencyPreferenceItem(
             )
         }
     }
+}
+
+@Composable
+private fun LanguagePreferenceItem(
+    currentLanguage: String,
+    onClick: () -> Unit
+) {
+    // Get display name for current language using AccentRepository
+    val displayName = com.titan2keyboard.data.AccentRepository().getSupportedLanguages()
+        .find { it.first == currentLanguage }?.second
+        ?: "English (no accents)"
+
+    Card(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onClick)
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = "Language for accents",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Text(
+                    text = "Determines which accent variants appear on long-press",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Text(
+                text = displayName.substringBefore(" ("),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
+    }
+}
+
+@Composable
+private fun LanguageSelectionDialog(
+    currentLanguage: String,
+    onLanguageSelected: (String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Select Language for Accents") },
+        text = {
+            LazyColumn {
+                items(com.titan2keyboard.data.AccentRepository().getSupportedLanguages()) { (code, displayName) ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onLanguageSelected(code) }
+                            .padding(vertical = 12.dp, horizontal = 8.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column {
+                            Text(
+                                text = displayName,
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                        }
+                        if (currentLanguage == code) {
+                            Text("✓", style = MaterialTheme.typography.headlineSmall)
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
 }
 
 @Composable
