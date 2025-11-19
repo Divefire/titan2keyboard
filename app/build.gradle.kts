@@ -16,6 +16,14 @@ if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 }
 
+// Load and auto-increment build number
+val versionPropsFile = rootProject.file("version.properties")
+val versionProps = Properties()
+if (versionPropsFile.exists()) {
+    versionProps.load(FileInputStream(versionPropsFile))
+}
+val buildNumber = (versionProps["versionCode"] as String?)?.toInt() ?: 1
+
 android {
     namespace = "com.titan2keyboard"
     compileSdk = 35
@@ -24,7 +32,7 @@ android {
         applicationId = "com.titan2keyboard"
         minSdk = 34
         targetSdk = 35
-        versionCode = 1
+        versionCode = buildNumber
         versionName = "0.1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -106,6 +114,14 @@ android {
             java.srcDirs("src/androidTest/kotlin")
         }
     }
+
+    // Customize APK output names
+    applicationVariants.all {
+        outputs.all {
+            (this as com.android.build.gradle.internal.api.BaseVariantOutputImpl).outputFileName =
+                "titan2keyboard-${buildType.name}.apk"
+        }
+    }
 }
 
 dependencies {
@@ -162,4 +178,19 @@ dependencies {
 // Configure JUnit 5 for testing
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+// Auto-increment build number on each build
+tasks.register("incrementBuildNumber") {
+    doLast {
+        val newBuildNumber = buildNumber + 1
+        versionProps["versionCode"] = newBuildNumber.toString()
+        versionProps.store(versionPropsFile.writer(), "Auto-incremented build number")
+        println("Build number incremented to: $newBuildNumber")
+    }
+}
+
+// Run incrementBuildNumber before preBuild
+tasks.named("preBuild").configure {
+    dependsOn("incrementBuildNumber")
 }

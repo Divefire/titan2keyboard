@@ -31,7 +31,10 @@ class SettingsRepositoryImpl @Inject constructor(
                 stickyAlt = preferences[PreferencesKeys.STICKY_ALT] ?: false,
                 altBackspaceDeleteLine = preferences[PreferencesKeys.ALT_BACKSPACE_DELETE_LINE] ?: true,
                 keyRepeatDelay = preferences[PreferencesKeys.KEY_REPEAT_DELAY] ?: 400L,
-                keyRepeatRate = preferences[PreferencesKeys.KEY_REPEAT_RATE] ?: 50L
+                keyRepeatRate = preferences[PreferencesKeys.KEY_REPEAT_RATE] ?: 50L,
+                preferredCurrency = preferences[PreferencesKeys.PREFERRED_CURRENCY],
+                selectedLanguage = preferences[PreferencesKeys.SELECTED_LANGUAGE] ?: "en",
+                longPressAccents = preferences[PreferencesKeys.LONG_PRESS_ACCENTS] ?: false
             )
         }
 
@@ -48,6 +51,15 @@ class SettingsRepositoryImpl @Inject constructor(
                 "altBackspaceDeleteLine" -> preferences[PreferencesKeys.ALT_BACKSPACE_DELETE_LINE] = value as Boolean
                 "keyRepeatDelay" -> preferences[PreferencesKeys.KEY_REPEAT_DELAY] = value as Long
                 "keyRepeatRate" -> preferences[PreferencesKeys.KEY_REPEAT_RATE] = value as Long
+                "preferredCurrency" -> {
+                    if (value == null) {
+                        preferences.remove(PreferencesKeys.PREFERRED_CURRENCY)
+                    } else {
+                        preferences[PreferencesKeys.PREFERRED_CURRENCY] = value as String
+                    }
+                }
+                "selectedLanguage" -> preferences[PreferencesKeys.SELECTED_LANGUAGE] = value as String
+                "longPressAccents" -> preferences[PreferencesKeys.LONG_PRESS_ACCENTS] = value as Boolean
             }
         }
     }

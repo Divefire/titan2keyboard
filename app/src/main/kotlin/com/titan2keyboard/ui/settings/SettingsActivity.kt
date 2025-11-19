@@ -42,11 +42,21 @@ private fun SettingsNavigation() {
             SettingsScreen(
                 onNavigateToShortcuts = {
                     navController.navigate("shortcuts")
+                },
+                onNavigateToAbout = {
+                    navController.navigate("about")
                 }
             )
         }
         composable("shortcuts") {
             ShortcutManagementScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+        composable("about") {
+            AboutScreen(
                 onNavigateBack = {
                     navController.popBackStack()
                 }

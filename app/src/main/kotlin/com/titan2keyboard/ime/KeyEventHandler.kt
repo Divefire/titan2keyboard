@@ -25,7 +25,8 @@ interface ModifierStateListener {
  */
 @Singleton
 class KeyEventHandler @Inject constructor(
-    private val shortcutRepository: ShortcutRepository
+    private val shortcutRepository: ShortcutRepository,
+    private val accentRepository: com.titan2keyboard.data.AccentRepository
 ) {
 
     private var currentSettings: KeyboardSettings = KeyboardSettings()
@@ -46,12 +47,29 @@ class KeyEventHandler @Inject constructor(
     private var modifiersState = ModifiersState()
     private var shiftKeyDownTime: Long = 0L
     private var altKeyDownTime: Long = 0L
+    private var lastShiftTapTime: Long = 0L
+    private var lastAltTapTime: Long = 0L
     private var modifierStateListener: ModifierStateListener? = null
+
+    // Sym key tracking
+    private var symKeyDownTime: Long = 0L
+    private var onSymKeyPressed: (() -> Unit)? = null
+
+    // Accent cycling tracking
+    private var accentKeyDownTime: Long = 0L
+    private var accentBaseChar: Char? = null
+    private var accentCycleList: List<String> = emptyList()
+    private var accentCycleIndex: Int = 0
+    private var accentCycleHandler: android.os.Handler? = null
+    private var accentCycleRunnable: Runnable? = null
 
     companion object {
         private const val TAG = "KeyEventHandler"
         private const val DOUBLE_SPACE_THRESHOLD_MS = 500L
         private const val LONG_PRESS_THRESHOLD_MS = 500L
+        private const val DOUBLE_TAP_THRESHOLD_MS = 300L // Max time between taps for double-tap
+        private const val ACCENT_CYCLE_INTERVAL_MS = 450L // Time between accent cycles while holding key
+        private const val ACCENT_START_DELAY_MS = 500L // Delay before starting accent cycling
     }
 
     /**
@@ -59,6 +77,13 @@ class KeyEventHandler @Inject constructor(
      */
     fun setModifierStateListener(listener: ModifierStateListener?) {
         modifierStateListener = listener
+    }
+
+    /**
+     * Set the callback for Sym key presses
+     */
+    fun setSymKeyPressedCallback(callback: () -> Unit) {
+        onSymKeyPressed = callback
     }
 
     /**
@@ -108,7 +133,31 @@ class KeyEventHandler @Inject constructor(
                 return KeyEventResult.NotHandled
             }
 
-            // Handle long-press capitalization for letter keys
+            // Handle accent cycling for letter keys if enabled
+            if (currentSettings.longPressAccents && isLetterKey(event.keyCode) && accentKeyDownTime > 0) {
+                val pressDuration = event.eventTime - accentKeyDownTime
+
+                // Start cycling after the initial delay
+                if (pressDuration >= ACCENT_START_DELAY_MS && accentCycleList.isNotEmpty()) {
+                    // Calculate which accent to show based on press duration
+                    val cyclesSinceStart = ((pressDuration - ACCENT_START_DELAY_MS) / ACCENT_CYCLE_INTERVAL_MS).toInt()
+                    val newIndex = (cyclesSinceStart + 1) % accentCycleList.size  // +1 because we start at index 0
+
+                    if (newIndex != accentCycleIndex) {
+                        // Cycle to next accent
+                        accentCycleIndex = newIndex
+
+                        // Delete previous character and insert new one
+                        inputConnection.deleteSurroundingText(1, 0)
+                        inputConnection.commitText(accentCycleList[accentCycleIndex], 1)
+
+                        Log.d(TAG, "Accent cycling: ${accentCycleList[accentCycleIndex]} (index $accentCycleIndex/${accentCycleList.size})")
+                    }
+                }
+                return KeyEventResult.Handled
+            }
+
+            // Handle long-press capitalization for letter keys (legacy behavior)
             if (currentSettings.longPressCapitalize && isLetterKey(event.keyCode)) {
                 val char = getCharForKeyCode(event.keyCode)
                 if (char != null) {
@@ -144,7 +193,7 @@ class KeyEventHandler @Inject constructor(
         // Check if we should activate auto-cap shift before processing this key
         checkAndActivateAutoCapShift(inputConnection)
 
-        // Handle modifier keys (Shift/Alt)
+        // Handle modifier keys (Shift/Alt/Sym)
         when (event.keyCode) {
             KeyEvent.KEYCODE_SHIFT_LEFT, KeyEvent.KEYCODE_SHIFT_RIGHT -> {
                 shiftKeyDownTime = event.eventTime
@@ -155,6 +204,10 @@ class KeyEventHandler @Inject constructor(
                     altKeyDownTime = event.eventTime
                     return KeyEventResult.Handled
                 }
+            }
+            KeyEvent.KEYCODE_SYM -> {
+                symKeyDownTime = event.eventTime
+                return KeyEventResult.Handled
             }
         }
 
@@ -333,6 +386,20 @@ class KeyEventHandler @Inject constructor(
                     clearOneShotModifiers()
                     return KeyEventResult.Handled
                 }
+
+                // Start tracking for accent cycling if enabled and no modifiers active
+                if (currentSettings.longPressAccents && !modifiersState.isShiftActive() && !modifiersState.isAltActive()) {
+                    val baseChar = if (modifiersState.shift == ModifierState.ONE_SHOT) char[0].uppercaseChar() else char[0]
+                    val accentCycle = accentRepository.getAccentCycle(currentSettings.selectedLanguage, baseChar)
+
+                    if (accentCycle.isNotEmpty()) {
+                        // This letter has accents, track it for cycling
+                        accentKeyDownTime = event.eventTime
+                        accentBaseChar = baseChar
+                        accentCycleList = accentCycle
+                        accentCycleIndex = 0  // Start with base character
+                    }
+                }
             }
         }
 
@@ -384,11 +451,33 @@ class KeyEventHandler @Inject constructor(
         // Handle modifier key release
         when (event.keyCode) {
             KeyEvent.KEYCODE_SHIFT_LEFT, KeyEvent.KEYCODE_SHIFT_RIGHT -> {
-                if (currentSettings.stickyShift && shiftKeyDownTime > 0) {
+                if (shiftKeyDownTime > 0) {
                     val pressDuration = event.eventTime - shiftKeyDownTime
                     val isLongPress = pressDuration >= LONG_PRESS_THRESHOLD_MS
-                    toggleShiftModifier(isLongPress)
+
+                    // Check for double-tap (only on short presses)
+                    val isDoubleTap = if (!isLongPress) {
+                        val timeSinceLastTap = event.eventTime - lastShiftTapTime
+                        timeSinceLastTap < DOUBLE_TAP_THRESHOLD_MS
+                    } else {
+                        false
+                    }
+
+                    // Double-tap acts like long-press (locks modifier)
+                    val shouldLock = isLongPress || isDoubleTap
+
+                    if (shouldLock) {
+                        Log.d(TAG, "Shift: ${if (isDoubleTap) "double-tap" else "long-press"} detected, locking")
+                    }
+
+                    toggleShiftModifier(shouldLock)
                     shiftKeyDownTime = 0L
+
+                    // Update last tap time for double-tap detection (only for short presses)
+                    if (!isLongPress) {
+                        lastShiftTapTime = event.eventTime
+                    }
+
                     return KeyEventResult.Handled
                 }
             }
@@ -396,11 +485,50 @@ class KeyEventHandler @Inject constructor(
                 if (currentSettings.stickyAlt && altKeyDownTime > 0) {
                     val pressDuration = event.eventTime - altKeyDownTime
                     val isLongPress = pressDuration >= LONG_PRESS_THRESHOLD_MS
-                    toggleAltModifier(isLongPress)
+
+                    // Check for double-tap (only on short presses)
+                    val isDoubleTap = if (!isLongPress) {
+                        val timeSinceLastTap = event.eventTime - lastAltTapTime
+                        timeSinceLastTap < DOUBLE_TAP_THRESHOLD_MS
+                    } else {
+                        false
+                    }
+
+                    // Double-tap acts like long-press (locks modifier)
+                    val shouldLock = isLongPress || isDoubleTap
+
+                    if (shouldLock) {
+                        Log.d(TAG, "Alt: ${if (isDoubleTap) "double-tap" else "long-press"} detected, locking")
+                    }
+
+                    toggleAltModifier(shouldLock)
                     altKeyDownTime = 0L
+
+                    // Update last tap time for double-tap detection (only for short presses)
+                    if (!isLongPress) {
+                        lastAltTapTime = event.eventTime
+                    }
+
                     return KeyEventResult.Handled
                 }
             }
+            KeyEvent.KEYCODE_SYM -> {
+                if (symKeyDownTime > 0) {
+                    // Notify service to show picker or cycle category
+                    onSymKeyPressed?.invoke()
+                    symKeyDownTime = 0L
+                    return KeyEventResult.Handled
+                }
+            }
+        }
+
+        // Reset accent tracking when letter key is released
+        if (isLetterKey(event.keyCode) && accentKeyDownTime > 0) {
+            accentKeyDownTime = 0L
+            accentBaseChar = null
+            accentCycleList = emptyList()
+            accentCycleIndex = 0
+            Log.d(TAG, "Accent tracking reset for keyCode=${event.keyCode}")
         }
 
         // Block key up for repeats if key repeat is disabled
@@ -457,18 +585,6 @@ class KeyEventHandler @Inject constructor(
             return
         }
 
-        // Check if any capitalization flags are set - if none are set, don't auto-capitalize
-        // This respects KeyboardCapitalization.None from Compose TextField
-        val hasCapFlag = (inputType and (
-            InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS or
-            InputType.TYPE_TEXT_FLAG_CAP_WORDS or
-            InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
-        )) != 0
-
-        if (!hasCapFlag) {
-            return
-        }
-
         // Check text before cursor to determine if we should capitalize
         val textBeforeCursor = inputConnection.getTextBeforeCursor(100, 0)
 
@@ -481,17 +597,13 @@ class KeyEventHandler @Inject constructor(
             // Get the last character
             val lastChar = textBeforeCursor.last()
 
-            // Activate after sentence-ending punctuation
-            if (lastChar in listOf('.', '!', '?')) {
-                shouldActivate = true
-            }
-
             // Activate after newline
             if (lastChar == '\n') {
                 shouldActivate = true
             }
 
             // Check for sentence-ending punctuation followed by space
+            // This prevents auto-cap in URLs (www.github.com) and other period uses
             if (textBeforeCursor.length >= 2) {
                 val secondToLast = textBeforeCursor[textBeforeCursor.length - 2]
                 if (lastChar in listOf(' ', '\t') && secondToLast in listOf('.', '!', '?')) {

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Debug build app name -->
+    <string name="app_name">Titan 2 Keyboard (debug)</string>
+</resources>

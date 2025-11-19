@@ -13,5 +13,8 @@ data class KeyboardSettings(
     val stickyAlt: Boolean = false,
     val altBackspaceDeleteLine: Boolean = true, // Alt+Backspace deletes entire line
     val keyRepeatDelay: Long = 400L, // milliseconds
-    val keyRepeatRate: Long = 50L    // milliseconds
+    val keyRepeatRate: Long = 50L,   // milliseconds
+    val preferredCurrency: String? = null, // Preferred currency symbol (null = use locale default)
+    val selectedLanguage: String = "en", // Primary language for accents (en, fr, de, es, pt, it, etc.)
+    val longPressAccents: Boolean = false // Long-press shows accent variants instead of uppercase
 )

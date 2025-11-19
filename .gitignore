@@ -55,6 +55,9 @@ captures/
 *.keystore
 keystore.properties
 
+# Version properties - auto-incremented build number
+version.properties
+
 # External native build folder generated in Android Studio 2.2 and later
 .externalNativeBuild
 .cxx/
