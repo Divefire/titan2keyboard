@@ -1,17 +1,24 @@
 package com.titan2keyboard.ime
 
+import android.app.Dialog
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.graphics.Color
+import android.graphics.PixelFormat
 import android.inputmethodservice.InputMethodService
 import android.os.Build
 import android.util.Log
+import android.view.Gravity
 import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
+import android.view.WindowManager
 import android.view.inputmethod.EditorInfo
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
@@ -25,7 +32,9 @@ import com.titan2keyboard.R
 import com.titan2keyboard.domain.model.KeyEventResult
 import com.titan2keyboard.domain.model.ModifierState
 import com.titan2keyboard.domain.model.ModifiersState
+import com.titan2keyboard.domain.model.SymbolCategory
 import com.titan2keyboard.domain.repository.SettingsRepository
+import com.titan2keyboard.ui.ime.SymbolPickerOverlay
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -39,26 +48,13 @@ import javax.inject.Inject
  * Handles physical keyboard input events
  */
 @AndroidEntryPoint
-class Titan2InputMethodService : InputMethodService(), ModifierStateListener,
-    LifecycleOwner, SavedStateRegistryOwner {
-
-    private val lifecycleRegistry = LifecycleRegistry(this)
-    private val savedStateRegistryController = SavedStateRegistryController.create(this)
-
-    override val lifecycle: Lifecycle
-        get() = lifecycleRegistry
-
-    override val savedStateRegistry: SavedStateRegistry
-        get() = savedStateRegistryController.savedStateRegistry
+class Titan2InputMethodService : InputMethodService(), ModifierStateListener {
 
     @Inject
     lateinit var keyEventHandler: KeyEventHandler
 
     @Inject
     lateinit var settingsRepository: SettingsRepository
-
-    @Inject
-    lateinit var symbolPickerViewModel: com.titan2keyboard.ui.symbolpicker.SymbolPickerViewModel
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
@@ -69,6 +65,18 @@ class Titan2InputMethodService : InputMethodService(), ModifierStateListener,
     // Notification for status bar indicator
     private lateinit var notificationManager: NotificationManager
 
+    // Symbol picker window management
+    private var windowManager: WindowManager? = null
+    private var symbolPickerView: ComposeView? = null
+    private var isSymbolPickerShowing = false
+
+    // Compose state for symbol picker
+    private var symbolPickerVisible by mutableStateOf(false)
+    private var symbolPickerCategory by mutableStateOf(SymbolCategory.PUNCTUATION)
+
+    // Lifecycle owner for Compose in service
+    private val lifecycleOwner = ServiceLifecycleOwner()
+
     companion object {
         private const val TAG = "Titan2IME"
         private const val CAPACITIVE_BLOCK_TIME_MS = 1000L // Block capacitive for 1s after keystroke
@@ -76,25 +84,42 @@ class Titan2InputMethodService : InputMethodService(), ModifierStateListener,
         private const val NOTIFICATION_ID = 1001
     }
 
+    /**
+     * Custom lifecycle owner for running Compose in a Service
+     */
+    private class ServiceLifecycleOwner : LifecycleOwner, SavedStateRegistryOwner {
+        private val lifecycleRegistry = LifecycleRegistry(this)
+        private val savedStateRegistryController = SavedStateRegistryController.create(this)
+
+        override val lifecycle: Lifecycle get() = lifecycleRegistry
+        override val savedStateRegistry: SavedStateRegistry get() = savedStateRegistryController.savedStateRegistry
+
+        fun handleLifecycleEvent(event: Lifecycle.Event) {
+            lifecycleRegistry.handleLifecycleEvent(event)
+        }
+
+        fun performRestore() {
+            savedStateRegistryController.performRestore(null)
+        }
+    }
+
     override fun onCreate() {
         super.onCreate()
         Log.d(TAG, "IME Service created")
 
-        // Initialize lifecycle components
-        savedStateRegistryController.performRestore(null)
-        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
+        // Initialize lifecycle for Compose
+        lifecycleOwner.performRestore()
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
 
         // Set up notification manager and channel for status bar indicators
         notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         createNotificationChannel()
 
+        // Initialize window manager for symbol picker overlay
+        windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
+
         // Set up modifier state listener
         keyEventHandler.setModifierStateListener(this)
-
-        // Set up Sym key callback to show/cycle symbol picker
-        keyEventHandler.setSymKeyPressedCallback {
-            handleSymKeyPressed()
-        }
 
         // Observe settings changes
         serviceScope.launch {
@@ -104,6 +129,9 @@ class Titan2InputMethodService : InputMethodService(), ModifierStateListener,
                 keyEventHandler.updateSettings(settings)
             }
         }
+
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_START)
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
     }
 
     private fun createNotificationChannel() {
@@ -130,12 +158,7 @@ class Titan2InputMethodService : InputMethodService(), ModifierStateListener,
     }
 
     override fun onCreateCandidatesView(): View? {
-        // TODO: Symbol picker disabled - ComposeView doesn't work properly in InputMethodService candidates view
-        // The IME window hierarchy doesn't support ViewTreeLifecycleOwner, causing crashes when ComposeView is attached
-        // Future implementation options:
-        // 1. Use a Dialog with Compose when Sym key is pressed
-        // 2. Use PopupWindow instead of candidates view
-        // 3. Build custom View-based UI for candidates area
+        // Reserve candidates view for other functions (autocomplete, suggestions, etc.)
         return null
     }
 
@@ -151,7 +174,7 @@ class Titan2InputMethodService : InputMethodService(), ModifierStateListener,
     }
 
     override fun onModifierStateChanged(modifiersState: ModifiersState) {
-        Log.d(TAG, "Modifier state changed: shift=${modifiersState.shift}, alt=${modifiersState.alt}")
+        Log.d(TAG, "Modifier state changed: shift=${modifiersState.shift}, alt=${modifiersState.alt}, symPicker=${modifiersState.symPickerVisible}")
 
         // Update status bar notification
         Log.d(TAG, "Calling updateStatusBarNotification")
@@ -160,6 +183,21 @@ class Titan2InputMethodService : InputMethodService(), ModifierStateListener,
             Log.d(TAG, "updateStatusBarNotification completed successfully")
         } catch (e: Exception) {
             Log.e(TAG, "Error in updateStatusBarNotification", e)
+        }
+
+        // Handle symbol picker visibility
+        if (modifiersState.symPickerVisible != symbolPickerVisible) {
+            symbolPickerVisible = modifiersState.symPickerVisible
+            if (symbolPickerVisible) {
+                showSymbolPicker()
+            } else {
+                hideSymbolPicker()
+            }
+        }
+
+        // Update symbol picker category
+        if (modifiersState.symCategory != symbolPickerCategory) {
+            symbolPickerCategory = modifiersState.symCategory
         }
     }
 
@@ -224,10 +262,6 @@ class Titan2InputMethodService : InputMethodService(), ModifierStateListener,
                 "fieldId: ${attribute?.fieldId}, " +
                 "restarting: $restarting")
 
-        // Move lifecycle to STARTED state when input starts
-        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_START)
-        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
-
         // Log input type details for debugging
         attribute?.let { info ->
             val typeClass = info.inputType and android.text.InputType.TYPE_MASK_CLASS
@@ -252,11 +286,6 @@ class Titan2InputMethodService : InputMethodService(), ModifierStateListener,
     override fun onFinishInput() {
         super.onFinishInput()
         Log.d(TAG, "Input finished")
-
-        // Move lifecycle to CREATED state when input finishes
-        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
-        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
-
         isInputActive = false
     }
 
@@ -309,26 +338,88 @@ class Titan2InputMethodService : InputMethodService(), ModifierStateListener,
     }
 
     /**
-     * Handle Sym key press - show picker or cycle to next category
+     * Show the symbol picker overlay window
      */
-    private fun handleSymKeyPressed() {
-        Log.d(TAG, "Sym key pressed")
-        symbolPickerViewModel.cycleToNextCategory()
+    private fun showSymbolPicker() {
+        if (isSymbolPickerShowing) return
+
+        Log.d(TAG, "Showing symbol picker")
+
+        try {
+            // Create the ComposeView for the symbol picker
+            val composeView = ComposeView(this).apply {
+                setViewTreeLifecycleOwner(lifecycleOwner)
+                setViewTreeSavedStateRegistryOwner(lifecycleOwner)
+
+                setContent {
+                    SymbolPickerOverlay(
+                        visible = symbolPickerVisible,
+                        currentCategory = symbolPickerCategory,
+                        onSymbolSelected = { symbol ->
+                            keyEventHandler.insertSymbol(symbol, currentInputConnection)
+                        },
+                        onDismiss = {
+                            keyEventHandler.dismissSymbolPicker()
+                        }
+                    )
+                }
+            }
+
+            // Window parameters for overlay
+            val params = WindowManager.LayoutParams(
+                WindowManager.LayoutParams.MATCH_PARENT,
+                WindowManager.LayoutParams.MATCH_PARENT,
+                WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+                        WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
+                        WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                PixelFormat.TRANSLUCENT
+            ).apply {
+                gravity = Gravity.CENTER
+                token = window?.window?.decorView?.windowToken
+            }
+
+            windowManager?.addView(composeView, params)
+            symbolPickerView = composeView
+            isSymbolPickerShowing = true
+
+            Log.d(TAG, "Symbol picker shown successfully")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error showing symbol picker", e)
+        }
     }
 
     /**
-     * Handle symbol selection from picker
+     * Hide the symbol picker overlay window
      */
-    private fun handleSymbolSelected(symbol: String) {
-        Log.d(TAG, "Symbol selected: $symbol")
-        currentInputConnection?.commitText(symbol, 1)
+    private fun hideSymbolPicker() {
+        if (!isSymbolPickerShowing) return
+
+        Log.d(TAG, "Hiding symbol picker")
+
+        try {
+            symbolPickerView?.let { view ->
+                windowManager?.removeView(view)
+            }
+            symbolPickerView = null
+            isSymbolPickerShowing = false
+
+            Log.d(TAG, "Symbol picker hidden successfully")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error hiding symbol picker", e)
+        }
     }
 
     override fun onDestroy() {
         Log.d(TAG, "IME Service destroyed")
 
-        // Clean up lifecycle
-        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+        // Hide symbol picker if showing
+        hideSymbolPicker()
+
+        // Update lifecycle
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
 
         // Cancel any active notifications
         notificationManager.cancel(NOTIFICATION_ID)
