@@ -1,7 +1,7 @@
 package com.titan2keyboard.ui.symbolpicker
 
+import com.titan2keyboard.data.SymbolCategoryItem
 import com.titan2keyboard.data.SymbolRepository
-import com.titan2keyboard.domain.model.SymbolCategory
 import com.titan2keyboard.domain.repository.SettingsRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -28,11 +28,11 @@ class SymbolPickerViewModel @Inject constructor(
     private val _isVisible = MutableStateFlow(false)
     val isVisible: StateFlow<Boolean> = _isVisible.asStateFlow()
 
-    private val _currentCategory = MutableStateFlow<SymbolCategory?>(null)
-    val currentCategory: StateFlow<SymbolCategory?> = _currentCategory.asStateFlow()
+    private val _currentCategory = MutableStateFlow<SymbolCategoryItem?>(null)
+    val currentCategory: StateFlow<SymbolCategoryItem?> = _currentCategory.asStateFlow()
 
     private var preferredCurrency: String? = null
-    private var allCategories: List<SymbolCategory> = emptyList()
+    private var allCategories: List<SymbolCategoryItem> = emptyList()
 
     init {
         // Watch for settings changes to update categories when currency preference changes

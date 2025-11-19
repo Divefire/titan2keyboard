@@ -53,7 +53,10 @@ class KeyEventHandler @Inject constructor(
 
     // Sym key tracking
     private var symKeyDownTime: Long = 0L
+    private var lastSymTapTime: Long = 0L
     private var onSymKeyPressed: (() -> Unit)? = null
+    private var onSymPickerDismiss: (() -> Unit)? = null
+    private var isSymPickerVisible: Boolean = false
 
     // Accent cycling tracking
     private var accentKeyDownTime: Long = 0L
@@ -84,6 +87,37 @@ class KeyEventHandler @Inject constructor(
      */
     fun setSymKeyPressedCallback(callback: () -> Unit) {
         onSymKeyPressed = callback
+    }
+
+    /**
+     * Set the callback for dismissing the symbol picker
+     */
+    fun setSymPickerDismissCallback(callback: () -> Unit) {
+        onSymPickerDismiss = callback
+    }
+
+    /**
+     * Update the symbol picker visibility state
+     */
+    fun setSymPickerVisible(visible: Boolean) {
+        isSymPickerVisible = visible
+    }
+
+    /**
+     * Insert a symbol from the symbol picker
+     */
+    fun insertSymbol(symbol: String, inputConnection: InputConnection?) {
+        inputConnection?.commitText(symbol, 1)
+        // Clear one-shot modifiers after inserting
+        clearOneShotModifiers()
+    }
+
+    /**
+     * Dismiss the symbol picker overlay
+     */
+    fun dismissSymbolPicker() {
+        // Update modifier state to hide symbol picker
+        updateModifierState(modifiersState.copy(symPickerVisible = false))
     }
 
     /**
@@ -125,6 +159,16 @@ class KeyEventHandler @Inject constructor(
     fun handleKeyDown(event: KeyEvent, inputConnection: InputConnection?): KeyEventResult {
         Log.d(TAG, "handleKeyDown: keyCode=${event.keyCode}, modifiers=shift:${modifiersState.shift}/alt:${modifiersState.alt}")
         inputConnection ?: return KeyEventResult.NotHandled
+
+        // Dismiss symbol picker on any key except Sym
+        if (isSymPickerVisible && event.keyCode != KeyEvent.KEYCODE_SYM) {
+            onSymPickerDismiss?.invoke()
+
+            // Consume back key to prevent Android from also handling it
+            if (event.keyCode == KeyEvent.KEYCODE_BACK) {
+                return KeyEventResult.Handled
+            }
+        }
 
         // Handle key repeats (repeatCount > 0)
         if (event.repeatCount > 0) {
@@ -514,8 +558,32 @@ class KeyEventHandler @Inject constructor(
             }
             KeyEvent.KEYCODE_SYM -> {
                 if (symKeyDownTime > 0) {
-                    // Notify service to show picker or cycle category
-                    onSymKeyPressed?.invoke()
+                    val pressDuration = event.eventTime - symKeyDownTime
+                    val isLongPress = pressDuration >= LONG_PRESS_THRESHOLD_MS
+
+                    // Check for double-tap (only on short presses)
+                    val timeSinceLastTap = event.eventTime - lastSymTapTime
+                    val isDoubleTap = !isLongPress && timeSinceLastTap < DOUBLE_TAP_THRESHOLD_MS
+
+                    if (isDoubleTap || isLongPress) {
+                        // Double-tap or long-press: insert preferred currency symbol
+                        val currency = currentSettings.preferredCurrency
+                            ?: com.titan2keyboard.util.LocaleUtils.getDefaultCurrencySymbol()
+                        inputConnection.commitText(currency, 1)
+
+                        // Dismiss the symbol picker if it's visible (from first tap)
+                        if (isSymPickerVisible) {
+                            onSymPickerDismiss?.invoke()
+                        }
+
+                        // Reset tap time to prevent triple-tap issues
+                        lastSymTapTime = 0L
+                    } else {
+                        // Short press: show picker or cycle category
+                        onSymKeyPressed?.invoke()
+                        // Update last tap time for double-tap detection
+                        lastSymTapTime = event.eventTime
+                    }
                     symKeyDownTime = 0L
                     return KeyEventResult.Handled
                 }

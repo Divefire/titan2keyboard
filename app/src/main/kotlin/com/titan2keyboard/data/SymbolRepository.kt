@@ -1,9 +1,25 @@
 package com.titan2keyboard.data
 
-import com.titan2keyboard.domain.model.SymbolCategory
 import com.titan2keyboard.util.LocaleUtils
 import javax.inject.Inject
 import javax.inject.Singleton
+
+/**
+ * Represents a category of symbols in the symbol picker
+ */
+data class SymbolCategoryItem(
+    /** Unique identifier for this category */
+    val id: String,
+
+    /** Display name shown in UI */
+    val displayName: String,
+
+    /** List of symbol characters in this category */
+    val symbols: List<String>,
+
+    /** Order in which categories are displayed (0-based) */
+    val order: Int
+)
 
 /**
  * Repository for symbol categories and symbol data
@@ -18,13 +34,13 @@ class SymbolRepository @Inject constructor() {
      * Get symbol categories with the specified currency symbol in Common category
      * @param preferredCurrency User's preferred currency symbol, or null to use locale default
      */
-    fun getCategories(preferredCurrency: String?): List<SymbolCategory> {
+    fun getCategories(preferredCurrency: String?): List<SymbolCategoryItem> {
         // Use preferred currency, or auto-detect from locale
         val currencySymbol = preferredCurrency ?: LocaleUtils.getDefaultCurrencySymbol()
 
         return listOf(
             // Category 1: Common Symbols
-            SymbolCategory(
+            SymbolCategoryItem(
                 id = "common",
                 displayName = "Common Symbols",
                 symbols = listOf(
@@ -38,7 +54,7 @@ class SymbolRepository @Inject constructor() {
             ),
 
             // Category 2: Math Symbols
-            SymbolCategory(
+            SymbolCategoryItem(
                 id = "math",
                 displayName = "Math",
                 symbols = listOf(
@@ -51,7 +67,7 @@ class SymbolRepository @Inject constructor() {
             ),
 
             // Category 3: Currency Symbols
-            SymbolCategory(
+            SymbolCategoryItem(
                 id = "currency",
                 displayName = "Currency",
                 symbols = listOf(
@@ -64,7 +80,7 @@ class SymbolRepository @Inject constructor() {
             ),
 
             // Category 4: Arrows
-            SymbolCategory(
+            SymbolCategoryItem(
                 id = "arrows",
                 displayName = "Arrows",
                 symbols = listOf(
@@ -76,7 +92,7 @@ class SymbolRepository @Inject constructor() {
             ),
 
             // Category 5: Other Symbols
-            SymbolCategory(
+            SymbolCategoryItem(
                 id = "other",
                 displayName = "Other",
                 symbols = listOf(
@@ -93,7 +109,7 @@ class SymbolRepository @Inject constructor() {
     /**
      * Get category by index (wraps around if out of bounds)
      */
-    fun getCategoryByIndex(index: Int, preferredCurrency: String?): SymbolCategory {
+    fun getCategoryByIndex(index: Int, preferredCurrency: String?): SymbolCategoryItem {
         val categories = getCategories(preferredCurrency)
         return categories[index % categories.size]
     }
@@ -101,7 +117,7 @@ class SymbolRepository @Inject constructor() {
     /**
      * Get the next category after the current one
      */
-    fun getNextCategory(currentId: String, preferredCurrency: String?): SymbolCategory {
+    fun getNextCategory(currentId: String, preferredCurrency: String?): SymbolCategoryItem {
         val categories = getCategories(preferredCurrency)
         val currentIndex = categories.indexOfFirst { it.id == currentId }
         val nextIndex = (currentIndex + 1) % categories.size

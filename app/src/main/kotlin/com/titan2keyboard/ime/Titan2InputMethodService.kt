@@ -15,6 +15,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
 import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -120,6 +121,16 @@ class Titan2InputMethodService : InputMethodService(), ModifierStateListener {
 
         // Set up modifier state listener
         keyEventHandler.setModifierStateListener(this)
+
+        // Set up Sym key callback to show/cycle symbol picker
+        keyEventHandler.setSymKeyPressedCallback {
+            handleSymKeyPressed()
+        }
+
+        // Set up Sym picker dismiss callback
+        keyEventHandler.setSymPickerDismissCallback {
+            hideSymbolPicker()
+        }
 
         // Observe settings changes
         serviceScope.launch {
@@ -338,15 +349,60 @@ class Titan2InputMethodService : InputMethodService(), ModifierStateListener {
     }
 
     /**
+     * Handle Sym key press - toggle symbol picker
+     */
+    private fun handleSymKeyPressed() {
+        if (symbolPickerVisible) {
+            // Already visible - cycle to next category
+            symbolPickerCategory = getNextSymbolCategory(symbolPickerCategory)
+        } else {
+            // Show symbol picker
+            symbolPickerCategory = SymbolCategory.PUNCTUATION
+            showSymbolPicker()
+        }
+    }
+
+    private fun getNextSymbolCategory(current: SymbolCategory): SymbolCategory {
+        val categories = SymbolCategory.entries
+        val currentIndex = categories.indexOf(current)
+        val nextIndex = (currentIndex + 1) % categories.size
+        return categories[nextIndex]
+    }
+
+    /**
      * Show the symbol picker overlay window
      */
     private fun showSymbolPicker() {
-        if (isSymbolPickerShowing) return
-
-        Log.d(TAG, "Showing symbol picker")
-
         try {
-            // Create the ComposeView for the symbol picker
+            // Always remove existing overlay first to ensure clean state
+            if (isSymbolPickerShowing) {
+                try {
+                    symbolPickerView?.let { view ->
+                        windowManager?.removeView(view)
+                    }
+                } catch (e: Exception) {
+                    Log.w(TAG, "Error removing old overlay", e)
+                }
+                symbolPickerView = null
+                isSymbolPickerShowing = false
+            }
+
+            // Check window token before creating
+            val token = window?.window?.decorView?.windowToken
+            if (token == null) {
+                Log.e(TAG, "No window token available for symbol picker")
+                return
+            }
+
+            // If IME window is hidden but input is active, bring it back
+            if (!isInputViewShown && isInputActive) {
+                requestShowSelf(InputMethodManager.SHOW_IMPLICIT)
+                // Continue to create the overlay - it will appear when IME window comes back
+            }
+
+            // Set visible state first so Compose creates with correct initial state
+            symbolPickerVisible = true
+
             val composeView = ComposeView(this).apply {
                 setViewTreeLifecycleOwner(lifecycleOwner)
                 setViewTreeSavedStateRegistryOwner(lifecycleOwner)
@@ -357,9 +413,12 @@ class Titan2InputMethodService : InputMethodService(), ModifierStateListener {
                         currentCategory = symbolPickerCategory,
                         onSymbolSelected = { symbol ->
                             keyEventHandler.insertSymbol(symbol, currentInputConnection)
+                            // Dismiss picker after inserting symbol
+                            hideSymbolPicker()
                         },
                         onDismiss = {
-                            keyEventHandler.dismissSymbolPicker()
+                            // Dismiss picker on back press or tap outside
+                            hideSymbolPicker()
                         }
                     )
                 }
@@ -376,14 +435,13 @@ class Titan2InputMethodService : InputMethodService(), ModifierStateListener {
                 PixelFormat.TRANSLUCENT
             ).apply {
                 gravity = Gravity.CENTER
-                token = window?.window?.decorView?.windowToken
+                this.token = window?.window?.decorView?.windowToken
             }
 
             windowManager?.addView(composeView, params)
             symbolPickerView = composeView
             isSymbolPickerShowing = true
-
-            Log.d(TAG, "Symbol picker shown successfully")
+            keyEventHandler.setSymPickerVisible(true)
         } catch (e: Exception) {
             Log.e(TAG, "Error showing symbol picker", e)
         }
@@ -393,9 +451,31 @@ class Titan2InputMethodService : InputMethodService(), ModifierStateListener {
      * Hide the symbol picker overlay window
      */
     private fun hideSymbolPicker() {
+        // Set state to hidden
+        symbolPickerVisible = false
+        keyEventHandler.setSymPickerVisible(false)
+
+        // Remove the overlay completely for clean state
+        if (isSymbolPickerShowing) {
+            try {
+                symbolPickerView?.let { view ->
+                    windowManager?.removeView(view)
+                }
+            } catch (e: Exception) {
+                Log.w(TAG, "Error removing overlay in hideSymbolPicker", e)
+            }
+            symbolPickerView = null
+            isSymbolPickerShowing = false
+        }
+    }
+
+    /**
+     * Remove the symbol picker overlay view completely
+     */
+    private fun removeSymbolPickerOverlay() {
         if (!isSymbolPickerShowing) return
 
-        Log.d(TAG, "Hiding symbol picker")
+        Log.d(TAG, "Removing symbol picker overlay")
 
         try {
             symbolPickerView?.let { view ->
@@ -403,18 +483,19 @@ class Titan2InputMethodService : InputMethodService(), ModifierStateListener {
             }
             symbolPickerView = null
             isSymbolPickerShowing = false
+            symbolPickerVisible = false
 
-            Log.d(TAG, "Symbol picker hidden successfully")
+            Log.d(TAG, "Symbol picker overlay removed")
         } catch (e: Exception) {
-            Log.e(TAG, "Error hiding symbol picker", e)
+            Log.e(TAG, "Error removing symbol picker overlay", e)
         }
     }
 
     override fun onDestroy() {
         Log.d(TAG, "IME Service destroyed")
 
-        // Hide symbol picker if showing
-        hideSymbolPicker()
+        // Remove symbol picker overlay if attached
+        removeSymbolPickerOverlay()
 
         // Update lifecycle
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)

@@ -13,7 +13,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.titan2keyboard.domain.model.SymbolCategory
+import com.titan2keyboard.data.SymbolCategoryItem
 
 /**
  * Symbol picker bottom sheet
@@ -56,7 +56,7 @@ fun SymbolPicker(
  */
 @Composable
 private fun SymbolPickerContent(
-    category: SymbolCategory,
+    category: SymbolCategoryItem,
     categoryIndex: Int,
     totalCategories: Int,
     onSymbolClick: (String) -> Unit,
