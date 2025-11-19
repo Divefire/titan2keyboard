@@ -16,17 +16,17 @@
     <string name="setting_long_press_capitalize_desc">Hold a letter key to capitalize it</string>
     <string name="setting_double_space_period">Double-space period</string>
     <string name="setting_double_space_period_desc">Press space twice to insert a period</string>
-    <string name="setting_text_shortcuts">Text shortcuts</string>
-    <string name="setting_text_shortcuts_desc">Auto-correct common contractions and typos (e.g., Im → I\'m)</string>
-    <string name="manage_shortcuts">Manage shortcuts</string>
+    <string name="setting_text_shortcuts">Word Substitution</string>
+    <string name="setting_text_shortcuts_desc">Auto-replace words as you type (e.g., Im → I\'m)</string>
+    <string name="manage_shortcuts">Manage substitutions</string>
 
-    <!-- Shortcuts Management -->
-    <string name="shortcuts_title">Text Shortcuts</string>
+    <!-- Word Substitution Management -->
+    <string name="shortcuts_title">Word Substitution</string>
     <string name="navigate_back">Navigate back</string>
-    <string name="add_shortcut">Add shortcut</string>
-    <string name="edit_shortcut">Edit shortcut</string>
-    <string name="delete_shortcut">Delete shortcut</string>
-    <string name="no_shortcuts">No shortcuts yet. Tap + to add one.</string>
+    <string name="add_shortcut">Add substitution</string>
+    <string name="edit_shortcut">Edit substitution</string>
+    <string name="delete_shortcut">Delete substitution</string>
+    <string name="no_shortcuts">No substitutions yet. Tap + to add one.</string>
     <string name="case_sensitive">Case sensitive</string>
     <string name="default_shortcut">Default</string>
     <string name="trigger_text">Trigger (e.g., Im)</string>

@@ -68,7 +68,7 @@ class KeyEventHandler @Inject constructor(
         private const val DOUBLE_SPACE_THRESHOLD_MS = 500L
         private const val LONG_PRESS_THRESHOLD_MS = 500L
         private const val DOUBLE_TAP_THRESHOLD_MS = 300L // Max time between taps for double-tap
-        private const val ACCENT_CYCLE_INTERVAL_MS = 300L // Time between accent cycles while holding key
+        private const val ACCENT_CYCLE_INTERVAL_MS = 450L // Time between accent cycles while holding key
         private const val ACCENT_START_DELAY_MS = 500L // Delay before starting accent cycling
     }
 
