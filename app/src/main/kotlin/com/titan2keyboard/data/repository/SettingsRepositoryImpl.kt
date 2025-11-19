@@ -38,7 +38,7 @@ class SettingsRepositoryImpl @Inject constructor(
             )
         }
 
-    override suspend fun updateSetting(key: String, value: Any) {
+    override suspend fun updateSetting(key: String, value: Any?) {
         dataStore.edit { preferences ->
             when (key) {
                 "autoCapitalize" -> preferences[PreferencesKeys.AUTO_CAPITALIZE] = value as Boolean
