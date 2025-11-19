@@ -14,7 +14,15 @@ Titan 2 Keyboard is built from the ground up using the latest Android technologi
 - **Material Design 3** - Modern UI with dynamic theming support
 - **Customizable Behavior**
   - Auto-capitalization
+  - Long-press capatlize
+  - Double-space period
+  - Word Substitution that's user editable
+  - Prefered Currency Symbol that's inputted on a long press or double tap of SYM key
+  - Language setting for letter accents
+  - Long pressing for accents, making the characters cycle (if there are any)
   - Key repeat control
+  - Sticky shift and alt
+  - Alt and backspace delete's lines control
 
 ## Technology Stack
 
