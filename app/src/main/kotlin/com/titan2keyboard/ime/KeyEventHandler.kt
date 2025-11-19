@@ -9,7 +9,10 @@ import com.titan2keyboard.domain.model.KeyEventResult
 import com.titan2keyboard.domain.model.KeyboardSettings
 import com.titan2keyboard.domain.model.ModifierState
 import com.titan2keyboard.domain.model.ModifiersState
+import com.titan2keyboard.domain.model.SymbolCategory
+import com.titan2keyboard.domain.model.SymbolData
 import com.titan2keyboard.domain.repository.ShortcutRepository
+import com.titan2keyboard.ui.ime.getNextCategory
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -144,7 +147,7 @@ class KeyEventHandler @Inject constructor(
         // Check if we should activate auto-cap shift before processing this key
         checkAndActivateAutoCapShift(inputConnection)
 
-        // Handle modifier keys (Shift/Alt)
+        // Handle modifier keys (Shift/Alt/Sym)
         when (event.keyCode) {
             KeyEvent.KEYCODE_SHIFT_LEFT, KeyEvent.KEYCODE_SHIFT_RIGHT -> {
                 shiftKeyDownTime = event.eventTime
@@ -156,6 +159,33 @@ class KeyEventHandler @Inject constructor(
                     return KeyEventResult.Handled
                 }
             }
+            KeyEvent.KEYCODE_SYM -> {
+                // Sym key toggles symbol picker or cycles category
+                if (modifiersState.symPickerVisible) {
+                    // Already visible - cycle to next category
+                    val nextCategory = getNextCategory(modifiersState.symCategory)
+                    updateModifierState(modifiersState.copy(symCategory = nextCategory))
+                } else {
+                    // Show symbol picker
+                    updateModifierState(modifiersState.copy(
+                        symPickerVisible = true,
+                        symCategory = SymbolData.getDefaultCategory()
+                    ))
+                }
+                return KeyEventResult.Handled
+            }
+        }
+
+        // Handle backspace when symbol picker is visible - dismiss without inserting
+        if (event.keyCode == KeyEvent.KEYCODE_DEL && modifiersState.symPickerVisible) {
+            dismissSymbolPicker()
+            return KeyEventResult.Handled
+        }
+
+        // Any other key press while symbol picker is visible - dismiss and process key
+        if (modifiersState.symPickerVisible && event.keyCode != KeyEvent.KEYCODE_SYM) {
+            dismissSymbolPicker()
+            // Continue to process the key normally
         }
 
         // Handle Alt+Backspace behavior
@@ -502,7 +532,7 @@ class KeyEventHandler @Inject constructor(
 
         if (shouldActivate) {
             // Activate shift in ONE_SHOT mode for auto-cap
-            updateModifierState(ModifiersState(shift = ModifierState.ONE_SHOT, alt = ModifierState.NONE))
+            updateModifierState(modifiersState.copy(shift = ModifierState.ONE_SHOT, alt = ModifierState.NONE))
         }
     }
 
@@ -629,7 +659,7 @@ class KeyEventHandler @Inject constructor(
         // Clear alt if activating shift (mutual exclusivity)
         val newAltState = if (newShiftState != ModifierState.NONE) ModifierState.NONE else modifiersState.alt
 
-        updateModifierState(ModifiersState(shift = newShiftState, alt = newAltState))
+        updateModifierState(modifiersState.copy(shift = newShiftState, alt = newAltState))
     }
 
     /**
@@ -667,7 +697,7 @@ class KeyEventHandler @Inject constructor(
         // Clear shift if activating alt (mutual exclusivity)
         val newShiftState = if (newAltState != ModifierState.NONE) ModifierState.NONE else modifiersState.shift
 
-        updateModifierState(ModifiersState(shift = newShiftState, alt = newAltState))
+        updateModifierState(modifiersState.copy(shift = newShiftState, alt = newAltState))
     }
 
     /**
@@ -681,7 +711,28 @@ class KeyEventHandler @Inject constructor(
         val newAlt = if (modifiersState.alt == ModifierState.ONE_SHOT) ModifierState.NONE else modifiersState.alt
 
         if (newShift != modifiersState.shift || newAlt != modifiersState.alt) {
-            updateModifierState(ModifiersState(shift = newShift, alt = newAlt))
+            updateModifierState(modifiersState.copy(shift = newShift, alt = newAlt))
         }
+    }
+
+    /**
+     * Dismiss the symbol picker
+     */
+    fun dismissSymbolPicker() {
+        if (modifiersState.symPickerVisible) {
+            updateModifierState(modifiersState.copy(symPickerVisible = false))
+        }
+    }
+
+    /**
+     * Insert a symbol and dismiss the picker
+     * @param symbol The symbol character to insert
+     * @param inputConnection The current input connection
+     */
+    fun insertSymbol(symbol: String, inputConnection: InputConnection?) {
+        inputConnection?.commitText(symbol, 1)
+        dismissSymbolPicker()
+        // Clear one-shot modifiers after inserting symbol (like regular key input)
+        clearOneShotModifiers()
     }
 }

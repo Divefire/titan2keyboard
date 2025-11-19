@@ -19,7 +19,9 @@ enum class ModifierState {
  */
 data class ModifiersState(
     val shift: ModifierState = ModifierState.NONE,
-    val alt: ModifierState = ModifierState.NONE
+    val alt: ModifierState = ModifierState.NONE,
+    val symPickerVisible: Boolean = false,
+    val symCategory: SymbolCategory = SymbolCategory.PUNCTUATION
 ) {
     /**
      * Check if shift is active (either one-shot or locked)
@@ -35,4 +37,9 @@ data class ModifiersState(
      * Check if any modifier is in one-shot mode
      */
     fun hasOneShotModifier(): Boolean = shift == ModifierState.ONE_SHOT || alt == ModifierState.ONE_SHOT
+
+    /**
+     * Check if symbol picker is showing
+     */
+    fun isSymPickerActive(): Boolean = symPickerVisible
 }
