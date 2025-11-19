@@ -567,7 +567,7 @@ class KeyEventHandler @Inject constructor(
 
                     if (isDoubleTap || isLongPress) {
                         // Double-tap or long-press: insert preferred currency symbol
-                        val currency = currentSettings.preferredCurrency
+                        val currency = currentSettings.preferredCurrency?.takeIf { it.isNotEmpty() }
                             ?: com.titan2keyboard.util.LocaleUtils.getDefaultCurrencySymbol()
                         inputConnection.commitText(currency, 1)
 
