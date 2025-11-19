@@ -17,7 +17,7 @@ interface SettingsRepository {
      * @param key The setting key
      * @param value The new value
      */
-    suspend fun updateSetting(key: String, value: Any)
+    suspend fun updateSetting(key: String, value: Any?)
 
     /**
      * Reset all settings to defaults
