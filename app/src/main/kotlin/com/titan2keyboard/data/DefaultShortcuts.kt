@@ -10,12 +10,16 @@ object DefaultShortcuts {
 
     /**
      * Get default shortcuts for a specific language
-     * @param language ISO 639-1 language code
+     * @param language ISO 639-1 language code (or regional variant like en-GB)
      * @return List of default shortcuts for the language
      */
     fun getDefaultsForLanguage(language: String): List<TextShortcut> {
         return when (language) {
             "en" -> englishDefaults()
+            "en-GB" -> englishGBDefaults()
+            "en-US" -> englishUSDefaults()
+            "en-AU" -> englishAUDefaults()
+            "en-CA" -> englishCADefaults()
             "fr" -> frenchDefaults()
             "de" -> germanDefaults()
             "es" -> spanishDefaults()
@@ -35,7 +39,7 @@ object DefaultShortcuts {
      * Get all default shortcuts for all languages
      */
     fun getAllDefaults(): List<TextShortcut> {
-        return listOf("en", "fr", "de", "es", "pt", "it", "nl", "sv", "no", "da", "cs", "pl")
+        return listOf("en", "en-GB", "en-US", "en-AU", "en-CA", "fr", "de", "es", "pt", "it", "nl", "sv", "no", "da", "cs", "pl")
             .flatMap { getDefaultsForLanguage(it) }
     }
 
@@ -92,6 +96,259 @@ object DefaultShortcuts {
             TextShortcut(UUID.randomUUID().toString(), "definately", "definitely", caseSensitive = false, isDefault = true, language = "en"),
             TextShortcut(UUID.randomUUID().toString(), "alot", "a lot", caseSensitive = false, isDefault = true, language = "en"),
         )
+    }
+
+    private fun englishGBDefaults(): List<TextShortcut> {
+        return buildList {
+            // Common contractions (same as generic English)
+            add(TextShortcut(UUID.randomUUID().toString(), "Im", "I'm", caseSensitive = false, isDefault = true, language = "en-GB"))
+            add(TextShortcut(UUID.randomUUID().toString(), "Ive", "I've", caseSensitive = false, isDefault = true, language = "en-GB"))
+            add(TextShortcut(UUID.randomUUID().toString(), "Ill", "I'll", caseSensitive = false, isDefault = true, language = "en-GB"))
+            add(TextShortcut(UUID.randomUUID().toString(), "Id", "I'd", caseSensitive = false, isDefault = true, language = "en-GB"))
+            add(TextShortcut(UUID.randomUUID().toString(), "dont", "don't", caseSensitive = false, isDefault = true, language = "en-GB"))
+            add(TextShortcut(UUID.randomUUID().toString(), "doesnt", "doesn't", caseSensitive = false, isDefault = true, language = "en-GB"))
+            add(TextShortcut(UUID.randomUUID().toString(), "didnt", "didn't", caseSensitive = false, isDefault = true, language = "en-GB"))
+            add(TextShortcut(UUID.randomUUID().toString(), "cant", "can't", caseSensitive = false, isDefault = true, language = "en-GB"))
+            add(TextShortcut(UUID.randomUUID().toString(), "couldnt", "couldn't", caseSensitive = false, isDefault = true, language = "en-GB"))
+            add(TextShortcut(UUID.randomUUID().toString(), "wouldnt", "wouldn't", caseSensitive = false, isDefault = true, language = "en-GB"))
+            add(TextShortcut(UUID.randomUUID().toString(), "shouldnt", "shouldn't", caseSensitive = false, isDefault = true, language = "en-GB"))
+            add(TextShortcut(UUID.randomUUID().toString(), "isnt", "isn't", caseSensitive = false, isDefault = true, language = "en-GB"))
+            add(TextShortcut(UUID.randomUUID().toString(), "arent", "aren't", caseSensitive = false, isDefault = true, language = "en-GB"))
+            add(TextShortcut(UUID.randomUUID().toString(), "wasnt", "wasn't", caseSensitive = false, isDefault = true, language = "en-GB"))
+            add(TextShortcut(UUID.randomUUID().toString(), "werent", "weren't", caseSensitive = false, isDefault = true, language = "en-GB"))
+            add(TextShortcut(UUID.randomUUID().toString(), "hasnt", "hasn't", caseSensitive = false, isDefault = true, language = "en-GB"))
+            add(TextShortcut(UUID.randomUUID().toString(), "havent", "haven't", caseSensitive = false, isDefault = true, language = "en-GB"))
+            add(TextShortcut(UUID.randomUUID().toString(), "hadnt", "hadn't", caseSensitive = false, isDefault = true, language = "en-GB"))
+            add(TextShortcut(UUID.randomUUID().toString(), "wont", "won't", caseSensitive = false, isDefault = true, language = "en-GB"))
+            add(TextShortcut(UUID.randomUUID().toString(), "thats", "that's", caseSensitive = false, isDefault = true, language = "en-GB"))
+            add(TextShortcut(UUID.randomUUID().toString(), "theres", "there's", caseSensitive = false, isDefault = true, language = "en-GB"))
+            add(TextShortcut(UUID.randomUUID().toString(), "heres", "here's", caseSensitive = false, isDefault = true, language = "en-GB"))
+            add(TextShortcut(UUID.randomUUID().toString(), "whats", "what's", caseSensitive = false, isDefault = true, language = "en-GB"))
+            add(TextShortcut(UUID.randomUUID().toString(), "wheres", "where's", caseSensitive = false, isDefault = true, language = "en-GB"))
+            add(TextShortcut(UUID.randomUUID().toString(), "whos", "who's", caseSensitive = false, isDefault = true, language = "en-GB"))
+            add(TextShortcut(UUID.randomUUID().toString(), "hows", "how's", caseSensitive = false, isDefault = true, language = "en-GB"))
+            add(TextShortcut(UUID.randomUUID().toString(), "whens", "when's", caseSensitive = false, isDefault = true, language = "en-GB"))
+            add(TextShortcut(UUID.randomUUID().toString(), "whys", "why's", caseSensitive = false, isDefault = true, language = "en-GB"))
+            add(TextShortcut(UUID.randomUUID().toString(), "youre", "you're", caseSensitive = false, isDefault = true, language = "en-GB"))
+            add(TextShortcut(UUID.randomUUID().toString(), "youve", "you've", caseSensitive = false, isDefault = true, language = "en-GB"))
+            add(TextShortcut(UUID.randomUUID().toString(), "youll", "you'll", caseSensitive = false, isDefault = true, language = "en-GB"))
+            add(TextShortcut(UUID.randomUUID().toString(), "youd", "you'd", caseSensitive = false, isDefault = true, language = "en-GB"))
+            add(TextShortcut(UUID.randomUUID().toString(), "theyre", "they're", caseSensitive = false, isDefault = true, language = "en-GB"))
+            add(TextShortcut(UUID.randomUUID().toString(), "theyve", "they've", caseSensitive = false, isDefault = true, language = "en-GB"))
+            add(TextShortcut(UUID.randomUUID().toString(), "theyll", "they'll", caseSensitive = false, isDefault = true, language = "en-GB"))
+            add(TextShortcut(UUID.randomUUID().toString(), "theyd", "they'd", caseSensitive = false, isDefault = true, language = "en-GB"))
+            add(TextShortcut(UUID.randomUUID().toString(), "weve", "we've", caseSensitive = false, isDefault = true, language = "en-GB"))
+            add(TextShortcut(UUID.randomUUID().toString(), "wed", "we'd", caseSensitive = false, isDefault = true, language = "en-GB"))
+            add(TextShortcut(UUID.randomUUID().toString(), "shes", "she's", caseSensitive = false, isDefault = true, language = "en-GB"))
+            add(TextShortcut(UUID.randomUUID().toString(), "hes", "he's", caseSensitive = false, isDefault = true, language = "en-GB"))
+            add(TextShortcut(UUID.randomUUID().toString(), "lets", "let's", caseSensitive = false, isDefault = true, language = "en-GB"))
+
+            // Common typos
+            add(TextShortcut(UUID.randomUUID().toString(), "teh", "the", caseSensitive = false, isDefault = true, language = "en-GB"))
+            add(TextShortcut(UUID.randomUUID().toString(), "recieve", "receive", caseSensitive = false, isDefault = true, language = "en-GB"))
+            add(TextShortcut(UUID.randomUUID().toString(), "occured", "occurred", caseSensitive = false, isDefault = true, language = "en-GB"))
+            add(TextShortcut(UUID.randomUUID().toString(), "seperate", "separate", caseSensitive = false, isDefault = true, language = "en-GB"))
+            add(TextShortcut(UUID.randomUUID().toString(), "definately", "definitely", caseSensitive = false, isDefault = true, language = "en-GB"))
+            add(TextShortcut(UUID.randomUUID().toString(), "alot", "a lot", caseSensitive = false, isDefault = true, language = "en-GB"))
+
+            // UK-specific: American spelling corrections
+            add(TextShortcut(UUID.randomUUID().toString(), "color", "colour", caseSensitive = false, isDefault = true, language = "en-GB"))
+            add(TextShortcut(UUID.randomUUID().toString(), "favor", "favour", caseSensitive = false, isDefault = true, language = "en-GB"))
+            add(TextShortcut(UUID.randomUUID().toString(), "honor", "honour", caseSensitive = false, isDefault = true, language = "en-GB"))
+            add(TextShortcut(UUID.randomUUID().toString(), "organize", "organise", caseSensitive = false, isDefault = true, language = "en-GB"))
+            add(TextShortcut(UUID.randomUUID().toString(), "realize", "realise", caseSensitive = false, isDefault = true, language = "en-GB"))
+            add(TextShortcut(UUID.randomUUID().toString(), "analyze", "analyse", caseSensitive = false, isDefault = true, language = "en-GB"))
+        }
+    }
+
+    private fun englishUSDefaults(): List<TextShortcut> {
+        return buildList {
+            // Common contractions (same as generic English)
+            add(TextShortcut(UUID.randomUUID().toString(), "Im", "I'm", caseSensitive = false, isDefault = true, language = "en-US"))
+            add(TextShortcut(UUID.randomUUID().toString(), "Ive", "I've", caseSensitive = false, isDefault = true, language = "en-US"))
+            add(TextShortcut(UUID.randomUUID().toString(), "Ill", "I'll", caseSensitive = false, isDefault = true, language = "en-US"))
+            add(TextShortcut(UUID.randomUUID().toString(), "Id", "I'd", caseSensitive = false, isDefault = true, language = "en-US"))
+            add(TextShortcut(UUID.randomUUID().toString(), "dont", "don't", caseSensitive = false, isDefault = true, language = "en-US"))
+            add(TextShortcut(UUID.randomUUID().toString(), "doesnt", "doesn't", caseSensitive = false, isDefault = true, language = "en-US"))
+            add(TextShortcut(UUID.randomUUID().toString(), "didnt", "didn't", caseSensitive = false, isDefault = true, language = "en-US"))
+            add(TextShortcut(UUID.randomUUID().toString(), "cant", "can't", caseSensitive = false, isDefault = true, language = "en-US"))
+            add(TextShortcut(UUID.randomUUID().toString(), "couldnt", "couldn't", caseSensitive = false, isDefault = true, language = "en-US"))
+            add(TextShortcut(UUID.randomUUID().toString(), "wouldnt", "wouldn't", caseSensitive = false, isDefault = true, language = "en-US"))
+            add(TextShortcut(UUID.randomUUID().toString(), "shouldnt", "shouldn't", caseSensitive = false, isDefault = true, language = "en-US"))
+            add(TextShortcut(UUID.randomUUID().toString(), "isnt", "isn't", caseSensitive = false, isDefault = true, language = "en-US"))
+            add(TextShortcut(UUID.randomUUID().toString(), "arent", "aren't", caseSensitive = false, isDefault = true, language = "en-US"))
+            add(TextShortcut(UUID.randomUUID().toString(), "wasnt", "wasn't", caseSensitive = false, isDefault = true, language = "en-US"))
+            add(TextShortcut(UUID.randomUUID().toString(), "werent", "weren't", caseSensitive = false, isDefault = true, language = "en-US"))
+            add(TextShortcut(UUID.randomUUID().toString(), "hasnt", "hasn't", caseSensitive = false, isDefault = true, language = "en-US"))
+            add(TextShortcut(UUID.randomUUID().toString(), "havent", "haven't", caseSensitive = false, isDefault = true, language = "en-US"))
+            add(TextShortcut(UUID.randomUUID().toString(), "hadnt", "hadn't", caseSensitive = false, isDefault = true, language = "en-US"))
+            add(TextShortcut(UUID.randomUUID().toString(), "wont", "won't", caseSensitive = false, isDefault = true, language = "en-US"))
+            add(TextShortcut(UUID.randomUUID().toString(), "thats", "that's", caseSensitive = false, isDefault = true, language = "en-US"))
+            add(TextShortcut(UUID.randomUUID().toString(), "theres", "there's", caseSensitive = false, isDefault = true, language = "en-US"))
+            add(TextShortcut(UUID.randomUUID().toString(), "heres", "here's", caseSensitive = false, isDefault = true, language = "en-US"))
+            add(TextShortcut(UUID.randomUUID().toString(), "whats", "what's", caseSensitive = false, isDefault = true, language = "en-US"))
+            add(TextShortcut(UUID.randomUUID().toString(), "wheres", "where's", caseSensitive = false, isDefault = true, language = "en-US"))
+            add(TextShortcut(UUID.randomUUID().toString(), "whos", "who's", caseSensitive = false, isDefault = true, language = "en-US"))
+            add(TextShortcut(UUID.randomUUID().toString(), "hows", "how's", caseSensitive = false, isDefault = true, language = "en-US"))
+            add(TextShortcut(UUID.randomUUID().toString(), "whens", "when's", caseSensitive = false, isDefault = true, language = "en-US"))
+            add(TextShortcut(UUID.randomUUID().toString(), "whys", "why's", caseSensitive = false, isDefault = true, language = "en-US"))
+            add(TextShortcut(UUID.randomUUID().toString(), "youre", "you're", caseSensitive = false, isDefault = true, language = "en-US"))
+            add(TextShortcut(UUID.randomUUID().toString(), "youve", "you've", caseSensitive = false, isDefault = true, language = "en-US"))
+            add(TextShortcut(UUID.randomUUID().toString(), "youll", "you'll", caseSensitive = false, isDefault = true, language = "en-US"))
+            add(TextShortcut(UUID.randomUUID().toString(), "youd", "you'd", caseSensitive = false, isDefault = true, language = "en-US"))
+            add(TextShortcut(UUID.randomUUID().toString(), "theyre", "they're", caseSensitive = false, isDefault = true, language = "en-US"))
+            add(TextShortcut(UUID.randomUUID().toString(), "theyve", "they've", caseSensitive = false, isDefault = true, language = "en-US"))
+            add(TextShortcut(UUID.randomUUID().toString(), "theyll", "they'll", caseSensitive = false, isDefault = true, language = "en-US"))
+            add(TextShortcut(UUID.randomUUID().toString(), "theyd", "they'd", caseSensitive = false, isDefault = true, language = "en-US"))
+            add(TextShortcut(UUID.randomUUID().toString(), "weve", "we've", caseSensitive = false, isDefault = true, language = "en-US"))
+            add(TextShortcut(UUID.randomUUID().toString(), "wed", "we'd", caseSensitive = false, isDefault = true, language = "en-US"))
+            add(TextShortcut(UUID.randomUUID().toString(), "shes", "she's", caseSensitive = false, isDefault = true, language = "en-US"))
+            add(TextShortcut(UUID.randomUUID().toString(), "hes", "he's", caseSensitive = false, isDefault = true, language = "en-US"))
+            add(TextShortcut(UUID.randomUUID().toString(), "lets", "let's", caseSensitive = false, isDefault = true, language = "en-US"))
+
+            // Common typos
+            add(TextShortcut(UUID.randomUUID().toString(), "teh", "the", caseSensitive = false, isDefault = true, language = "en-US"))
+            add(TextShortcut(UUID.randomUUID().toString(), "recieve", "receive", caseSensitive = false, isDefault = true, language = "en-US"))
+            add(TextShortcut(UUID.randomUUID().toString(), "occured", "occurred", caseSensitive = false, isDefault = true, language = "en-US"))
+            add(TextShortcut(UUID.randomUUID().toString(), "seperate", "separate", caseSensitive = false, isDefault = true, language = "en-US"))
+            add(TextShortcut(UUID.randomUUID().toString(), "definately", "definitely", caseSensitive = false, isDefault = true, language = "en-US"))
+            add(TextShortcut(UUID.randomUUID().toString(), "alot", "a lot", caseSensitive = false, isDefault = true, language = "en-US"))
+
+            // US-specific: British spelling corrections
+            add(TextShortcut(UUID.randomUUID().toString(), "colour", "color", caseSensitive = false, isDefault = true, language = "en-US"))
+            add(TextShortcut(UUID.randomUUID().toString(), "favour", "favor", caseSensitive = false, isDefault = true, language = "en-US"))
+            add(TextShortcut(UUID.randomUUID().toString(), "honour", "honor", caseSensitive = false, isDefault = true, language = "en-US"))
+            add(TextShortcut(UUID.randomUUID().toString(), "organise", "organize", caseSensitive = false, isDefault = true, language = "en-US"))
+            add(TextShortcut(UUID.randomUUID().toString(), "realise", "realize", caseSensitive = false, isDefault = true, language = "en-US"))
+            add(TextShortcut(UUID.randomUUID().toString(), "analyse", "analyze", caseSensitive = false, isDefault = true, language = "en-US"))
+        }
+    }
+
+    private fun englishAUDefaults(): List<TextShortcut> {
+        return buildList {
+            // Common contractions (same as generic English)
+            add(TextShortcut(UUID.randomUUID().toString(), "Im", "I'm", caseSensitive = false, isDefault = true, language = "en-AU"))
+            add(TextShortcut(UUID.randomUUID().toString(), "Ive", "I've", caseSensitive = false, isDefault = true, language = "en-AU"))
+            add(TextShortcut(UUID.randomUUID().toString(), "Ill", "I'll", caseSensitive = false, isDefault = true, language = "en-AU"))
+            add(TextShortcut(UUID.randomUUID().toString(), "Id", "I'd", caseSensitive = false, isDefault = true, language = "en-AU"))
+            add(TextShortcut(UUID.randomUUID().toString(), "dont", "don't", caseSensitive = false, isDefault = true, language = "en-AU"))
+            add(TextShortcut(UUID.randomUUID().toString(), "doesnt", "doesn't", caseSensitive = false, isDefault = true, language = "en-AU"))
+            add(TextShortcut(UUID.randomUUID().toString(), "didnt", "didn't", caseSensitive = false, isDefault = true, language = "en-AU"))
+            add(TextShortcut(UUID.randomUUID().toString(), "cant", "can't", caseSensitive = false, isDefault = true, language = "en-AU"))
+            add(TextShortcut(UUID.randomUUID().toString(), "couldnt", "couldn't", caseSensitive = false, isDefault = true, language = "en-AU"))
+            add(TextShortcut(UUID.randomUUID().toString(), "wouldnt", "wouldn't", caseSensitive = false, isDefault = true, language = "en-AU"))
+            add(TextShortcut(UUID.randomUUID().toString(), "shouldnt", "shouldn't", caseSensitive = false, isDefault = true, language = "en-AU"))
+            add(TextShortcut(UUID.randomUUID().toString(), "isnt", "isn't", caseSensitive = false, isDefault = true, language = "en-AU"))
+            add(TextShortcut(UUID.randomUUID().toString(), "arent", "aren't", caseSensitive = false, isDefault = true, language = "en-AU"))
+            add(TextShortcut(UUID.randomUUID().toString(), "wasnt", "wasn't", caseSensitive = false, isDefault = true, language = "en-AU"))
+            add(TextShortcut(UUID.randomUUID().toString(), "werent", "weren't", caseSensitive = false, isDefault = true, language = "en-AU"))
+            add(TextShortcut(UUID.randomUUID().toString(), "hasnt", "hasn't", caseSensitive = false, isDefault = true, language = "en-AU"))
+            add(TextShortcut(UUID.randomUUID().toString(), "havent", "haven't", caseSensitive = false, isDefault = true, language = "en-AU"))
+            add(TextShortcut(UUID.randomUUID().toString(), "hadnt", "hadn't", caseSensitive = false, isDefault = true, language = "en-AU"))
+            add(TextShortcut(UUID.randomUUID().toString(), "wont", "won't", caseSensitive = false, isDefault = true, language = "en-AU"))
+            add(TextShortcut(UUID.randomUUID().toString(), "thats", "that's", caseSensitive = false, isDefault = true, language = "en-AU"))
+            add(TextShortcut(UUID.randomUUID().toString(), "theres", "there's", caseSensitive = false, isDefault = true, language = "en-AU"))
+            add(TextShortcut(UUID.randomUUID().toString(), "heres", "here's", caseSensitive = false, isDefault = true, language = "en-AU"))
+            add(TextShortcut(UUID.randomUUID().toString(), "whats", "what's", caseSensitive = false, isDefault = true, language = "en-AU"))
+            add(TextShortcut(UUID.randomUUID().toString(), "wheres", "where's", caseSensitive = false, isDefault = true, language = "en-AU"))
+            add(TextShortcut(UUID.randomUUID().toString(), "whos", "who's", caseSensitive = false, isDefault = true, language = "en-AU"))
+            add(TextShortcut(UUID.randomUUID().toString(), "hows", "how's", caseSensitive = false, isDefault = true, language = "en-AU"))
+            add(TextShortcut(UUID.randomUUID().toString(), "whens", "when's", caseSensitive = false, isDefault = true, language = "en-AU"))
+            add(TextShortcut(UUID.randomUUID().toString(), "whys", "why's", caseSensitive = false, isDefault = true, language = "en-AU"))
+            add(TextShortcut(UUID.randomUUID().toString(), "youre", "you're", caseSensitive = false, isDefault = true, language = "en-AU"))
+            add(TextShortcut(UUID.randomUUID().toString(), "youve", "you've", caseSensitive = false, isDefault = true, language = "en-AU"))
+            add(TextShortcut(UUID.randomUUID().toString(), "youll", "you'll", caseSensitive = false, isDefault = true, language = "en-AU"))
+            add(TextShortcut(UUID.randomUUID().toString(), "youd", "you'd", caseSensitive = false, isDefault = true, language = "en-AU"))
+            add(TextShortcut(UUID.randomUUID().toString(), "theyre", "they're", caseSensitive = false, isDefault = true, language = "en-AU"))
+            add(TextShortcut(UUID.randomUUID().toString(), "theyve", "they've", caseSensitive = false, isDefault = true, language = "en-AU"))
+            add(TextShortcut(UUID.randomUUID().toString(), "theyll", "they'll", caseSensitive = false, isDefault = true, language = "en-AU"))
+            add(TextShortcut(UUID.randomUUID().toString(), "theyd", "they'd", caseSensitive = false, isDefault = true, language = "en-AU"))
+            add(TextShortcut(UUID.randomUUID().toString(), "weve", "we've", caseSensitive = false, isDefault = true, language = "en-AU"))
+            add(TextShortcut(UUID.randomUUID().toString(), "wed", "we'd", caseSensitive = false, isDefault = true, language = "en-AU"))
+            add(TextShortcut(UUID.randomUUID().toString(), "shes", "she's", caseSensitive = false, isDefault = true, language = "en-AU"))
+            add(TextShortcut(UUID.randomUUID().toString(), "hes", "he's", caseSensitive = false, isDefault = true, language = "en-AU"))
+            add(TextShortcut(UUID.randomUUID().toString(), "lets", "let's", caseSensitive = false, isDefault = true, language = "en-AU"))
+
+            // Common typos
+            add(TextShortcut(UUID.randomUUID().toString(), "teh", "the", caseSensitive = false, isDefault = true, language = "en-AU"))
+            add(TextShortcut(UUID.randomUUID().toString(), "recieve", "receive", caseSensitive = false, isDefault = true, language = "en-AU"))
+            add(TextShortcut(UUID.randomUUID().toString(), "occured", "occurred", caseSensitive = false, isDefault = true, language = "en-AU"))
+            add(TextShortcut(UUID.randomUUID().toString(), "seperate", "separate", caseSensitive = false, isDefault = true, language = "en-AU"))
+            add(TextShortcut(UUID.randomUUID().toString(), "definately", "definitely", caseSensitive = false, isDefault = true, language = "en-AU"))
+            add(TextShortcut(UUID.randomUUID().toString(), "alot", "a lot", caseSensitive = false, isDefault = true, language = "en-AU"))
+
+            // AU follows UK spelling, so correct American spellings
+            add(TextShortcut(UUID.randomUUID().toString(), "color", "colour", caseSensitive = false, isDefault = true, language = "en-AU"))
+            add(TextShortcut(UUID.randomUUID().toString(), "favor", "favour", caseSensitive = false, isDefault = true, language = "en-AU"))
+            add(TextShortcut(UUID.randomUUID().toString(), "honor", "honour", caseSensitive = false, isDefault = true, language = "en-AU"))
+            add(TextShortcut(UUID.randomUUID().toString(), "organize", "organise", caseSensitive = false, isDefault = true, language = "en-AU"))
+            add(TextShortcut(UUID.randomUUID().toString(), "realize", "realise", caseSensitive = false, isDefault = true, language = "en-AU"))
+            add(TextShortcut(UUID.randomUUID().toString(), "analyze", "analyse", caseSensitive = false, isDefault = true, language = "en-AU"))
+        }
+    }
+
+    private fun englishCADefaults(): List<TextShortcut> {
+        return buildList {
+            // Common contractions (same as generic English)
+            add(TextShortcut(UUID.randomUUID().toString(), "Im", "I'm", caseSensitive = false, isDefault = true, language = "en-CA"))
+            add(TextShortcut(UUID.randomUUID().toString(), "Ive", "I've", caseSensitive = false, isDefault = true, language = "en-CA"))
+            add(TextShortcut(UUID.randomUUID().toString(), "Ill", "I'll", caseSensitive = false, isDefault = true, language = "en-CA"))
+            add(TextShortcut(UUID.randomUUID().toString(), "Id", "I'd", caseSensitive = false, isDefault = true, language = "en-CA"))
+            add(TextShortcut(UUID.randomUUID().toString(), "dont", "don't", caseSensitive = false, isDefault = true, language = "en-CA"))
+            add(TextShortcut(UUID.randomUUID().toString(), "doesnt", "doesn't", caseSensitive = false, isDefault = true, language = "en-CA"))
+            add(TextShortcut(UUID.randomUUID().toString(), "didnt", "didn't", caseSensitive = false, isDefault = true, language = "en-CA"))
+            add(TextShortcut(UUID.randomUUID().toString(), "cant", "can't", caseSensitive = false, isDefault = true, language = "en-CA"))
+            add(TextShortcut(UUID.randomUUID().toString(), "couldnt", "couldn't", caseSensitive = false, isDefault = true, language = "en-CA"))
+            add(TextShortcut(UUID.randomUUID().toString(), "wouldnt", "wouldn't", caseSensitive = false, isDefault = true, language = "en-CA"))
+            add(TextShortcut(UUID.randomUUID().toString(), "shouldnt", "shouldn't", caseSensitive = false, isDefault = true, language = "en-CA"))
+            add(TextShortcut(UUID.randomUUID().toString(), "isnt", "isn't", caseSensitive = false, isDefault = true, language = "en-CA"))
+            add(TextShortcut(UUID.randomUUID().toString(), "arent", "aren't", caseSensitive = false, isDefault = true, language = "en-CA"))
+            add(TextShortcut(UUID.randomUUID().toString(), "wasnt", "wasn't", caseSensitive = false, isDefault = true, language = "en-CA"))
+            add(TextShortcut(UUID.randomUUID().toString(), "werent", "weren't", caseSensitive = false, isDefault = true, language = "en-CA"))
+            add(TextShortcut(UUID.randomUUID().toString(), "hasnt", "hasn't", caseSensitive = false, isDefault = true, language = "en-CA"))
+            add(TextShortcut(UUID.randomUUID().toString(), "havent", "haven't", caseSensitive = false, isDefault = true, language = "en-CA"))
+            add(TextShortcut(UUID.randomUUID().toString(), "hadnt", "hadn't", caseSensitive = false, isDefault = true, language = "en-CA"))
+            add(TextShortcut(UUID.randomUUID().toString(), "wont", "won't", caseSensitive = false, isDefault = true, language = "en-CA"))
+            add(TextShortcut(UUID.randomUUID().toString(), "thats", "that's", caseSensitive = false, isDefault = true, language = "en-CA"))
+            add(TextShortcut(UUID.randomUUID().toString(), "theres", "there's", caseSensitive = false, isDefault = true, language = "en-CA"))
+            add(TextShortcut(UUID.randomUUID().toString(), "heres", "here's", caseSensitive = false, isDefault = true, language = "en-CA"))
+            add(TextShortcut(UUID.randomUUID().toString(), "whats", "what's", caseSensitive = false, isDefault = true, language = "en-CA"))
+            add(TextShortcut(UUID.randomUUID().toString(), "wheres", "where's", caseSensitive = false, isDefault = true, language = "en-CA"))
+            add(TextShortcut(UUID.randomUUID().toString(), "whos", "who's", caseSensitive = false, isDefault = true, language = "en-CA"))
+            add(TextShortcut(UUID.randomUUID().toString(), "hows", "how's", caseSensitive = false, isDefault = true, language = "en-CA"))
+            add(TextShortcut(UUID.randomUUID().toString(), "whens", "when's", caseSensitive = false, isDefault = true, language = "en-CA"))
+            add(TextShortcut(UUID.randomUUID().toString(), "whys", "why's", caseSensitive = false, isDefault = true, language = "en-CA"))
+            add(TextShortcut(UUID.randomUUID().toString(), "youre", "you're", caseSensitive = false, isDefault = true, language = "en-CA"))
+            add(TextShortcut(UUID.randomUUID().toString(), "youve", "you've", caseSensitive = false, isDefault = true, language = "en-CA"))
+            add(TextShortcut(UUID.randomUUID().toString(), "youll", "you'll", caseSensitive = false, isDefault = true, language = "en-CA"))
+            add(TextShortcut(UUID.randomUUID().toString(), "youd", "you'd", caseSensitive = false, isDefault = true, language = "en-CA"))
+            add(TextShortcut(UUID.randomUUID().toString(), "theyre", "they're", caseSensitive = false, isDefault = true, language = "en-CA"))
+            add(TextShortcut(UUID.randomUUID().toString(), "theyve", "they've", caseSensitive = false, isDefault = true, language = "en-CA"))
+            add(TextShortcut(UUID.randomUUID().toString(), "theyll", "they'll", caseSensitive = false, isDefault = true, language = "en-CA"))
+            add(TextShortcut(UUID.randomUUID().toString(), "theyd", "they'd", caseSensitive = false, isDefault = true, language = "en-CA"))
+            add(TextShortcut(UUID.randomUUID().toString(), "weve", "we've", caseSensitive = false, isDefault = true, language = "en-CA"))
+            add(TextShortcut(UUID.randomUUID().toString(), "wed", "we'd", caseSensitive = false, isDefault = true, language = "en-CA"))
+            add(TextShortcut(UUID.randomUUID().toString(), "shes", "she's", caseSensitive = false, isDefault = true, language = "en-CA"))
+            add(TextShortcut(UUID.randomUUID().toString(), "hes", "he's", caseSensitive = false, isDefault = true, language = "en-CA"))
+            add(TextShortcut(UUID.randomUUID().toString(), "lets", "let's", caseSensitive = false, isDefault = true, language = "en-CA"))
+
+            // Common typos
+            add(TextShortcut(UUID.randomUUID().toString(), "teh", "the", caseSensitive = false, isDefault = true, language = "en-CA"))
+            add(TextShortcut(UUID.randomUUID().toString(), "recieve", "receive", caseSensitive = false, isDefault = true, language = "en-CA"))
+            add(TextShortcut(UUID.randomUUID().toString(), "occured", "occurred", caseSensitive = false, isDefault = true, language = "en-CA"))
+            add(TextShortcut(UUID.randomUUID().toString(), "seperate", "separate", caseSensitive = false, isDefault = true, language = "en-CA"))
+            add(TextShortcut(UUID.randomUUID().toString(), "definately", "definitely", caseSensitive = false, isDefault = true, language = "en-CA"))
+            add(TextShortcut(UUID.randomUUID().toString(), "alot", "a lot", caseSensitive = false, isDefault = true, language = "en-CA"))
+
+            // Canadian spelling follows UK for -our/-ise words, so correct American spellings
+            add(TextShortcut(UUID.randomUUID().toString(), "color", "colour", caseSensitive = false, isDefault = true, language = "en-CA"))
+            add(TextShortcut(UUID.randomUUID().toString(), "favor", "favour", caseSensitive = false, isDefault = true, language = "en-CA"))
+            add(TextShortcut(UUID.randomUUID().toString(), "honor", "honour", caseSensitive = false, isDefault = true, language = "en-CA"))
+            // Note: Canadian uses -ize (like US) not -ise (like UK) for these:
+            add(TextShortcut(UUID.randomUUID().toString(), "organise", "organize", caseSensitive = false, isDefault = true, language = "en-CA"))
+            add(TextShortcut(UUID.randomUUID().toString(), "realise", "realize", caseSensitive = false, isDefault = true, language = "en-CA"))
+            add(TextShortcut(UUID.randomUUID().toString(), "analyse", "analyze", caseSensitive = false, isDefault = true, language = "en-CA"))
+        }
     }
 
     private fun frenchDefaults(): List<TextShortcut> {

@@ -213,7 +213,11 @@ class AccentRepository @Inject constructor() {
      */
     fun getSupportedLanguages(): List<Pair<String, String>> {
         return listOf(
-            "en" to "English (no accents)",
+            "en-GB" to "English (UK)",
+            "en-US" to "English (US)",
+            "en-AU" to "English (Australia)",
+            "en-CA" to "English (Canada)",
+            "en" to "English (Generic)",
             "fr" to "French (Français)",
             "de" to "German (Deutsch)",
             "es" to "Spanish (Español)",
