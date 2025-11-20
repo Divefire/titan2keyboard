@@ -102,6 +102,7 @@ fun ShortcutManagementScreen(
             is ShortcutManagementUiState.Success -> {
                 ShortcutsList(
                     shortcuts = state.shortcuts,
+                    languageMap = state.languageMap,
                     onEditShortcut = { editingShortcut = it },
                     onDeleteShortcut = { viewModel.deleteShortcut(it.id) },
                     modifier = Modifier
@@ -150,6 +151,7 @@ fun ShortcutManagementScreen(
 @Composable
 private fun ShortcutsList(
     shortcuts: List<TextShortcut>,
+    languageMap: Map<String, String>,
     onEditShortcut: (TextShortcut) -> Unit,
     onDeleteShortcut: (TextShortcut) -> Unit,
     modifier: Modifier = Modifier
@@ -174,6 +176,7 @@ private fun ShortcutsList(
             items(shortcuts, key = { it.id }) { shortcut ->
                 ShortcutItem(
                     shortcut = shortcut,
+                    languageName = languageMap[shortcut.language] ?: shortcut.language,
                     onEdit = { onEditShortcut(shortcut) },
                     onDelete = { onDeleteShortcut(shortcut) }
                 )
@@ -188,6 +191,7 @@ private fun ShortcutsList(
 @Composable
 private fun ShortcutItem(
     shortcut: TextShortcut,
+    languageName: String,
     onEdit: () -> Unit,
     onDelete: () -> Unit,
     modifier: Modifier = Modifier
@@ -225,21 +229,30 @@ private fun ShortcutItem(
                         style = MaterialTheme.typography.titleMedium
                     )
                 }
-                if (shortcut.caseSensitive) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.padding(top = 4.dp)
+                ) {
+                    // Always show language
                     Text(
-                        text = stringResource(R.string.case_sensitive),
+                        text = languageName,
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(top = 4.dp)
+                        color = MaterialTheme.colorScheme.secondary
                     )
-                }
-                if (shortcut.isDefault) {
-                    Text(
-                        text = stringResource(R.string.default_shortcut),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.tertiary,
-                        modifier = Modifier.padding(top = 4.dp)
-                    )
+                    if (shortcut.caseSensitive) {
+                        Text(
+                            text = stringResource(R.string.case_sensitive),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    if (shortcut.isDefault) {
+                        Text(
+                            text = stringResource(R.string.default_shortcut),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.tertiary
+                        )
+                    }
                 }
             }
 

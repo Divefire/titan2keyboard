@@ -1,0 +1,231 @@
+package com.titan2keyboard.data
+
+import com.titan2keyboard.domain.model.TextShortcut
+import java.util.UUID
+
+/**
+ * Provides default text shortcuts for different languages
+ */
+object DefaultShortcuts {
+
+    /**
+     * Get default shortcuts for a specific language
+     * @param language ISO 639-1 language code
+     * @return List of default shortcuts for the language
+     */
+    fun getDefaultsForLanguage(language: String): List<TextShortcut> {
+        return when (language) {
+            "en" -> englishDefaults()
+            "fr" -> frenchDefaults()
+            "de" -> germanDefaults()
+            "es" -> spanishDefaults()
+            "pt" -> portugueseDefaults()
+            "it" -> italianDefaults()
+            "nl" -> dutchDefaults()
+            "sv" -> swedishDefaults()
+            "no" -> norwegianDefaults()
+            "da" -> danishDefaults()
+            "cs" -> czechDefaults()
+            "pl" -> polishDefaults()
+            else -> emptyList()
+        }
+    }
+
+    /**
+     * Get all default shortcuts for all languages
+     */
+    fun getAllDefaults(): List<TextShortcut> {
+        return listOf("en", "fr", "de", "es", "pt", "it", "nl", "sv", "no", "da", "cs", "pl")
+            .flatMap { getDefaultsForLanguage(it) }
+    }
+
+    private fun englishDefaults(): List<TextShortcut> {
+        return listOf(
+            // Common contractions
+            TextShortcut(UUID.randomUUID().toString(), "Im", "I'm", caseSensitive = false, isDefault = true, language = "en"),
+            TextShortcut(UUID.randomUUID().toString(), "Ive", "I've", caseSensitive = false, isDefault = true, language = "en"),
+            TextShortcut(UUID.randomUUID().toString(), "Ill", "I'll", caseSensitive = false, isDefault = true, language = "en"),
+            TextShortcut(UUID.randomUUID().toString(), "Id", "I'd", caseSensitive = false, isDefault = true, language = "en"),
+            TextShortcut(UUID.randomUUID().toString(), "dont", "don't", caseSensitive = false, isDefault = true, language = "en"),
+            TextShortcut(UUID.randomUUID().toString(), "doesnt", "doesn't", caseSensitive = false, isDefault = true, language = "en"),
+            TextShortcut(UUID.randomUUID().toString(), "didnt", "didn't", caseSensitive = false, isDefault = true, language = "en"),
+            TextShortcut(UUID.randomUUID().toString(), "cant", "can't", caseSensitive = false, isDefault = true, language = "en"),
+            TextShortcut(UUID.randomUUID().toString(), "couldnt", "couldn't", caseSensitive = false, isDefault = true, language = "en"),
+            TextShortcut(UUID.randomUUID().toString(), "wouldnt", "wouldn't", caseSensitive = false, isDefault = true, language = "en"),
+            TextShortcut(UUID.randomUUID().toString(), "shouldnt", "shouldn't", caseSensitive = false, isDefault = true, language = "en"),
+            TextShortcut(UUID.randomUUID().toString(), "isnt", "isn't", caseSensitive = false, isDefault = true, language = "en"),
+            TextShortcut(UUID.randomUUID().toString(), "arent", "aren't", caseSensitive = false, isDefault = true, language = "en"),
+            TextShortcut(UUID.randomUUID().toString(), "wasnt", "wasn't", caseSensitive = false, isDefault = true, language = "en"),
+            TextShortcut(UUID.randomUUID().toString(), "werent", "weren't", caseSensitive = false, isDefault = true, language = "en"),
+            TextShortcut(UUID.randomUUID().toString(), "hasnt", "hasn't", caseSensitive = false, isDefault = true, language = "en"),
+            TextShortcut(UUID.randomUUID().toString(), "havent", "haven't", caseSensitive = false, isDefault = true, language = "en"),
+            TextShortcut(UUID.randomUUID().toString(), "hadnt", "hadn't", caseSensitive = false, isDefault = true, language = "en"),
+            TextShortcut(UUID.randomUUID().toString(), "wont", "won't", caseSensitive = false, isDefault = true, language = "en"),
+            TextShortcut(UUID.randomUUID().toString(), "thats", "that's", caseSensitive = false, isDefault = true, language = "en"),
+            TextShortcut(UUID.randomUUID().toString(), "theres", "there's", caseSensitive = false, isDefault = true, language = "en"),
+            TextShortcut(UUID.randomUUID().toString(), "heres", "here's", caseSensitive = false, isDefault = true, language = "en"),
+            TextShortcut(UUID.randomUUID().toString(), "whats", "what's", caseSensitive = false, isDefault = true, language = "en"),
+            TextShortcut(UUID.randomUUID().toString(), "wheres", "where's", caseSensitive = false, isDefault = true, language = "en"),
+            TextShortcut(UUID.randomUUID().toString(), "whos", "who's", caseSensitive = false, isDefault = true, language = "en"),
+            TextShortcut(UUID.randomUUID().toString(), "hows", "how's", caseSensitive = false, isDefault = true, language = "en"),
+            TextShortcut(UUID.randomUUID().toString(), "whens", "when's", caseSensitive = false, isDefault = true, language = "en"),
+            TextShortcut(UUID.randomUUID().toString(), "whys", "why's", caseSensitive = false, isDefault = true, language = "en"),
+            TextShortcut(UUID.randomUUID().toString(), "youre", "you're", caseSensitive = false, isDefault = true, language = "en"),
+            TextShortcut(UUID.randomUUID().toString(), "youve", "you've", caseSensitive = false, isDefault = true, language = "en"),
+            TextShortcut(UUID.randomUUID().toString(), "youll", "you'll", caseSensitive = false, isDefault = true, language = "en"),
+            TextShortcut(UUID.randomUUID().toString(), "youd", "you'd", caseSensitive = false, isDefault = true, language = "en"),
+            TextShortcut(UUID.randomUUID().toString(), "theyre", "they're", caseSensitive = false, isDefault = true, language = "en"),
+            TextShortcut(UUID.randomUUID().toString(), "theyve", "they've", caseSensitive = false, isDefault = true, language = "en"),
+            TextShortcut(UUID.randomUUID().toString(), "theyll", "they'll", caseSensitive = false, isDefault = true, language = "en"),
+            TextShortcut(UUID.randomUUID().toString(), "theyd", "they'd", caseSensitive = false, isDefault = true, language = "en"),
+            TextShortcut(UUID.randomUUID().toString(), "weve", "we've", caseSensitive = false, isDefault = true, language = "en"),
+            TextShortcut(UUID.randomUUID().toString(), "wed", "we'd", caseSensitive = false, isDefault = true, language = "en"),
+            TextShortcut(UUID.randomUUID().toString(), "shes", "she's", caseSensitive = false, isDefault = true, language = "en"),
+            TextShortcut(UUID.randomUUID().toString(), "hes", "he's", caseSensitive = false, isDefault = true, language = "en"),
+            TextShortcut(UUID.randomUUID().toString(), "lets", "let's", caseSensitive = false, isDefault = true, language = "en"),
+
+            // Common typos
+            TextShortcut(UUID.randomUUID().toString(), "teh", "the", caseSensitive = false, isDefault = true, language = "en"),
+            TextShortcut(UUID.randomUUID().toString(), "recieve", "receive", caseSensitive = false, isDefault = true, language = "en"),
+            TextShortcut(UUID.randomUUID().toString(), "occured", "occurred", caseSensitive = false, isDefault = true, language = "en"),
+            TextShortcut(UUID.randomUUID().toString(), "seperate", "separate", caseSensitive = false, isDefault = true, language = "en"),
+            TextShortcut(UUID.randomUUID().toString(), "definately", "definitely", caseSensitive = false, isDefault = true, language = "en"),
+            TextShortcut(UUID.randomUUID().toString(), "alot", "a lot", caseSensitive = false, isDefault = true, language = "en"),
+        )
+    }
+
+    private fun frenchDefaults(): List<TextShortcut> {
+        return listOf(
+            // Common contractions and shortcuts
+            TextShortcut(UUID.randomUUID().toString(), "qq", "quelque", caseSensitive = false, isDefault = true, language = "fr"),
+            TextShortcut(UUID.randomUUID().toString(), "qqch", "quelque chose", caseSensitive = false, isDefault = true, language = "fr"),
+            TextShortcut(UUID.randomUUID().toString(), "qqn", "quelqu'un", caseSensitive = false, isDefault = true, language = "fr"),
+            TextShortcut(UUID.randomUUID().toString(), "tjrs", "toujours", caseSensitive = false, isDefault = true, language = "fr"),
+            TextShortcut(UUID.randomUUID().toString(), "bcp", "beaucoup", caseSensitive = false, isDefault = true, language = "fr"),
+            TextShortcut(UUID.randomUUID().toString(), "svp", "s'il vous plaît", caseSensitive = false, isDefault = true, language = "fr"),
+            TextShortcut(UUID.randomUUID().toString(), "stp", "s'il te plaît", caseSensitive = false, isDefault = true, language = "fr"),
+            TextShortcut(UUID.randomUUID().toString(), "pq", "pourquoi", caseSensitive = false, isDefault = true, language = "fr"),
+            TextShortcut(UUID.randomUUID().toString(), "pcq", "parce que", caseSensitive = false, isDefault = true, language = "fr"),
+            TextShortcut(UUID.randomUUID().toString(), "qd", "quand", caseSensitive = false, isDefault = true, language = "fr"),
+            TextShortcut(UUID.randomUUID().toString(), "rdv", "rendez-vous", caseSensitive = false, isDefault = true, language = "fr"),
+            TextShortcut(UUID.randomUUID().toString(), "jai", "j'ai", caseSensitive = false, isDefault = true, language = "fr"),
+            TextShortcut(UUID.randomUUID().toString(), "cest", "c'est", caseSensitive = false, isDefault = true, language = "fr"),
+            TextShortcut(UUID.randomUUID().toString(), "sil", "s'il", caseSensitive = false, isDefault = true, language = "fr"),
+            TextShortcut(UUID.randomUUID().toString(), "qqun", "quelqu'un", caseSensitive = false, isDefault = true, language = "fr"),
+        )
+    }
+
+    private fun germanDefaults(): List<TextShortcut> {
+        return listOf(
+            // Common German typos and shortcuts
+            TextShortcut(UUID.randomUUID().toString(), "zb", "z.B.", caseSensitive = false, isDefault = true, language = "de"),
+            TextShortcut(UUID.randomUUID().toString(), "bzw", "bzw.", caseSensitive = false, isDefault = true, language = "de"),
+            TextShortcut(UUID.randomUUID().toString(), "usw", "usw.", caseSensitive = false, isDefault = true, language = "de"),
+            TextShortcut(UUID.randomUUID().toString(), "ua", "u.a.", caseSensitive = false, isDefault = true, language = "de"),
+            TextShortcut(UUID.randomUUID().toString(), "zzt", "z.Zt.", caseSensitive = false, isDefault = true, language = "de"),
+            TextShortcut(UUID.randomUUID().toString(), "mfg", "Mit freundlichen Grüßen", caseSensitive = false, isDefault = true, language = "de"),
+            TextShortcut(UUID.randomUUID().toString(), "lg", "Liebe Grüße", caseSensitive = false, isDefault = true, language = "de"),
+            TextShortcut(UUID.randomUUID().toString(), "vg", "Viele Grüße", caseSensitive = false, isDefault = true, language = "de"),
+        )
+    }
+
+    private fun spanishDefaults(): List<TextShortcut> {
+        return listOf(
+            // Common Spanish typos and shortcuts
+            TextShortcut(UUID.randomUUID().toString(), "xq", "porque", caseSensitive = false, isDefault = true, language = "es"),
+            TextShortcut(UUID.randomUUID().toString(), "pq", "porque", caseSensitive = false, isDefault = true, language = "es"),
+            TextShortcut(UUID.randomUUID().toString(), "xk", "porque", caseSensitive = false, isDefault = true, language = "es"),
+            TextShortcut(UUID.randomUUID().toString(), "tb", "también", caseSensitive = false, isDefault = true, language = "es"),
+            TextShortcut(UUID.randomUUID().toString(), "tmb", "también", caseSensitive = false, isDefault = true, language = "es"),
+            TextShortcut(UUID.randomUUID().toString(), "q", "que", caseSensitive = false, isDefault = true, language = "es"),
+            TextShortcut(UUID.randomUUID().toString(), "bn", "bien", caseSensitive = false, isDefault = true, language = "es"),
+            TextShortcut(UUID.randomUUID().toString(), "porfavor", "por favor", caseSensitive = false, isDefault = true, language = "es"),
+            TextShortcut(UUID.randomUUID().toString(), "pf", "por favor", caseSensitive = false, isDefault = true, language = "es"),
+        )
+    }
+
+    private fun portugueseDefaults(): List<TextShortcut> {
+        return listOf(
+            // Common Portuguese typos and shortcuts
+            TextShortcut(UUID.randomUUID().toString(), "vc", "você", caseSensitive = false, isDefault = true, language = "pt"),
+            TextShortcut(UUID.randomUUID().toString(), "vcs", "vocês", caseSensitive = false, isDefault = true, language = "pt"),
+            TextShortcut(UUID.randomUUID().toString(), "pq", "porque", caseSensitive = false, isDefault = true, language = "pt"),
+            TextShortcut(UUID.randomUUID().toString(), "tb", "também", caseSensitive = false, isDefault = true, language = "pt"),
+            TextShortcut(UUID.randomUUID().toString(), "tbm", "também", caseSensitive = false, isDefault = true, language = "pt"),
+            TextShortcut(UUID.randomUUID().toString(), "blz", "beleza", caseSensitive = false, isDefault = true, language = "pt"),
+            TextShortcut(UUID.randomUUID().toString(), "pfv", "por favor", caseSensitive = false, isDefault = true, language = "pt"),
+            TextShortcut(UUID.randomUUID().toString(), "obg", "obrigado", caseSensitive = false, isDefault = true, language = "pt"),
+        )
+    }
+
+    private fun italianDefaults(): List<TextShortcut> {
+        return listOf(
+            // Common Italian typos and shortcuts
+            TextShortcut(UUID.randomUUID().toString(), "cmq", "comunque", caseSensitive = false, isDefault = true, language = "it"),
+            TextShortcut(UUID.randomUUID().toString(), "xche", "perché", caseSensitive = false, isDefault = true, language = "it"),
+            TextShortcut(UUID.randomUUID().toString(), "xchè", "perché", caseSensitive = false, isDefault = true, language = "it"),
+            TextShortcut(UUID.randomUUID().toString(), "nn", "non", caseSensitive = false, isDefault = true, language = "it"),
+            TextShortcut(UUID.randomUUID().toString(), "qnd", "quando", caseSensitive = false, isDefault = true, language = "it"),
+            TextShortcut(UUID.randomUUID().toString(), "qlc", "qualche", caseSensitive = false, isDefault = true, language = "it"),
+            TextShortcut(UUID.randomUUID().toString(), "qlcs", "qualcosa", caseSensitive = false, isDefault = true, language = "it"),
+        )
+    }
+
+    private fun dutchDefaults(): List<TextShortcut> {
+        return listOf(
+            // Common Dutch typos and shortcuts
+            TextShortcut(UUID.randomUUID().toString(), "svp", "alstublieft", caseSensitive = false, isDefault = true, language = "nl"),
+            TextShortcut(UUID.randomUUID().toString(), "aub", "alstublieft", caseSensitive = false, isDefault = true, language = "nl"),
+            TextShortcut(UUID.randomUUID().toString(), "ajb", "alsjeblieft", caseSensitive = false, isDefault = true, language = "nl"),
+            TextShortcut(UUID.randomUUID().toString(), "bv", "bijvoorbeeld", caseSensitive = false, isDefault = true, language = "nl"),
+            TextShortcut(UUID.randomUUID().toString(), "mvg", "Met vriendelijke groet", caseSensitive = false, isDefault = true, language = "nl"),
+            TextShortcut(UUID.randomUUID().toString(), "gr", "groet", caseSensitive = false, isDefault = true, language = "nl"),
+        )
+    }
+
+    private fun swedishDefaults(): List<TextShortcut> {
+        return listOf(
+            // Common Swedish typos and shortcuts
+            TextShortcut(UUID.randomUUID().toString(), "tex", "till exempel", caseSensitive = false, isDefault = true, language = "sv"),
+            TextShortcut(UUID.randomUUID().toString(), "osv", "och så vidare", caseSensitive = false, isDefault = true, language = "sv"),
+            TextShortcut(UUID.randomUUID().toString(), "mvh", "Med vänliga hälsningar", caseSensitive = false, isDefault = true, language = "sv"),
+        )
+    }
+
+    private fun norwegianDefaults(): List<TextShortcut> {
+        return listOf(
+            // Common Norwegian typos and shortcuts
+            TextShortcut(UUID.randomUUID().toString(), "feks", "for eksempel", caseSensitive = false, isDefault = true, language = "no"),
+            TextShortcut(UUID.randomUUID().toString(), "osv", "og så videre", caseSensitive = false, isDefault = true, language = "no"),
+            TextShortcut(UUID.randomUUID().toString(), "mvh", "Med vennlig hilsen", caseSensitive = false, isDefault = true, language = "no"),
+        )
+    }
+
+    private fun danishDefaults(): List<TextShortcut> {
+        return listOf(
+            // Common Danish typos and shortcuts
+            TextShortcut(UUID.randomUUID().toString(), "fx", "for eksempel", caseSensitive = false, isDefault = true, language = "da"),
+            TextShortcut(UUID.randomUUID().toString(), "osv", "og så videre", caseSensitive = false, isDefault = true, language = "da"),
+            TextShortcut(UUID.randomUUID().toString(), "mvh", "Med venlig hilsen", caseSensitive = false, isDefault = true, language = "da"),
+        )
+    }
+
+    private fun czechDefaults(): List<TextShortcut> {
+        return listOf(
+            // Common Czech typos and shortcuts
+            TextShortcut(UUID.randomUUID().toString(), "napр", "například", caseSensitive = false, isDefault = true, language = "cs"),
+            TextShortcut(UUID.randomUUID().toString(), "apod", "a podobně", caseSensitive = false, isDefault = true, language = "cs"),
+            TextShortcut(UUID.randomUUID().toString(), "atd", "a tak dále", caseSensitive = false, isDefault = true, language = "cs"),
+        )
+    }
+
+    private fun polishDefaults(): List<TextShortcut> {
+        return listOf(
+            // Common Polish typos and shortcuts
+            TextShortcut(UUID.randomUUID().toString(), "np", "na przykład", caseSensitive = false, isDefault = true, language = "pl"),
+            TextShortcut(UUID.randomUUID().toString(), "itd", "i tak dalej", caseSensitive = false, isDefault = true, language = "pl"),
+            TextShortcut(UUID.randomUUID().toString(), "itp", "i tym podobne", caseSensitive = false, isDefault = true, language = "pl"),
+            TextShortcut(UUID.randomUUID().toString(), "tzw", "tak zwany", caseSensitive = false, isDefault = true, language = "pl"),
+        )
+    }
+}
