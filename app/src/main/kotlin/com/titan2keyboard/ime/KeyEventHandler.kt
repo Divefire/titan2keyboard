@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.KeyEvent
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputConnection
+import com.titan2keyboard.domain.model.AltBackspaceBehavior
 import com.titan2keyboard.domain.model.KeyEventResult
 import com.titan2keyboard.domain.model.KeyboardSettings
 import com.titan2keyboard.domain.model.ModifierState
@@ -257,33 +258,46 @@ class KeyEventHandler @Inject constructor(
 
         // Handle Alt+Backspace behavior
         if (event.keyCode == KeyEvent.KEYCODE_DEL && modifiersState.isAltActive()) {
-            if (currentSettings.altBackspaceDeleteLine) {
-                // Delete entire line before cursor (everything from last newline or start of text to cursor)
-                val textBeforeCursor = inputConnection.getTextBeforeCursor(1000, 0)
-                if (textBeforeCursor != null && textBeforeCursor.isNotEmpty()) {
-                    val lastNewlineIndex = textBeforeCursor.lastIndexOf('\n')
-                    val deleteCount = if (lastNewlineIndex >= 0) {
-                        // Delete everything after the last newline
-                        textBeforeCursor.length - lastNewlineIndex - 1
-                    } else {
-                        // No newline found, delete everything
-                        textBeforeCursor.length
+            when (currentSettings.altBackspaceBehavior) {
+                AltBackspaceBehavior.DELETE_LINE -> {
+                    // Delete entire line before cursor (everything from last newline or start of text to cursor)
+                    val textBeforeCursor = inputConnection.getTextBeforeCursor(1000, 0)
+                    if (textBeforeCursor != null && textBeforeCursor.isNotEmpty()) {
+                        val lastNewlineIndex = textBeforeCursor.lastIndexOf('\n')
+                        val deleteCount = if (lastNewlineIndex >= 0) {
+                            // Delete everything after the last newline
+                            textBeforeCursor.length - lastNewlineIndex - 1
+                        } else {
+                            // No newline found, delete everything
+                            textBeforeCursor.length
+                        }
+
+                        if (deleteCount > 0) {
+                            inputConnection.deleteSurroundingText(deleteCount, 0)
+                        }
                     }
 
-                    if (deleteCount > 0) {
-                        inputConnection.deleteSurroundingText(deleteCount, 0)
-                    }
+                    // Clear one-shot modifiers after use
+                    clearOneShotModifiers()
+                    return KeyEventResult.Handled
                 }
 
-                // Clear one-shot modifiers after use
-                clearOneShotModifiers()
-                return KeyEventResult.Handled
-            } else {
-                // Setting is OFF: treat Alt+Backspace as regular backspace (ignore Alt modifier)
-                // Clear one-shot modifiers and let the regular backspace handler process it
-                clearOneShotModifiers()
-                // Fall through to let system handle regular backspace (don't send Alt modifier)
-                return KeyEventResult.NotHandled
+                AltBackspaceBehavior.DELETE_FORWARD -> {
+                    // Delete character after cursor (forward delete)
+                    inputConnection.deleteSurroundingText(0, 1)
+
+                    // Clear one-shot modifiers after use
+                    clearOneShotModifiers()
+                    return KeyEventResult.Handled
+                }
+
+                AltBackspaceBehavior.REGULAR_BACKSPACE -> {
+                    // Treat Alt+Backspace as regular backspace (ignore Alt modifier)
+                    // Clear one-shot modifiers and let the regular backspace handler process it
+                    clearOneShotModifiers()
+                    // Fall through to let system handle regular backspace (don't send Alt modifier)
+                    return KeyEventResult.NotHandled
+                }
             }
         }
 

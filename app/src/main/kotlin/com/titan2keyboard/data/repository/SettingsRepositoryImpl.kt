@@ -4,6 +4,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import com.titan2keyboard.data.datastore.PreferencesKeys
+import com.titan2keyboard.domain.model.AltBackspaceBehavior
 import com.titan2keyboard.domain.model.KeyboardSettings
 import com.titan2keyboard.domain.repository.SettingsRepository
 import kotlinx.coroutines.flow.Flow
@@ -21,6 +22,22 @@ class SettingsRepositoryImpl @Inject constructor(
 
     override val settingsFlow: Flow<KeyboardSettings> = dataStore.data
         .map { preferences ->
+            // Migrate old boolean setting to new enum if needed
+            val altBackspaceBehavior = when {
+                // If new key exists, use it
+                preferences.contains(PreferencesKeys.ALT_BACKSPACE_BEHAVIOR) -> {
+                    AltBackspaceBehavior.fromString(preferences[PreferencesKeys.ALT_BACKSPACE_BEHAVIOR])
+                }
+                // Otherwise, migrate from old boolean key
+                preferences.contains(PreferencesKeys.ALT_BACKSPACE_DELETE_LINE) -> {
+                    @Suppress("DEPRECATION")
+                    val oldValue = preferences[PreferencesKeys.ALT_BACKSPACE_DELETE_LINE] ?: true
+                    AltBackspaceBehavior.fromBoolean(oldValue)
+                }
+                // Default if neither exists
+                else -> AltBackspaceBehavior.DELETE_LINE
+            }
+
             KeyboardSettings(
                 autoCapitalize = preferences[PreferencesKeys.AUTO_CAPITALIZE] ?: true,
                 keyRepeatEnabled = preferences[PreferencesKeys.KEY_REPEAT_ENABLED] ?: true,
@@ -29,7 +46,7 @@ class SettingsRepositoryImpl @Inject constructor(
                 textShortcutsEnabled = preferences[PreferencesKeys.TEXT_SHORTCUTS_ENABLED] ?: true,
                 stickyShift = preferences[PreferencesKeys.STICKY_SHIFT] ?: false,
                 stickyAlt = preferences[PreferencesKeys.STICKY_ALT] ?: false,
-                altBackspaceDeleteLine = preferences[PreferencesKeys.ALT_BACKSPACE_DELETE_LINE] ?: true,
+                altBackspaceBehavior = altBackspaceBehavior,
                 keyRepeatDelay = preferences[PreferencesKeys.KEY_REPEAT_DELAY] ?: 400L,
                 keyRepeatRate = preferences[PreferencesKeys.KEY_REPEAT_RATE] ?: 50L,
                 preferredCurrency = preferences[PreferencesKeys.PREFERRED_CURRENCY],
@@ -48,7 +65,12 @@ class SettingsRepositoryImpl @Inject constructor(
                 "textShortcutsEnabled" -> preferences[PreferencesKeys.TEXT_SHORTCUTS_ENABLED] = value as Boolean
                 "stickyShift" -> preferences[PreferencesKeys.STICKY_SHIFT] = value as Boolean
                 "stickyAlt" -> preferences[PreferencesKeys.STICKY_ALT] = value as Boolean
-                "altBackspaceDeleteLine" -> preferences[PreferencesKeys.ALT_BACKSPACE_DELETE_LINE] = value as Boolean
+                "altBackspaceBehavior" -> {
+                    preferences[PreferencesKeys.ALT_BACKSPACE_BEHAVIOR] = (value as AltBackspaceBehavior).name
+                    // Remove old key if it exists
+                    @Suppress("DEPRECATION")
+                    preferences.remove(PreferencesKeys.ALT_BACKSPACE_DELETE_LINE)
+                }
                 "keyRepeatDelay" -> preferences[PreferencesKeys.KEY_REPEAT_DELAY] = value as Long
                 "keyRepeatRate" -> preferences[PreferencesKeys.KEY_REPEAT_RATE] = value as Long
                 "preferredCurrency" -> {

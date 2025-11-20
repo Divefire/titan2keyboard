@@ -76,9 +76,9 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    fun updateAltBackspaceDeleteLine(enabled: Boolean) {
+    fun updateAltBackspaceBehavior(behavior: com.titan2keyboard.domain.model.AltBackspaceBehavior) {
         viewModelScope.launch {
-            settingsRepository.updateSetting("altBackspaceDeleteLine", enabled)
+            settingsRepository.updateSetting("altBackspaceBehavior", behavior)
         }
     }
 

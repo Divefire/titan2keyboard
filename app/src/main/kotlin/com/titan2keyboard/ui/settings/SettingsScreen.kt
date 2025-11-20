@@ -116,7 +116,7 @@ fun SettingsScreen(
                         onTextShortcutsChanged = viewModel::updateTextShortcuts,
                         onStickyShiftChanged = viewModel::updateStickyShift,
                         onStickyAltChanged = viewModel::updateStickyAlt,
-                        onAltBackspaceDeleteLineChanged = viewModel::updateAltBackspaceDeleteLine,
+                        onAltBackspaceBehaviorChanged = viewModel::updateAltBackspaceBehavior,
                         onPreferredCurrencyChanged = viewModel::updatePreferredCurrency,
                         onSelectedLanguageChanged = viewModel::updateSelectedLanguage,
                         onLongPressAccentsChanged = viewModel::updateLongPressAccents,
@@ -147,7 +147,7 @@ private fun SettingsContent(
     onTextShortcutsChanged: (Boolean) -> Unit,
     onStickyShiftChanged: (Boolean) -> Unit,
     onStickyAltChanged: (Boolean) -> Unit,
-    onAltBackspaceDeleteLineChanged: (Boolean) -> Unit,
+    onAltBackspaceBehaviorChanged: (com.titan2keyboard.domain.model.AltBackspaceBehavior) -> Unit,
     onPreferredCurrencyChanged: (String?) -> Unit,
     onSelectedLanguageChanged: (String) -> Unit,
     onLongPressAccentsChanged: (Boolean) -> Unit,
@@ -157,6 +157,7 @@ private fun SettingsContent(
 ) {
     var showCurrencyDialog by remember { mutableStateOf(false) }
     var showLanguageDialog by remember { mutableStateOf(false) }
+    var showAltBackspaceDialog by remember { mutableStateOf(false) }
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
@@ -257,11 +258,10 @@ private fun SettingsContent(
             onCheckedChange = onStickyAltChanged
         )
 
-        SettingItem(
-            title = stringResource(R.string.setting_alt_backspace_delete_line),
-            description = stringResource(R.string.setting_alt_backspace_delete_line_desc),
-            checked = settings.altBackspaceDeleteLine,
-            onCheckedChange = onAltBackspaceDeleteLineChanged
+        // Alt+Backspace behavior selection
+        AltBackspaceBehaviorItem(
+            currentBehavior = settings.altBackspaceBehavior,
+            onClick = { showAltBackspaceDialog = true }
         )
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -311,6 +311,18 @@ private fun SettingsContent(
                 showLanguageDialog = false
             },
             onDismiss = { showLanguageDialog = false }
+        )
+    }
+
+    // Alt+Backspace behavior selection dialog
+    if (showAltBackspaceDialog) {
+        AltBackspaceBehaviorDialog(
+            currentBehavior = settings.altBackspaceBehavior,
+            onBehaviorSelected = { behavior ->
+                onAltBackspaceBehaviorChanged(behavior)
+                showAltBackspaceDialog = false
+            },
+            onDismiss = { showAltBackspaceDialog = false }
         )
     }
 }
@@ -531,6 +543,114 @@ private fun CurrencySelectionDialog(
                             style = MaterialTheme.typography.bodyLarge
                         )
                         if (currentCurrency == symbol) {
+                            Text("✓", style = MaterialTheme.typography.headlineSmall)
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
+}
+
+@Composable
+private fun AltBackspaceBehaviorItem(
+    currentBehavior: com.titan2keyboard.domain.model.AltBackspaceBehavior,
+    onClick: () -> Unit
+) {
+    val displayName = when (currentBehavior) {
+        com.titan2keyboard.domain.model.AltBackspaceBehavior.REGULAR_BACKSPACE -> "Regular Backspace"
+        com.titan2keyboard.domain.model.AltBackspaceBehavior.DELETE_LINE -> "Delete Line"
+        com.titan2keyboard.domain.model.AltBackspaceBehavior.DELETE_FORWARD -> "Delete Forward"
+    }
+
+    Card(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onClick)
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = "Alt+Backspace Behavior",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Text(
+                    text = "What happens when you press Alt+Backspace",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Text(
+                text = displayName,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
+    }
+}
+
+@Composable
+private fun AltBackspaceBehaviorDialog(
+    currentBehavior: com.titan2keyboard.domain.model.AltBackspaceBehavior,
+    onBehaviorSelected: (com.titan2keyboard.domain.model.AltBackspaceBehavior) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val behaviors = listOf(
+        com.titan2keyboard.domain.model.AltBackspaceBehavior.REGULAR_BACKSPACE to Pair(
+            "Regular Backspace",
+            "Alt is ignored, deletes character before cursor"
+        ),
+        com.titan2keyboard.domain.model.AltBackspaceBehavior.DELETE_LINE to Pair(
+            "Delete Line",
+            "Deletes entire line before cursor"
+        ),
+        com.titan2keyboard.domain.model.AltBackspaceBehavior.DELETE_FORWARD to Pair(
+            "Delete Forward",
+            "Deletes character after cursor"
+        )
+    )
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text("Alt+Backspace Behavior")
+        },
+        text = {
+            Column {
+                behaviors.forEach { (behavior, labels) ->
+                    val (title, description) = labels
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onBehaviorSelected(behavior) }
+                            .padding(vertical = 12.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = title,
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                            Text(
+                                text = description,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        if (currentBehavior == behavior) {
                             Text("✓", style = MaterialTheme.typography.headlineSmall)
                         }
                     }
