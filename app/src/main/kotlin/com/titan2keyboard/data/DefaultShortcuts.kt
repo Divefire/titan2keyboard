@@ -21,9 +21,12 @@ object DefaultShortcuts {
             "en-AU" -> englishAUDefaults()
             "en-CA" -> englishCADefaults()
             "fr" -> frenchDefaults()
+            "fr-CA" -> frenchCADefaults()
             "de" -> germanDefaults()
             "es" -> spanishDefaults()
+            "es-MX" -> spanishMXDefaults()
             "pt" -> portugueseDefaults()
+            "pt-BR" -> portugueseBRDefaults()
             "it" -> italianDefaults()
             "nl" -> dutchDefaults()
             "sv" -> swedishDefaults()
@@ -39,7 +42,7 @@ object DefaultShortcuts {
      * Get all default shortcuts for all languages
      */
     fun getAllDefaults(): List<TextShortcut> {
-        return listOf("en", "en-GB", "en-US", "en-AU", "en-CA", "fr", "de", "es", "pt", "it", "nl", "sv", "no", "da", "cs", "pl")
+        return listOf("en", "en-GB", "en-US", "en-AU", "en-CA", "fr", "fr-CA", "de", "es", "es-MX", "pt", "pt-BR", "it", "nl", "sv", "no", "da", "cs", "pl")
             .flatMap { getDefaultsForLanguage(it) }
     }
 
@@ -372,6 +375,34 @@ object DefaultShortcuts {
         )
     }
 
+    private fun frenchCADefaults(): List<TextShortcut> {
+        return listOf(
+            // Common Quebec French abbreviations and shortcuts
+            TextShortcut(UUID.randomUUID().toString(), "qq", "quelque", caseSensitive = false, isDefault = true, language = "fr-CA"),
+            TextShortcut(UUID.randomUUID().toString(), "qqch", "quelque chose", caseSensitive = false, isDefault = true, language = "fr-CA"),
+            TextShortcut(UUID.randomUUID().toString(), "qqn", "quelqu'un", caseSensitive = false, isDefault = true, language = "fr-CA"),
+            TextShortcut(UUID.randomUUID().toString(), "tjrs", "toujours", caseSensitive = false, isDefault = true, language = "fr-CA"),
+            TextShortcut(UUID.randomUUID().toString(), "bcp", "beaucoup", caseSensitive = false, isDefault = true, language = "fr-CA"),
+            TextShortcut(UUID.randomUUID().toString(), "svp", "s'il vous plaît", caseSensitive = false, isDefault = true, language = "fr-CA"),
+            TextShortcut(UUID.randomUUID().toString(), "stp", "s'il te plaît", caseSensitive = false, isDefault = true, language = "fr-CA"),
+            TextShortcut(UUID.randomUUID().toString(), "pq", "pourquoi", caseSensitive = false, isDefault = true, language = "fr-CA"),
+            TextShortcut(UUID.randomUUID().toString(), "pcq", "parce que", caseSensitive = false, isDefault = true, language = "fr-CA"),
+            TextShortcut(UUID.randomUUID().toString(), "qd", "quand", caseSensitive = false, isDefault = true, language = "fr-CA"),
+            TextShortcut(UUID.randomUUID().toString(), "rdv", "rendez-vous", caseSensitive = false, isDefault = true, language = "fr-CA"),
+            TextShortcut(UUID.randomUUID().toString(), "jai", "j'ai", caseSensitive = false, isDefault = true, language = "fr-CA"),
+            TextShortcut(UUID.randomUUID().toString(), "cest", "c'est", caseSensitive = false, isDefault = true, language = "fr-CA"),
+            TextShortcut(UUID.randomUUID().toString(), "sil", "s'il", caseSensitive = false, isDefault = true, language = "fr-CA"),
+            TextShortcut(UUID.randomUUID().toString(), "qqun", "quelqu'un", caseSensitive = false, isDefault = true, language = "fr-CA"),
+            // Quebec-specific
+            TextShortcut(UUID.randomUUID().toString(), "tsé", "tu sais", caseSensitive = false, isDefault = true, language = "fr-CA"),
+            TextShortcut(UUID.randomUUID().toString(), "tse", "tu sais", caseSensitive = false, isDefault = true, language = "fr-CA"),
+            TextShortcut(UUID.randomUUID().toString(), "pis", "puis", caseSensitive = false, isDefault = true, language = "fr-CA"),
+            TextShortcut(UUID.randomUUID().toString(), "dsl", "désolé", caseSensitive = false, isDefault = true, language = "fr-CA"),
+            TextShortcut(UUID.randomUUID().toString(), "msg", "message", caseSensitive = false, isDefault = true, language = "fr-CA"),
+            TextShortcut(UUID.randomUUID().toString(), "jsais", "je sais", caseSensitive = false, isDefault = true, language = "fr-CA"),
+        )
+    }
+
     private fun germanDefaults(): List<TextShortcut> {
         return listOf(
             // Common German typos and shortcuts
@@ -401,6 +432,29 @@ object DefaultShortcuts {
         )
     }
 
+    private fun spanishMXDefaults(): List<TextShortcut> {
+        return listOf(
+            // Common Mexican Spanish abbreviations
+            TextShortcut(UUID.randomUUID().toString(), "xq", "porque", caseSensitive = false, isDefault = true, language = "es-MX"),
+            TextShortcut(UUID.randomUUID().toString(), "pq", "porque", caseSensitive = false, isDefault = true, language = "es-MX"),
+            TextShortcut(UUID.randomUUID().toString(), "xk", "porque", caseSensitive = false, isDefault = true, language = "es-MX"),
+            TextShortcut(UUID.randomUUID().toString(), "tb", "también", caseSensitive = false, isDefault = true, language = "es-MX"),
+            TextShortcut(UUID.randomUUID().toString(), "tmb", "también", caseSensitive = false, isDefault = true, language = "es-MX"),
+            TextShortcut(UUID.randomUUID().toString(), "q", "que", caseSensitive = false, isDefault = true, language = "es-MX"),
+            TextShortcut(UUID.randomUUID().toString(), "bn", "bien", caseSensitive = false, isDefault = true, language = "es-MX"),
+            TextShortcut(UUID.randomUUID().toString(), "porfavor", "por favor", caseSensitive = false, isDefault = true, language = "es-MX"),
+            TextShortcut(UUID.randomUUID().toString(), "pf", "por favor", caseSensitive = false, isDefault = true, language = "es-MX"),
+            // Mexican-specific
+            TextShortcut(UUID.randomUUID().toString(), "x", "por", caseSensitive = false, isDefault = true, language = "es-MX"),
+            TextShortcut(UUID.randomUUID().toString(), "pa", "para", caseSensitive = false, isDefault = true, language = "es-MX"),
+            TextShortcut(UUID.randomUUID().toString(), "qndo", "cuando", caseSensitive = false, isDefault = true, language = "es-MX"),
+            TextShortcut(UUID.randomUUID().toString(), "k", "que", caseSensitive = false, isDefault = true, language = "es-MX"),
+            TextShortcut(UUID.randomUUID().toString(), "aki", "aquí", caseSensitive = false, isDefault = true, language = "es-MX"),
+            TextShortcut(UUID.randomUUID().toString(), "ahi", "ahí", caseSensitive = false, isDefault = true, language = "es-MX"),
+            TextShortcut(UUID.randomUUID().toString(), "asi", "así", caseSensitive = false, isDefault = true, language = "es-MX"),
+        )
+    }
+
     private fun portugueseDefaults(): List<TextShortcut> {
         return listOf(
             // Common Portuguese typos and shortcuts
@@ -412,6 +466,28 @@ object DefaultShortcuts {
             TextShortcut(UUID.randomUUID().toString(), "blz", "beleza", caseSensitive = false, isDefault = true, language = "pt"),
             TextShortcut(UUID.randomUUID().toString(), "pfv", "por favor", caseSensitive = false, isDefault = true, language = "pt"),
             TextShortcut(UUID.randomUUID().toString(), "obg", "obrigado", caseSensitive = false, isDefault = true, language = "pt"),
+        )
+    }
+
+    private fun portugueseBRDefaults(): List<TextShortcut> {
+        return listOf(
+            // Common Brazilian Portuguese abbreviations and slang
+            TextShortcut(UUID.randomUUID().toString(), "vc", "você", caseSensitive = false, isDefault = true, language = "pt-BR"),
+            TextShortcut(UUID.randomUUID().toString(), "vcs", "vocês", caseSensitive = false, isDefault = true, language = "pt-BR"),
+            TextShortcut(UUID.randomUUID().toString(), "pq", "porque", caseSensitive = false, isDefault = true, language = "pt-BR"),
+            TextShortcut(UUID.randomUUID().toString(), "tb", "também", caseSensitive = false, isDefault = true, language = "pt-BR"),
+            TextShortcut(UUID.randomUUID().toString(), "tbm", "também", caseSensitive = false, isDefault = true, language = "pt-BR"),
+            TextShortcut(UUID.randomUUID().toString(), "blz", "beleza", caseSensitive = false, isDefault = true, language = "pt-BR"),
+            TextShortcut(UUID.randomUUID().toString(), "pfv", "por favor", caseSensitive = false, isDefault = true, language = "pt-BR"),
+            TextShortcut(UUID.randomUUID().toString(), "obg", "obrigado", caseSensitive = false, isDefault = true, language = "pt-BR"),
+            TextShortcut(UUID.randomUUID().toString(), "td", "tudo", caseSensitive = false, isDefault = true, language = "pt-BR"),
+            TextShortcut(UUID.randomUUID().toString(), "fds", "fim de semana", caseSensitive = false, isDefault = true, language = "pt-BR"),
+            TextShortcut(UUID.randomUUID().toString(), "msg", "mensagem", caseSensitive = false, isDefault = true, language = "pt-BR"),
+            TextShortcut(UUID.randomUUID().toString(), "hj", "hoje", caseSensitive = false, isDefault = true, language = "pt-BR"),
+            TextShortcut(UUID.randomUUID().toString(), "dps", "depois", caseSensitive = false, isDefault = true, language = "pt-BR"),
+            TextShortcut(UUID.randomUUID().toString(), "tmj", "tamo junto", caseSensitive = false, isDefault = true, language = "pt-BR"),
+            TextShortcut(UUID.randomUUID().toString(), "flw", "falou", caseSensitive = false, isDefault = true, language = "pt-BR"),
+            TextShortcut(UUID.randomUUID().toString(), "vlw", "valeu", caseSensitive = false, isDefault = true, language = "pt-BR"),
         )
     }
 
