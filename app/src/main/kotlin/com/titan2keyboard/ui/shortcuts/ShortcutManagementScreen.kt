@@ -15,11 +15,14 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -60,6 +63,7 @@ fun ShortcutManagementScreen(
 
     var showAddDialog by remember { mutableStateOf(false) }
     var editingShortcut by remember { mutableStateOf<TextShortcut?>(null) }
+    var showFilterMenu by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -68,6 +72,48 @@ fun ShortcutManagementScreen(
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.navigate_back))
+                    }
+                },
+                actions = {
+                    Box {
+                        IconButton(onClick = { showFilterMenu = true }) {
+                            Icon(Icons.Default.FilterList, contentDescription = "Filter shortcuts")
+                        }
+
+                        DropdownMenu(
+                            expanded = showFilterMenu,
+                            onDismissRequest = { showFilterMenu = false }
+                        ) {
+                            val currentFilter = (uiState as? ShortcutManagementUiState.Success)?.filterMode
+                                ?: ShortcutFilter.CURRENT_LANGUAGE_ONLY
+
+                            DropdownMenuItem(
+                                text = { Text("Current language only") },
+                                onClick = {
+                                    viewModel.setFilterMode(ShortcutFilter.CURRENT_LANGUAGE_ONLY)
+                                    showFilterMenu = false
+                                },
+                                enabled = currentFilter != ShortcutFilter.CURRENT_LANGUAGE_ONLY
+                            )
+
+                            DropdownMenuItem(
+                                text = { Text("Current + English") },
+                                onClick = {
+                                    viewModel.setFilterMode(ShortcutFilter.CURRENT_AND_ENGLISH)
+                                    showFilterMenu = false
+                                },
+                                enabled = currentFilter != ShortcutFilter.CURRENT_AND_ENGLISH
+                            )
+
+                            DropdownMenuItem(
+                                text = { Text("All languages") },
+                                onClick = {
+                                    viewModel.setFilterMode(ShortcutFilter.ALL_LANGUAGES)
+                                    showFilterMenu = false
+                                },
+                                enabled = currentFilter != ShortcutFilter.ALL_LANGUAGES
+                            )
+                        }
                     }
                 }
             )

@@ -7,6 +7,7 @@ import com.titan2keyboard.domain.model.TextShortcut
 import com.titan2keyboard.domain.repository.SettingsRepository
 import com.titan2keyboard.domain.repository.ShortcutRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -27,22 +28,53 @@ class ShortcutManagementViewModel @Inject constructor(
 ) : ViewModel() {
 
     /**
+     * Current filter mode for displaying shortcuts
+     */
+    private val _filterMode = MutableStateFlow(ShortcutFilter.CURRENT_LANGUAGE_ONLY)
+    val filterMode: StateFlow<ShortcutFilter> = _filterMode
+
+    /**
      * UI state for the shortcuts screen
      */
     val uiState: StateFlow<ShortcutManagementUiState> = combine(
         shortcutRepository.shortcutsFlow,
-        settingsRepository.settingsFlow
-    ) { shortcuts, settings ->
+        settingsRepository.settingsFlow,
+        _filterMode
+    ) { shortcuts, settings, filter ->
+        val filteredShortcuts = when (filter) {
+            ShortcutFilter.CURRENT_LANGUAGE_ONLY -> {
+                shortcuts.filter { it.language == settings.selectedLanguage }
+            }
+            ShortcutFilter.CURRENT_AND_ENGLISH -> {
+                if (settings.selectedLanguage == "en") {
+                    shortcuts.filter { it.language == "en" }
+                } else {
+                    shortcuts.filter { it.language == settings.selectedLanguage || it.language == "en" }
+                }
+            }
+            ShortcutFilter.ALL_LANGUAGES -> {
+                shortcuts
+            }
+        }
+
         ShortcutManagementUiState.Success(
-            shortcuts = shortcuts,
+            shortcuts = filteredShortcuts,
             languageMap = accentRepository.getSupportedLanguages().toMap(),
-            currentLanguage = settings.selectedLanguage
+            currentLanguage = settings.selectedLanguage,
+            filterMode = filter
         )
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = ShortcutManagementUiState.Loading
     )
+
+    /**
+     * Set the filter mode for displaying shortcuts
+     */
+    fun setFilterMode(filter: ShortcutFilter) {
+        _filterMode.value = filter
+    }
 
     /**
      * Add a new shortcut (uses the currently selected language)
@@ -90,6 +122,28 @@ sealed interface ShortcutManagementUiState {
     data class Success(
         val shortcuts: List<TextShortcut>,
         val languageMap: Map<String, String>,
-        val currentLanguage: String
+        val currentLanguage: String,
+        val filterMode: ShortcutFilter
     ) : ShortcutManagementUiState
+}
+
+/**
+ * Filter modes for displaying shortcuts
+ */
+enum class ShortcutFilter {
+    /**
+     * Show only shortcuts for the currently selected language
+     */
+    CURRENT_LANGUAGE_ONLY,
+
+    /**
+     * Show shortcuts for the current language and English
+     * (If current is English, show only English)
+     */
+    CURRENT_AND_ENGLISH,
+
+    /**
+     * Show shortcuts for all languages
+     */
+    ALL_LANGUAGES
 }
