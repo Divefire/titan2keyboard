@@ -177,6 +177,109 @@ class AccentRepository @Inject constructor() {
             'O' to listOf("Ó"),
             'S' to listOf("Ś"),
             'Z' to listOf("Ź", "Ż")
+        ),
+
+        // Greek
+        "el" to mapOf(
+            'a' to listOf("ά", "α"),
+            'e' to listOf("έ", "ε"),
+            'i' to listOf("ί", "ϊ", "ΐ", "ι"),
+            'o' to listOf("ό", "ο"),
+            'u' to listOf("ύ", "ϋ", "ΰ", "υ"),
+            'w' to listOf("ώ", "ω"),
+            'h' to listOf("ή", "η"),
+            'A' to listOf("Ά", "Α"),
+            'E' to listOf("Έ", "Ε"),
+            'I' to listOf("Ί", "Ϊ", "Ι"),
+            'O' to listOf("Ό", "Ο"),
+            'U' to listOf("Ύ", "Ϋ", "Υ"),
+            'W' to listOf("Ώ", "Ω"),
+            'H' to listOf("Ή", "Η")
+        ),
+
+        // Turkish
+        "tr" to mapOf(
+            'a' to listOf("â"),
+            'c' to listOf("ç"),
+            'g' to listOf("ğ"),
+            'i' to listOf("ı", "î"),
+            'o' to listOf("ö", "ô"),
+            's' to listOf("ş"),
+            'u' to listOf("ü", "û"),
+            'A' to listOf("Â"),
+            'C' to listOf("Ç"),
+            'G' to listOf("Ğ"),
+            'I' to listOf("İ", "Î"),
+            'O' to listOf("Ö", "Ô"),
+            'S' to listOf("Ş"),
+            'U' to listOf("Ü", "Û")
+        ),
+
+        // Russian
+        "ru" to mapOf(
+            'e' to listOf("ё"),
+            'E' to listOf("Ё")
+        ),
+
+        // Hungarian
+        "hu" to mapOf(
+            'a' to listOf("á"),
+            'e' to listOf("é"),
+            'i' to listOf("í"),
+            'o' to listOf("ó", "ö", "ő"),
+            'u' to listOf("ú", "ü", "ű"),
+            'A' to listOf("Á"),
+            'E' to listOf("É"),
+            'I' to listOf("Í"),
+            'O' to listOf("Ó", "Ö", "Ő"),
+            'U' to listOf("Ú", "Ü", "Ű")
+        ),
+
+        // Romanian
+        "ro" to mapOf(
+            'a' to listOf("ă", "â"),
+            'i' to listOf("î"),
+            's' to listOf("ș"),
+            't' to listOf("ț"),
+            'A' to listOf("Ă", "Â"),
+            'I' to listOf("Î"),
+            'S' to listOf("Ș"),
+            'T' to listOf("Ț")
+        ),
+
+        // Finnish
+        "fi" to mapOf(
+            'a' to listOf("ä", "å"),
+            'o' to listOf("ö"),
+            'A' to listOf("Ä", "Å"),
+            'O' to listOf("Ö")
+        ),
+
+        // Bulgarian (Cyrillic)
+        "bg" to mapOf(
+            // Bulgarian uses Cyrillic, but we provide Latin to Cyrillic common mappings
+            'a' to listOf("а"),
+            'b' to listOf("б"),
+            'v' to listOf("в"),
+            'g' to listOf("г"),
+            'd' to listOf("д"),
+            'e' to listOf("е"),
+            'z' to listOf("з"),
+            'i' to listOf("и"),
+            'k' to listOf("к"),
+            'l' to listOf("л"),
+            'm' to listOf("м"),
+            'n' to listOf("н"),
+            'o' to listOf("о"),
+            'p' to listOf("п"),
+            'r' to listOf("р"),
+            's' to listOf("с"),
+            't' to listOf("т"),
+            'u' to listOf("у"),
+            'f' to listOf("ф"),
+            'h' to listOf("х"),
+            'c' to listOf("ц"),
+            'y' to listOf("ъ", "ь", "ю", "я")
         )
     )
 
@@ -231,7 +334,14 @@ class AccentRepository @Inject constructor() {
             "no" to "Norwegian (Norsk)",
             "da" to "Danish (Dansk)",
             "cs" to "Czech (Čeština)",
-            "pl" to "Polish (Polski)"
+            "pl" to "Polish (Polski)",
+            "el" to "Greek (Ελληνικά)",
+            "tr" to "Turkish (Türkçe)",
+            "ru" to "Russian (Русский)",
+            "hu" to "Hungarian (Magyar)",
+            "ro" to "Romanian (Română)",
+            "fi" to "Finnish (Suomi)",
+            "bg" to "Bulgarian (Български)"
         )
     }
 }

@@ -34,6 +34,13 @@ object DefaultShortcuts {
             "da" -> danishDefaults()
             "cs" -> czechDefaults()
             "pl" -> polishDefaults()
+            "el" -> greekDefaults()
+            "tr" -> turkishDefaults()
+            "ru" -> russianDefaults()
+            "hu" -> hungarianDefaults()
+            "ro" -> romanianDefaults()
+            "fi" -> finnishDefaults()
+            "bg" -> bulgarianDefaults()
             else -> emptyList()
         }
     }
@@ -42,7 +49,7 @@ object DefaultShortcuts {
      * Get all default shortcuts for all languages
      */
     fun getAllDefaults(): List<TextShortcut> {
-        return listOf("en", "en-GB", "en-US", "en-AU", "en-CA", "fr", "fr-CA", "de", "es", "es-MX", "pt", "pt-BR", "it", "nl", "sv", "no", "da", "cs", "pl")
+        return listOf("en", "en-GB", "en-US", "en-AU", "en-CA", "fr", "fr-CA", "de", "es", "es-MX", "pt", "pt-BR", "it", "nl", "sv", "no", "da", "cs", "pl", "el", "tr", "ru", "hu", "ro", "fi", "bg")
             .flatMap { getDefaultsForLanguage(it) }
     }
 
@@ -559,6 +566,95 @@ object DefaultShortcuts {
             TextShortcut(UUID.randomUUID().toString(), "itd", "i tak dalej", caseSensitive = false, isDefault = true, language = "pl"),
             TextShortcut(UUID.randomUUID().toString(), "itp", "i tym podobne", caseSensitive = false, isDefault = true, language = "pl"),
             TextShortcut(UUID.randomUUID().toString(), "tzw", "tak zwany", caseSensitive = false, isDefault = true, language = "pl"),
+        )
+    }
+
+    private fun greekDefaults(): List<TextShortcut> {
+        return listOf(
+            // Common Greek abbreviations
+            TextShortcut(UUID.randomUUID().toString(), "dx", "δηλαδή", caseSensitive = false, isDefault = true, language = "el"),
+            TextShortcut(UUID.randomUUID().toString(), "dhladh", "δηλαδή", caseSensitive = false, isDefault = true, language = "el"),
+            TextShortcut(UUID.randomUUID().toString(), "klp", "και λοιπά", caseSensitive = false, isDefault = true, language = "el"),
+            TextShortcut(UUID.randomUUID().toString(), "kati", "κάτι", caseSensitive = false, isDefault = true, language = "el"),
+            TextShortcut(UUID.randomUUID().toString(), "pou", "που", caseSensitive = false, isDefault = true, language = "el"),
+            TextShortcut(UUID.randomUUID().toString(), "gia", "για", caseSensitive = false, isDefault = true, language = "el"),
+            TextShortcut(UUID.randomUUID().toString(), "den", "δεν", caseSensitive = false, isDefault = true, language = "el"),
+        )
+    }
+
+    private fun turkishDefaults(): List<TextShortcut> {
+        return listOf(
+            // Common Turkish abbreviations
+            TextShortcut(UUID.randomUUID().toString(), "mrb", "merhaba", caseSensitive = false, isDefault = true, language = "tr"),
+            TextShortcut(UUID.randomUUID().toString(), "tmm", "tamam", caseSensitive = false, isDefault = true, language = "tr"),
+            TextShortcut(UUID.randomUUID().toString(), "slm", "selam", caseSensitive = false, isDefault = true, language = "tr"),
+            TextShortcut(UUID.randomUUID().toString(), "naber", "ne haber", caseSensitive = false, isDefault = true, language = "tr"),
+            TextShortcut(UUID.randomUUID().toString(), "nbr", "ne haber", caseSensitive = false, isDefault = true, language = "tr"),
+            TextShortcut(UUID.randomUUID().toString(), "tsk", "teşekkür", caseSensitive = false, isDefault = true, language = "tr"),
+            TextShortcut(UUID.randomUUID().toString(), "tsklr", "teşekkürler", caseSensitive = false, isDefault = true, language = "tr"),
+            TextShortcut(UUID.randomUUID().toString(), "sgol", "sağ ol", caseSensitive = false, isDefault = true, language = "tr"),
+        )
+    }
+
+    private fun russianDefaults(): List<TextShortcut> {
+        return listOf(
+            // Common Russian abbreviations
+            TextShortcut(UUID.randomUUID().toString(), "spasibo", "спасибо", caseSensitive = false, isDefault = true, language = "ru"),
+            TextShortcut(UUID.randomUUID().toString(), "pozhaluista", "пожалуйста", caseSensitive = false, isDefault = true, language = "ru"),
+            TextShortcut(UUID.randomUUID().toString(), "privet", "привет", caseSensitive = false, isDefault = true, language = "ru"),
+            TextShortcut(UUID.randomUUID().toString(), "chto", "что", caseSensitive = false, isDefault = true, language = "ru"),
+            TextShortcut(UUID.randomUUID().toString(), "kogda", "когда", caseSensitive = false, isDefault = true, language = "ru"),
+            TextShortcut(UUID.randomUUID().toString(), "kak", "как", caseSensitive = false, isDefault = true, language = "ru"),
+            TextShortcut(UUID.randomUUID().toString(), "gde", "где", caseSensitive = false, isDefault = true, language = "ru"),
+        )
+    }
+
+    private fun hungarianDefaults(): List<TextShortcut> {
+        return listOf(
+            // Common Hungarian abbreviations
+            TextShortcut(UUID.randomUUID().toString(), "pl", "például", caseSensitive = false, isDefault = true, language = "hu"),
+            TextShortcut(UUID.randomUUID().toString(), "stb", "és a többi", caseSensitive = false, isDefault = true, language = "hu"),
+            TextShortcut(UUID.randomUUID().toString(), "kb", "körülbelül", caseSensitive = false, isDefault = true, language = "hu"),
+            TextShortcut(UUID.randomUUID().toString(), "kb.", "körülbelül", caseSensitive = false, isDefault = true, language = "hu"),
+            TextShortcut(UUID.randomUUID().toString(), "tf", "tisztelettel", caseSensitive = false, isDefault = true, language = "hu"),
+            TextShortcut(UUID.randomUUID().toString(), "udv", "üdvözlettel", caseSensitive = false, isDefault = true, language = "hu"),
+        )
+    }
+
+    private fun romanianDefaults(): List<TextShortcut> {
+        return listOf(
+            // Common Romanian abbreviations
+            TextShortcut(UUID.randomUUID().toString(), "vr", "vă rog", caseSensitive = false, isDefault = true, language = "ro"),
+            TextShortcut(UUID.randomUUID().toString(), "ms", "mulțumesc", caseSensitive = false, isDefault = true, language = "ro"),
+            TextShortcut(UUID.randomUUID().toString(), "mss", "mulțumesc", caseSensitive = false, isDefault = true, language = "ro"),
+            TextShortcut(UUID.randomUUID().toString(), "dc", "de ce", caseSensitive = false, isDefault = true, language = "ro"),
+            TextShortcut(UUID.randomUUID().toString(), "pt", "pentru", caseSensitive = false, isDefault = true, language = "ro"),
+            TextShortcut(UUID.randomUUID().toString(), "ptr", "pentru", caseSensitive = false, isDefault = true, language = "ro"),
+            TextShortcut(UUID.randomUUID().toString(), "samd", "și altele multe de", caseSensitive = false, isDefault = true, language = "ro"),
+        )
+    }
+
+    private fun finnishDefaults(): List<TextShortcut> {
+        return listOf(
+            // Common Finnish abbreviations
+            TextShortcut(UUID.randomUUID().toString(), "esim", "esimerkiksi", caseSensitive = false, isDefault = true, language = "fi"),
+            TextShortcut(UUID.randomUUID().toString(), "jne", "ja niin edelleen", caseSensitive = false, isDefault = true, language = "fi"),
+            TextShortcut(UUID.randomUUID().toString(), "yms", "ynnä muuta sellaista", caseSensitive = false, isDefault = true, language = "fi"),
+            TextShortcut(UUID.randomUUID().toString(), "ym", "ynnä muuta", caseSensitive = false, isDefault = true, language = "fi"),
+            TextShortcut(UUID.randomUUID().toString(), "ts", "toisin sanoen", caseSensitive = false, isDefault = true, language = "fi"),
+            TextShortcut(UUID.randomUUID().toString(), "mm", "muun muassa", caseSensitive = false, isDefault = true, language = "fi"),
+        )
+    }
+
+    private fun bulgarianDefaults(): List<TextShortcut> {
+        return listOf(
+            // Common Bulgarian abbreviations (using Latin transliterations)
+            TextShortcut(UUID.randomUUID().toString(), "mnogo", "много", caseSensitive = false, isDefault = true, language = "bg"),
+            TextShortcut(UUID.randomUUID().toString(), "blagodarya", "благодаря", caseSensitive = false, isDefault = true, language = "bg"),
+            TextShortcut(UUID.randomUUID().toString(), "molya", "моля", caseSensitive = false, isDefault = true, language = "bg"),
+            TextShortcut(UUID.randomUUID().toString(), "zdravei", "здравей", caseSensitive = false, isDefault = true, language = "bg"),
+            TextShortcut(UUID.randomUUID().toString(), "kak", "как", caseSensitive = false, isDefault = true, language = "bg"),
+            TextShortcut(UUID.randomUUID().toString(), "kakvo", "какво", caseSensitive = false, isDefault = true, language = "bg"),
         )
     }
 }
