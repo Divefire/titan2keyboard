@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">AOSP Prototype</string>
+    <string name="ime_name">AOSP Prototype IME</string>
+    <string name="ime_description">Minimal IME for testing AOSP features on Titan 2</string>
+    <string name="settings_title">AOSP Prototype Settings</string>
+</resources>

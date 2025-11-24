@@ -16,3 +16,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Titan2Keyboard"
 include(":app")
+include(":aosp-prototype")

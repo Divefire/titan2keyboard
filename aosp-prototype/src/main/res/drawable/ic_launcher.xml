@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+
+    <!-- Background circle -->
+    <path
+        android:fillColor="#FF6200EE"
+        android:pathData="M24,24m-24,0a24,24 0,1 1,48 0a24,24 0,1 1,-48 0" />
+
+    <!-- Letter "P" for Prototype -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M18,12 L18,36 L16,36 L16,12 L26,12 C30,12 32,14 32,18 C32,22 30,24 26,24 L18,24 L18,22 L26,22 C28.5,22 30,21 30,18 C30,15 28.5,14 26,14 L18,14 Z" />
+</vector>
